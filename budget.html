@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestaurantBudget — Dit økonomiværktøj</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFF8EE;
+  --surface: #FFFFFF;
+  --surface2: #FFF1D6;
+  --border: rgba(180,110,0,0.15);
+  --border-strong: rgba(180,110,0,0.35);
+  --text: #2D1F00;
+  --text-muted: #7A5C1E;
+  --text-hint: #C49A45;
+  --accent: #FFB343;
+  --accent-dark: #E8930A;
+  --accent-soft: #FFF1D6;
+  --green: #1E7A4A;
+  --green-soft: #D6F5E5;
+  --red: #C0392B;
+  --red-soft: #FCE8E6;
+  --yellow: #B07800;
+  --yellow-soft: #FFF3CC;
+  --blue: #1A5A8A;
+  --blue-soft: #E0EDF5;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Syne', sans-serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+.shell{display:flex;min-height:100vh}
+.sidebar{width:230px;flex-shrink:0;background:#fff;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;border-right:1px solid #e8e0d0}
+.sidebar-logo{padding:22px 20px 14px;border-bottom:1px solid #e8e0d0}
+.sidebar-logo .brand{font-family:var(--display);font-weight:700;font-size:17px;color:#1A1200;line-height:1.2}
+.sidebar-logo .tagline{font-size:10px;color:#9a8a70;margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+.month-selector{padding:12px 20px;border-bottom:1px solid #e8e0d0}
+.month-selector label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#9a8a70;display:block;margin-bottom:5px}
+.month-nav-row{display:flex;align-items:center;gap:6px}
+.month-nav-row button{background:#f5f0e8;border:none;color:#1A1200;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.month-nav-row button:hover{background:#e8e0d0}
+.month-nav-row .month-name{font-family:var(--display);font-size:13px;color:#1A1200;font-weight:600;flex:1;text-align:center}
+.nav-group-label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9a8a70;padding:12px 20px 4px;font-weight:600}
+.nav-items{padding:6px 10px;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:13px;color:#5a4a2e;transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:#f5f0e8;color:#1A1200}
+.nav-item.active{background:#FFB343;color:#1A1200;font-weight:600}
+.nav-item .icon{font-size:12px;width:14px;text-align:center}
+.sidebar-footer{padding:14px 20px;border-top:1px solid #e8e0d0;font-size:11px;color:#b0a080}
+.main{margin-left:230px;flex:1;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar h1{font-family:var(--display);font-size:19px;font-weight:700}
+.alerts-badge{background:var(--red-soft);color:var(--red);font-size:12px;padding:4px 10px;border-radius:20px;font-weight:500;display:none}
+.content{padding:24px 28px}
+.section{display:none}.section.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.kpi .kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:5px}
+.kpi .kpi-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1;margin-bottom:3px}
+.kpi .kpi-sub{font-size:11px;color:var(--text-hint)}
+.kpi.accent{border-color:var(--accent)}.kpi.accent .kpi-val{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:16px}
+.card h2{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:5px 8px;border-bottom:1px solid var(--border)}
+th.r{text-align:right}
+td{padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+td.r{text-align:right;font-family:var(--mono);font-size:13px}
+td.muted{color:var(--text-muted);font-family:var(--mono)}
+tr:last-child td{border-bottom:none}
+input[type=number],input[type=text],select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-size:13px;font-family:var(--sans);color:var(--text);outline:none;transition:border-color .15s;width:100%}
+input[type=number]{font-family:var(--mono);text-align:right}
+input:focus,select:focus{border-color:var(--accent);background:#fff}
+.field-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.field-row label{font-size:13px;color:var(--text-muted);flex:1;min-width:180px}
+.field-wrap{display:flex;align-items:center;gap:6px}
+.unit{font-size:12px;color:var(--text-hint);min-width:22px}
+.field-row input[type=number]{width:120px}
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);font-weight:600;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--accent-soft)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:13px;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.btn:hover{border-color:var(--border-strong);color:var(--text)}
+.btn.sm{padding:5px 10px;font-size:12px}
+.del-btn{background:none;border:none;color:var(--text-hint);font-size:17px;cursor:pointer;padding:0 4px;line-height:1;transition:color .1s}
+.del-btn:hover{color:var(--red)}
+.alert{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:8px}
+.alert.ok{background:var(--green-soft);color:var(--green)}
+.alert.warn{background:var(--yellow-soft);color:var(--yellow)}
+.alert.bad{background:var(--red-soft);color:var(--red)}
+.good{color:var(--green)}.bad{color:var(--red)}.warn-color{color:var(--yellow)}
+.bar-row{margin-bottom:12px}
+.bar-meta{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.bar-meta .name{color:var(--text-muted)}
+.bar-meta .pct{font-family:var(--mono);font-weight:500}
+.bar-bg{background:var(--surface2);border-radius:3px;height:6px}
+.bar-fill{height:6px;border-radius:3px;transition:width .4s}
+.pl-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:14px}
+.pl-row:last-child{border-bottom:none}
+.pl-row.sub{padding-left:18px}
+.pl-row.sub .pl-label{color:var(--text-muted);font-size:13px}
+.pl-row.total{border-top:2px solid var(--border-strong);border-bottom:none;margin-top:4px;padding-top:11px;font-weight:600}
+.pl-amount{font-family:var(--mono);font-weight:500}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge.good{background:var(--green-soft);color:var(--green)}
+.badge.bad{background:var(--red-soft);color:var(--red)}
+.badge.warn{background:var(--yellow-soft);color:var(--yellow)}
+.badge.neu{background:var(--blue-soft);color:var(--blue)}
+/* VAGTPLAN */
+.vagtplan-grid{display:grid;grid-template-columns:130px repeat(7,1fr);gap:4px;font-size:12px;margin-bottom:12px}
+.vagtplan-header{background:var(--surface2);padding:5px 4px;border-radius:5px;text-align:center;font-weight:500;color:var(--text-muted);font-size:11px}
+.vagtplan-name{padding:5px 8px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--text-muted)}
+.vagtplan-cell input{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:5px 3px;font-size:11px;font-family:var(--mono);text-align:center;width:100%}
+/* LØNSEDDEL */
+.lønseddel{background:var(--surface2);border-radius:var(--radius-lg);padding:18px}
+.lønseddel .ls-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px}
+.lønseddel .ls-row:last-child{border-bottom:none}
+.lønseddel .ls-total{font-weight:600;border-top:2px solid var(--border-strong);margin-top:4px;padding-top:8px;border-bottom:none}
+.lager-ok{color:var(--green)}.lager-lav{color:var(--yellow)}.lager-tom{color:var(--red)}
+.action-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.action-btn:hover{border-color:var(--accent-dark);color:var(--accent-dark);background:var(--accent-soft)}
+.action-btn.primary{background:#FFB343;color:#1A1200;border-color:#FFB343;font-weight:600}
+.action-btn.primary:hover{background:#E8930A;border-color:#E8930A}
+@media(max-width:600px){
+  .sidebar{width:55px}
+  .sidebar .brand,.sidebar .tagline,.month-selector,.nav-item .label,.nav-group-label,.sidebar-footer{display:none}
+  .main{margin-left:55px}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .content{padding:14px}
+}
+@media print{
+  .sidebar,.topbar{display:none!important}
+  .main{margin-left:0!important}
+  .section{display:none!important}
+  .section.print-target{display:block!important}
+  body{background:#fff!important}
+}
+
+/* ── SHIFTDESK-STYLE VAGTPLAN ─────────────────────────────── */
+.sd-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+.sd-grid{display:grid;grid-template-columns:140px repeat(7,1fr);min-width:780px;font-size:12px;}
+.sd-corner{padding:10px 12px;background:var(--surface2);border-right:1px solid var(--border);border-bottom:2px solid var(--border-strong);display:flex;align-items:flex-end;}
+.sd-dh{padding:9px 6px 8px;text-align:center;background:var(--surface2);border-right:1px solid var(--border);border-bottom:2px solid var(--border-strong);}
+.sd-dh.today{background:var(--accent-soft);border-bottom:3px solid var(--accent);}
+.sd-dh .dn{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-weight:600;}
+.sd-dh .dd{font-family:var(--display);font-size:20px;font-weight:700;line-height:1.1;margin-top:1px;}
+.sd-role-hdr{grid-column:1/-1;display:grid;grid-template-columns:140px repeat(7,1fr);background:var(--surface2);border-bottom:1px solid var(--border);border-top:2px solid var(--border-strong);}
+.sd-role-lbl{padding:5px 12px;border-right:1px solid var(--border);display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);}
+.sd-role-day{border-right:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:5px 4px;font-size:10px;color:var(--text-hint);font-family:var(--mono);}
+.sd-name{padding:8px 10px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:#fff;display:flex;flex-direction:column;justify-content:center;cursor:pointer;}
+.sd-name .nm{font-size:12px;font-weight:600;}
+.sd-name .nh{font-size:10px;color:var(--text-muted);font-family:var(--mono);margin-top:1px;}
+.sd-cell{padding:4px 5px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:#fff;display:flex;flex-direction:column;gap:3px;min-height:58px;position:relative;}
+.sd-cell:last-child{border-right:none;}
+.sd-block{border-radius:6px;padding:4px 7px;font-size:11px;font-family:var(--mono);cursor:pointer;border-left:3px solid;display:flex;flex-direction:column;gap:1px;transition:filter .12s,transform .1s;position:relative;}
+.sd-block:hover{filter:brightness(.94);transform:scale(1.02);}
+.sd-block .sb-time{font-weight:600;font-size:11px;}
+.sd-block .sb-note{font-size:10px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sd-block .sb-del{position:absolute;top:3px;right:3px;opacity:0;background:rgba(0,0,0,.15);border:none;color:inherit;border-radius:3px;width:14px;height:14px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sd-block:hover .sb-del{opacity:1;}
+.sd-add{background:transparent;border:1.5px dashed var(--border-strong);color:var(--text-hint);border-radius:6px;padding:4px;font-size:11px;cursor:pointer;text-align:center;transition:all .13s;font-family:var(--sans);width:100%;}
+.sd-add:hover{border-color:var(--accent-dark);color:var(--accent-dark);background:var(--accent-soft);}
+/* Shift modal */
+.sd-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:flex;align-items:center;justify-content:center;}
+.sd-modal{background:#fff;border-radius:14px;padding:24px;width:360px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.16);border:1.5px solid var(--border);}
+.sd-modal h3{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:16px;}
+.sd-fg{margin-bottom:11px;}
+.sd-fl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;}
+.sd-fc{width:100%;background:var(--surface2);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:7px 10px;font-family:var(--mono);font-size:13px;outline:none;transition:border-color .13s;}
+.sd-fc:focus{border-color:var(--accent);background:#fff;}
+.sd-frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sd-role-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── LOGIN SCREEN ── */
+#budgetLogin{position:fixed;inset:0;background:#FFF8EE;z-index:9999;display:flex;align-items:center;justify-content:center;}
+.bly-box{background:#fff;border:1.5px solid rgba(180,110,0,0.35);border-radius:20px;padding:40px 36px;width:380px;max-width:calc(100vw - 32px);box-shadow:0 24px 80px rgba(0,0,0,.12);}
+.bly-logo{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+.bly-dot{width:11px;height:11px;border-radius:50%;background:#FFB343;}
+.bly-brand{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:#2D1F00;}
+.bly-sub{font-size:.76rem;color:#7A5C1E;margin-bottom:24px;}
+.bly-fg{margin-bottom:12px;}
+.bly-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:#7A5C1E;display:block;margin-bottom:5px;font-weight:700;}
+.bly-inp{width:100%;background:#FFF1D6;border:1.5px solid rgba(180,110,0,0.35);border-radius:9px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:.84rem;outline:none;box-sizing:border-box;transition:border-color .15s;color:#2D1F00;}
+.bly-inp:focus{border-color:#FFB343;background:#fff;}
+.bly-btn{width:100%;background:#FFB343;color:#2D1F00;border:none;border-radius:10px;padding:12px;font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:10px;}
+.bly-btn:hover{background:#E8930A;color:#fff;}
+.bly-btn:disabled{opacity:.5;cursor:not-allowed;}
+.bly-err{font-size:.74rem;color:#C0392B;background:#FCE8E6;border:1px solid #f5c0c0;border-radius:8px;padding:8px 11px;margin-bottom:10px;display:none;}
+@keyframes blyFade{to{opacity:0;transform:scale(.97)}}
+</style>
+</head>
+<body>
+<div id="budgetLogin">
+  <div class="bly-box">
+    <div class="bly-logo"><div class="bly-dot"></div><div class="bly-brand">RestaurantBudget</div></div>
+    <div class="bly-sub">Log ind med dine ShiftDesk-oplysninger</div>
+    <div class="bly-fg"><label class="bly-lbl">Email</label><input type="email" id="blyEmail" class="bly-inp" autocomplete="off" placeholder="din@email.com" onkeydown="if(event.key==='Enter')document.getElementById('blyPw').focus()"></div>
+    <div class="bly-fg"><label class="bly-lbl">Adgangskode</label><input type="password" id="blyPw" class="bly-inp" autocomplete="off" placeholder="••••••••" onkeydown="if(event.key==='Enter')blyLogin()"></div>
+    <div id="blyErr" class="bly-err"></div>
+    <button class="bly-btn" id="blyBtn" onclick="blyLogin()">Log ind →</button>
+    <div style="text-align:center;font-size:.69rem;color:#C49A45;">Glemt adgangskode? Kontakt din ShiftDesk administrator</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, getDocs, getDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  const _k=['AIza','SyCgIw7hW9rL104rx9WrImWaQvvSd3oRoGQ'];
+  const cfg={apiKey:"AIzaSyCgIw7hW9rL104rx9WrImWaQvvSd3oRoGQ",authDomain:"shiftdesk-admin.firebaseapp.com",projectId:"shiftdesk-admin",storageBucket:"shiftdesk-admin.firebasestorage.app",messagingSenderId:"942500137972",appId:"1:942500137972:web:c0e0755c97f3590bcb07a1"};
+  try{
+    const app=getApps().length?getApps()[0]:initializeApp(cfg);
+    const db=getFirestore(app);
+    window.fbGetData=async function(k){try{const d=await getDoc(doc(db,"customerData",k));return d.exists()?d.data().value:null;}catch(e){return null;}};
+    window.fbSetData=async function(k,v){try{await setDoc(doc(db,"customerData",k),{value:v});}catch(e){}};
+    window.fbGetCustomers=async function(){try{const s=await getDocs(collection(db,"customers"));return s.docs.map(d=>({id:d.id,...d.data()}));}catch(e){return[];}};
+    window._fbReady=true;
+  }catch(e){console.error('Firebase init error:',e);window._fbReady=false;}
+</script>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Restaurant<br>Budget DK</div>
+    <div class="tagline">Økonomiværktøj</div>
+  </div>
+  <div class="month-selector">
+    <label>Periode</label>
+    <div class="month-nav-row">
+      <button onclick="changeMonth(-1)">&#8592;</button>
+      <div class="month-name" id="sb-month"></div>
+      <button onclick="changeMonth(1)">&#8594;</button>
+    </div>
+  </div>
+  <nav class="nav-items">
+    <div class="nav-group-label">Økonomi</div>
+    <button class="nav-item active" onclick="showTab('dashboard',this)"><span class="icon">▦</span><span class="label">Overblik</span></button>
+    <button class="nav-item" onclick="showTab('omsaetning',this)"><span class="icon">▲</span><span class="label">Omsætning</span></button>
+    <button class="nav-item" onclick="showTab('vareforbrug',this)"><span class="icon">◆</span><span class="label">Vareforbrug</span></button>
+    <button class="nav-item" onclick="showTab('driftsomk',this)"><span class="icon">◎</span><span class="label">Driftsomk.</span></button>
+    <button class="nav-item" onclick="showTab('resultat',this)"><span class="icon">≡</span><span class="label">Resultatopgørelse</span></button>
+    <div class="nav-group-label">Personale</div>
+    <button class="nav-item" onclick="showTab('lonninger',this)"><span class="icon">●</span><span class="label">Lønberegning</span></button>
+    <button class="nav-item" onclick="showTab('vagtplan',this)"><span class="icon">◉</span><span class="label">Vagtplan</span></button>
+    <div class="nav-group-label">Drift</div>
+    <button class="nav-item" onclick="showTab('lager',this)"><span class="icon">◈</span><span class="label">Lagerstyring</span></button>
+  </nav>
+  <div class="sidebar-footer">v2.0 · Dansk udgave</div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button id="back-btn" onclick="goAlert('dashboard')" style="display:none;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .15s" onmouseover="this.style.borderColor='var(--border-strong)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">← Forside</button>
+      <h1 id="page-title">Overblik</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="alerts-badge" id="alerts-badge">⚠ Advarsler</div>
+      <div style="font-size:12px;color:var(--text-hint)" id="topbar-month"></div>
+      <div style="width:1px;height:18px;background:var(--border);margin:0 4px"></div>
+      <button class="action-btn" onclick="doEmail()">✉ Send</button>
+      <button class="action-btn" onclick="doPrint()">⎙ Print</button>
+      <button class="action-btn" onclick="doDownload()">↓ Hent</button>
+      <button class="action-btn primary" id="save-btn" onclick="manualSave()" style="min-width:90px">💾 Gem</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="section-dashboard" class="section active">
+      <div id="alert-box" style="margin-bottom:14px"></div>
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="grid2">
+        <div class="card"><h2>Omkostningsfordeling</h2><div id="cost-bars"></div></div>
+        <div class="card"><h2>Budget vs. realiseret</h2><div id="bva-table"></div></div>
+      </div>
+      <div class="grid3">
+        <div class="card"><h2>Salgsprognose</h2><div id="prognose-mini"></div></div>
+        <div class="card"><h2>Lageradvarsler</h2><div id="lager-mini"></div></div>
+        <div class="card"><h2>Løn denne måned</h2><div id="lon-mini"></div></div>
+      </div>
+    </div>
+
+    <!-- OMSÆTNING -->
+    <div id="section-omsaetning" class="section">
+      <div class="card">
+        <h2>Omsætning</h2>
+        <div class="section-label">Couverter &amp; gennemsnitspris</div>
+        <div class="field-row"><label>Couverter pr. dag (gns.)</label><div class="field-wrap"><input type="number" id="covers" value="45" min="0" onchange="calc()"></div></div>
+        <div class="field-row"><label>Åbningsdage denne måned</label><div class="field-wrap"><input type="number" id="dage" value="26" min="0" onchange="calc()"></div></div>
+        <div class="field-row"><label>Gns. forbrug pr. couvert (inkl. moms)</label><div class="field-wrap"><input type="number" id="gns-forbrug" value="320" min="0" onchange="calc()"><span class="unit">kr</span></div></div>
+        <div class="field-row"><label>Momssats (restauranter)</label><div class="field-wrap"><input type="number" id="moms-pct" value="25" min="0" max="100" onchange="calc()"><span class="unit">%</span></div></div>
+        <div class="section-label">Øvrig omsætning (inkl. moms)</div>
+        <div class="field-row"><label>Selskaber &amp; catering</label><div class="field-wrap"><input type="number" id="selskaber" value="0" min="0" onchange="calc()"><span class="unit">kr</span></div></div>
+        <div class="field-row"><label>Take-away / levering</label><div class="field-wrap"><input type="number" id="takeaway" value="0" min="0" onchange="calc()"><span class="unit">kr</span></div></div>
+        <div class="field-row"><label>Anden omsætning</label><div class="field-wrap"><input type="number" id="anden-omsk" value="0" min="0" onchange="calc()"><span class="unit">kr</span></div></div>
+        <div class="section-label">Budgetmål</div>
+        <div class="field-row"><label>Månedligt omsætningsbudget (inkl. moms)</label><div class="field-wrap"><input type="number" id="omsk-budget" value="400000" min="0" onchange="calc()"><span class="unit">kr</span></div></div>
+      </div>
+      <div class="card">
+        <h2>Salgsprognose — uge for uge</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Angiv forventet og realiseret omsætning pr. uge (inkl. moms)</p>
+        <table>
+          <thead><tr><th>Uge</th><th class="r">Prognose (kr)</th><th class="r">Realiseret (kr)</th><th class="r">Afvigelse</th></tr></thead>
+          <tbody id="prognose-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VAREFORBRUG -->
+    <div id="section-vareforbrug" class="section">
+      <div class="card">
+        <h2>Vareforbrug (råvarer &amp; drikkevarer)</h2>
+        <table>
+          <thead><tr><th>Kategori</th><th class="r">Budget (kr)</th><th class="r">Realiseret (kr)</th><th class="r">% af omsk. ekskl. moms</th><th></th></tr></thead>
+          <tbody id="vareforbrug-body"></tbody>
+        </table>
+        <div style="margin-top:10px"><button class="btn sm" onclick="addVare()">+ Tilføj kategori</button></div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="field-row"><label style="font-weight:600">Samlet vareforbrug %</label><div id="vare-pct-total" class="badge neu">—</div></div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:4px">Branchens tommelfingerregel: 28–35% af omsætning ekskl. moms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRIFTSOMKOSTNINGER -->
+    <div id="section-driftsomk" class="section">
+      <div class="card">
+        <h2>Driftsomkostninger</h2>
+        <table>
+          <thead><tr><th>Post</th><th class="r">Budget (kr)</th><th class="r">Realiseret (kr)</th><th class="r">Afvigelse</th><th></th></tr></thead>
+          <tbody id="drift-body"></tbody>
+        </table>
+        <div style="margin-top:10px"><button class="btn sm" onclick="addDrift()">+ Tilføj post</button></div>
+      </div>
+    </div>
+
+    <!-- RESULTATOPGØRELSE -->
+    <div id="section-resultat" class="section">
+      <div class="grid2">
+        <div class="card">
+          <h2>Resultatopgørelse — <span id="res-month"></span></h2>
+          <div id="pl-body" style="margin-top:8px"></div>
+        </div>
+        <div>
+          <div class="card">
+            <h2>Momsoversigt (momsangivelse)</h2>
+            <div id="moms-body"></div>
+          </div>
+          <div class="card">
+            <h2>AM-bidrag &amp; A-skat (estimat)</h2>
+            <div id="skat-body"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LØNBEREGNING -->
+    <div id="section-lonninger" class="section">
+      <div class="card">
+        <h2>Lønberegning — dansk model</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Feriepenge: 12,5% af bruttoløn. ATP: 99 kr/md (fuldtid). AM-bidrag: 8% af brutto (trækkes fra medarbejder, angives til SKAT).</p>
+        <table>
+          <thead><tr><th>Medarbejder</th><th class="r">Timer/md</th><th class="r">Timeløn (kr)</th><th class="r">Bruttoløn</th><th class="r">Feriepenge 12,5%</th><th class="r">ATP (kr)</th><th class="r">Samlet omk.</th><th></th></tr></thead>
+          <tbody id="lon-body"></tbody>
+        </table>
+        <div style="margin-top:10px"><button class="btn sm" onclick="addLon()">+ Tilføj medarbejder</button></div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <div class="field-row"><label style="font-weight:600">Samlet lønomkostning</label><span id="lon-total-kr" style="font-family:var(--mono);font-weight:600">—</span></div>
+          <div class="field-row"><label style="font-weight:600">Lønomkostning % af omsætning</label><div id="lon-pct-total" class="badge neu">—</div></div>
+          <div style="font-size:12px;color:var(--text-hint);margin-top:4px">Inkl. feriepenge (12,5%) + ATP. Tommelfingerregel: 30–35% af omsætning inkl. moms</div>
+        </div>
+      </div>
+      <div class="card" style="max-width:500px">
+        <h2>Lønseddel-beregner</h2>
+        <div class="field-row"><label>Vælg medarbejder</label>
+          <select id="ls-valg" onchange="renderLonseddel()" style="width:200px"></select>
+        </div>
+        <div id="lonseddel-output" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- VAGTPLAN -->
+    <div id="section-vagtplan" class="section">
+
+      <!-- Uge-tabs + summary bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div id="uge-tabs" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+        <div style="display:flex;align-items:center;gap:16px;font-size:13px;">
+          <span>Uge-timer: <strong id="vagt-timer-total" style="font-family:var(--mono)">—</strong></span>
+          <span>Uge-løn: <strong id="vagt-lon-total" style="font-family:var(--mono);color:var(--accent)">—</strong></span>
+        </div>
+      </div>
+
+      <!-- ShiftDesk-style grid -->
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px;">
+        <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h2 style="margin-bottom:2px" id="sd-week-title">Vagtplan</h2>
+            <p style="font-size:12px;color:var(--text-muted)" id="sd-week-sub">Klik + for at tilføje vagt</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="sd-legend"></div>
+          </div>
+        </div>
+        <div class="sd-wrap">
+          <div class="sd-grid" id="sd-grid"></div>
+        </div>
+      </div>
+
+      <!-- Månedsoversigt -->
+      <div class="card">
+        <h2>Månedsoversigt — timer i alt</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">Summerer alle ugers vagter. Klik knappen for at overføre til lønberegning.</p>
+        <table>
+          <thead><tr id="maaned-header"><th>Medarbejder</th><th class="r">Uge 1</th><th class="r">Uge 2</th><th class="r">Uge 3</th><th class="r">Uge 4</th><th class="r">Uge 5</th><th class="r" style="color:var(--accent)">I alt (md)</th><th class="r">Aktuelt i løn</th><th class="r">Forskel</th></tr></thead>
+          <tbody id="maaned-body"></tbody>
+        </table>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div id="maaned-total-timer" style="font-family:var(--mono);font-size:15px;font-weight:600"></div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Samlet lønomkostning fra vagtplan: <span id="maaned-total-lon" style="font-family:var(--mono);font-weight:600;color:var(--accent)">—</span></div>
+          </div>
+          <button class="action-btn primary" onclick="overfoeTimerTilLon()">↑ Overfør timer til lønberegning</button>
+        </div>
+        <div id="overfoel-besked" style="margin-top:10px;font-size:13px;display:none"></div>
+      </div>
+
+      <div class="card">
+        <h2>Overarbejde &amp; tillæg</h2>
+        <table>
+          <thead><tr><th>Medarbejder</th><th class="r">Planl. t/uge</th><th class="r">Vagt-timer</th><th class="r">Overarb.</th><th class="r">50% tillæg (kr)</th></tr></thead>
+          <tbody id="overarb-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Shift modal -->
+      <div class="sd-modal-overlay" id="sd-overlay" style="display:none" onclick="if(event.target===this)closeSdModal()">
+        <div class="sd-modal">
+          <h3 id="sd-modal-title">Tilføj vagt</h3>
+          <div class="sd-fg">
+            <label class="sd-fl">Medarbejder</label>
+            <select class="sd-fc" id="sd-m-emp"></select>
+          </div>
+          <div class="sd-frow">
+            <div class="sd-fg">
+              <label class="sd-fl">Start</label>
+              <input class="sd-fc" type="time" id="sd-m-start" value="09:00">
+            </div>
+            <div class="sd-fg">
+              <label class="sd-fl">Slut</label>
+              <input class="sd-fc" type="time" id="sd-m-end" value="17:00">
+            </div>
+          </div>
+          <div class="sd-frow">
+            <div class="sd-fg">
+              <label class="sd-fl">Pause start</label>
+              <input class="sd-fc" type="time" id="sd-m-bstart" placeholder="—">
+            </div>
+            <div class="sd-fg">
+              <label class="sd-fl">Pause slut</label>
+              <input class="sd-fc" type="time" id="sd-m-bend" placeholder="—">
+            </div>
+          </div>
+          <div class="sd-fg">
+            <label class="sd-fl">Note (valgfri)</label>
+            <input class="sd-fc" type="text" autocomplete="off" id="sd-m-note" placeholder="fx Åbning, Aften, Brunch…">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;align-items:center;">
+            <button id="sd-del-btn" class="btn-del" style="margin-right:auto;display:none" onclick="deleteSdShift()">✕ Slet vagt</button>
+            <button class="btn sm" onclick="closeSdModal()">Annuller</button>
+            <button class="action-btn primary" onclick="saveSdShift()">Gem vagt</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LAGERSTYRING -->
+    <div id="section-lager" class="section">
+      <div class="card">
+        <h2>Lagerstyring</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px">Følg lagerstatus og få advarsel når varer er under minimumsniveau.</p>
+        <table>
+          <thead><tr><th>Vare</th><th class="r">Enhed</th><th class="r">Lager nu</th><th class="r">Min. niveau</th><th class="r">Indkøbspris</th><th class="r">Lagerværdi</th><th class="r">Status</th><th></th></tr></thead>
+          <tbody id="lager-body"></tbody>
+        </table>
+        <div style="margin-top:10px"><button class="btn sm" onclick="addLager()">+ Tilføj vare</button></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <div class="field-row"><label style="font-weight:600">Samlet lagerværdi</label><span id="lager-total" style="font-family:var(--mono);font-weight:600">—</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Leverandørfakturaer (indkøb)</h2>
+        <table>
+          <thead><tr><th>Type</th><th>Leverandør</th><th>Nummer</th><th class="r">Beløb (kr)</th><th class="r">Forfaldsdato</th><th class="r">Status</th><th></th></tr></thead>
+          <tbody id="indkob-body"></tbody>
+        </table>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn sm" onclick="addFaktura()">+ Tilføj faktura</button>
+          <button class="btn sm" onclick="addKreditnota()" style="color:var(--green);border-color:rgba(30,122,74,0.3)">↩ Tilføj kreditnota</button>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <div id="indkob-sub" style="margin-bottom:6px"></div>
+          <div class="field-row"><label style="font-weight:600">Netto udestående beløb</label><span id="indkob-total" style="font-family:var(--mono);font-weight:600">—</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</div>
+
+<script>
+const MANEDER=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+const DAGE=['Man','Tir','Ons','Tor','Fre','Lor','Son'];
+let curMonth=new Date().getMonth();
+let curYear=new Date().getFullYear();
+const ATP=99;
+
+let vareRows=[
+  {kat:'Mad – koekken',budget:56000,real:52800},
+  {kat:'Drikkevarer (alkohol)',budget:18000,real:17200},
+  {kat:'Drikkevarer (alkoholfri)',budget:6000,real:6400},
+  {kat:'Dessert & bageri',budget:8000,real:7600},
+];
+let lonRows=[
+  {navn:'Kokkenchef',timer:176,timelon:280},
+  {navn:'Koekkenhjælp',timer:160,timelon:195},
+  {navn:'Tjener 1 (fuldtid)',timer:160,timelon:185},
+  {navn:'Tjener 2 (deltid)',timer:80,timelon:175},
+  {navn:'Restaurantchef',timer:176,timelon:320},
+];
+let driftRows=[
+  {post:'Husleje',budget:28000,real:28000},
+  {post:'El, vand & varme',budget:9000,real:8400},
+  {post:'Emballage & engangsartikler',budget:3000,real:2800},
+  {post:'Forsikringer',budget:2500,real:2500},
+  {post:'Markedsfoering & sociale medier',budget:4000,real:2600},
+  {post:'Rengoering & hygiejne',budget:2000,real:1900},
+  {post:'Regnskab & bogfoering',budget:3500,real:3500},
+  {post:'Vedligeholdelse',budget:2000,real:1200},
+  {post:'Kassesystem / software',budget:800,real:800},
+];
+let prognoseRows=[
+  {uge:'Uge 1',prog:95000,real:88000},
+  {uge:'Uge 2',prog:100000,real:104000},
+  {uge:'Uge 3',prog:98000,real:91000},
+  {uge:'Uge 4',prog:107000,real:0},
+];
+// vagtTimer[uge][medarbejder][dag]  — 5 uger maks.
+let vagtTimer=[
+  lonRows.map(()=>[8,8,8,8,8,6,0]),
+  lonRows.map(()=>[8,8,8,8,8,6,0]),
+  lonRows.map(()=>[8,8,8,8,8,6,0]),
+  lonRows.map(()=>[8,8,8,8,8,0,0]),
+  lonRows.map(()=>[0,0,0,0,0,0,0]),
+];
+let aktivUge=0;
+let lagerRows=[
+  {vare:'Oksekoed (kg)',enhed:'kg',lager:12,min:8,pris:95},
+  {vare:'Kylling (kg)',enhed:'kg',lager:18,min:10,pris:55},
+  {vare:'Fisk – laks (kg)',enhed:'kg',lager:5,min:6,pris:130},
+  {vare:'Groentsager (kg)',enhed:'kg',lager:22,min:10,pris:18},
+  {vare:'Floede (liter)',enhed:'ltr',lager:8,min:5,pris:22},
+  {vare:'Hvidvin (fl.)',enhed:'fl.',lager:24,min:12,pris:65},
+  {vare:'Roedvin (fl.)',enhed:'fl.',lager:30,min:12,pris:70},
+  {vare:'Oel (kasse)',enhed:'kas.',lager:6,min:4,pris:200},
+];
+let indkobRows=[
+  {type:'faktura', lev:'Madsen Engros A/S',  belob:24000, dato:'10/04', status:'afventer',  nr:'F-2026-001'},
+  {type:'faktura', lev:'Carlsberg Distribution', belob:8400, dato:'15/04', status:'betalt', nr:'F-2026-002'},
+  {type:'faktura', lev:'Groent & Godt ApS',  belob:3200,  dato:'08/04', status:'forfalden', nr:'F-2026-003'},
+  {type:'kreditnota', lev:'Madsen Engros A/S', belob:1200, dato:'12/04', status:'afventer', nr:'K-2026-001'},
+];
+
+// Per-month store
+function _key(){return 'rb-'+curYear+'-'+curMonth;}
+function _save(){
+  const data={
+    vareRows:JSON.parse(JSON.stringify(vareRows)),
+    lonRows:JSON.parse(JSON.stringify(lonRows)),
+    driftRows:JSON.parse(JSON.stringify(driftRows)),
+    prognoseRows:JSON.parse(JSON.stringify(prognoseRows)),
+    vagtTimer:JSON.parse(JSON.stringify(vagtTimer)),
+    aktivUge:aktivUge,
+    sdShifts:JSON.parse(JSON.stringify(window.sdShifts||{})),
+    lagerRows:JSON.parse(JSON.stringify(lagerRows)),
+    indkobRows:JSON.parse(JSON.stringify(indkobRows)),
+    covers:document.getElementById('covers').value,
+    dage:document.getElementById('dage').value,
+    gnsForbrug:document.getElementById('gns-forbrug').value,
+    momsPct:document.getElementById('moms-pct').value,
+    selskaber:document.getElementById('selskaber').value,
+    takeaway:document.getElementById('takeaway').value,
+    andenOmsk:document.getElementById('anden-omsk').value,
+    omskBudget:document.getElementById('omsk-budget').value,
+  };
+  try{localStorage.setItem(_key(),JSON.stringify(data));}catch(e){}
+}
+function _load(){
+  let d=null;
+  try{const raw=localStorage.getItem(_key());if(raw)d=JSON.parse(raw);}catch(e){}
+  if(!d)return;
+  vareRows=JSON.parse(JSON.stringify(d.vareRows));
+  lonRows=JSON.parse(JSON.stringify(d.lonRows));
+  driftRows=JSON.parse(JSON.stringify(d.driftRows));
+  prognoseRows=JSON.parse(JSON.stringify(d.prognoseRows));
+  vagtTimer=JSON.parse(JSON.stringify(d.vagtTimer));
+  aktivUge=d.aktivUge||0;
+  if(d.sdShifts)window.sdShifts=JSON.parse(JSON.stringify(d.sdShifts));
+  bootstrapSdFromVagtTimer();
+  lagerRows=JSON.parse(JSON.stringify(d.lagerRows));
+  indkobRows=JSON.parse(JSON.stringify(d.indkobRows));
+  document.getElementById('covers').value=d.covers;
+  document.getElementById('dage').value=d.dage;
+  document.getElementById('gns-forbrug').value=d.gnsForbrug;
+  document.getElementById('moms-pct').value=d.momsPct;
+  document.getElementById('selskaber').value=d.selskaber;
+  document.getElementById('takeaway').value=d.takeaway;
+  document.getElementById('anden-omsk').value=d.andenOmsk;
+  document.getElementById('omsk-budget').value=d.omskBudget;
+}
+// Load all months from localStorage on startup
+function _loadAll(){
+  try{
+    Object.keys(localStorage).filter(k=>k.startsWith('rb-')).forEach(k=>{});
+  }catch(e){}
+}
+
+// Action buttons — current page only
+function doEmail(){
+  const title=document.getElementById('page-title').textContent;
+  const month=document.getElementById('topbar-month').textContent;
+  const sec=document.querySelector('.section.active');
+  const nums=[...sec.querySelectorAll('.kpi-val,.pl-amount,.r')].slice(0,14).map(el=>el.textContent.trim()).filter(Boolean).join(', ');
+  const sub=encodeURIComponent('RestaurantBudget – '+title+' – '+month);
+  const body=encodeURIComponent('Hej,\n\nHer er data fra siden "'+title+'" for '+month+':\n\n'+nums+'\n\nMvh\nRestaurantBudget DK');
+  window.location.href='mailto:?subject='+sub+'&body='+body;
+}
+function doPrint(){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('print-target'));
+  document.querySelector('.section.active').classList.add('print-target');
+  window.print();
+}
+function doDownload(){
+  const title=document.getElementById('page-title').textContent;
+  const month=document.getElementById('topbar-month').textContent;
+  const sec=document.querySelector('.section.active').cloneNode(true);
+  sec.querySelectorAll('.del-btn,.btn.sm').forEach(el=>el.remove());
+  const styles=document.querySelector('style').innerHTML;
+  const html='<!DOCTYPE html><html lang="da"><head><meta charset="UTF-8"><title>'+title+' – '+month+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">'
+    +'<style>'+styles+'body{padding:28px;background:var(--bg)}.section{display:block!important}</style></head><body>'
+    +'<div style="font-family:var(--display);font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px">'+title+'</div>'
+    +'<div style="font-size:13px;color:var(--text-muted);margin-bottom:22px">'+month+' · RestaurantBudget DK</div>'
+    +'<div>'+sec.innerHTML+'</div></body></html>';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='budget-'+title.toLowerCase().replace(/\s+/g,'-')+'-'+month.toLowerCase().replace(/\s+/g,'-')+'.html';
+  a.click();
+}
+
+function manualSave(){
+  _save();
+  const btn=document.getElementById('save-btn');
+  if(!btn)return;
+  const orig=btn.innerHTML;
+  btn.innerHTML='✓ Gemt!';
+  btn.style.background='var(--green)';
+  btn.style.borderColor='var(--green)';
+  setTimeout(()=>{btn.innerHTML=orig;btn.style.background='';btn.style.borderColor='';},2000);
+}
+
+// Auto-save indicator: mark unsaved changes
+function markUnsaved(){
+  const btn=document.getElementById('save-btn');
+  if(btn&&!btn.textContent.includes('Gemt')&&!btn.textContent.includes('●')){
+    btn.innerHTML='💾 Gem ●';
+    btn.style.background='var(--accent-dark)';
+  }
+}
+
+function fmt(n){return Math.round(n).toLocaleString('da-DK')+' kr';}
+function fmtN(n){return Math.round(n).toLocaleString('da-DK');}
+function pct(a,b){return b?((a/b)*100).toFixed(1)+'%':'-%';}
+function pctNum(a,b){return b?(a/b)*100:0;}
+
+function showTab(tab,btn){
+  const backBtn=document.getElementById('back-btn');
+  if(backBtn)backBtn.style.display=tab==='dashboard'?'none':'inline-flex';
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+tab).classList.add('active');
+  if(btn)btn.classList.add('active');
+  const t={dashboard:'Overblik',omsaetning:'Omsaetning',vareforbrug:'Vareforbrug',driftsomk:'Driftsomkostninger',resultat:'Resultatopgorelse',lonninger:'Lonberegning',vagtplan:'Vagtplan',lager:'Lagerstyring'};
+  document.getElementById('page-title').textContent=t[tab]||tab;
+  if(tab==='vagtplan'){renderVagtplan();}
+}
+function goAlert(tab){
+  const navBtn=document.querySelector('.nav-item[onclick*="\''+tab+'\'"]');
+  showTab(tab,navBtn);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function changeMonth(d){
+  _save();
+  curMonth+=d;
+  if(curMonth>11){curMonth=0;curYear++;}
+  if(curMonth<0){curMonth=11;curYear--;}
+  _load();
+  updateMonthUI();calc();
+}
+function updateMonthUI(){
+  const s=MANEDER[curMonth]+' '+curYear;
+  document.getElementById('sb-month').textContent=MANEDER[curMonth].substring(0,3);
+  document.getElementById('topbar-month').textContent=s;
+  const rm=document.getElementById('res-month');
+  if(rm)rm.textContent=s;
+}
+
+function getOmsaetning(){
+  const c=+document.getElementById('covers').value||0;
+  const d=+document.getElementById('dage').value||0;
+  const g=+document.getElementById('gns-forbrug').value||0;
+  return c*d*g+(+document.getElementById('selskaber').value||0)+(+document.getElementById('takeaway').value||0)+(+document.getElementById('anden-omsk').value||0);
+}
+function getMomsPct(){return +document.getElementById('moms-pct').value||25;}
+function getVare(){let b=0,r=0;vareRows.forEach(x=>{b+=x.budget;r+=x.real});return{b,r};}
+function getLonData(){
+  return lonRows.map(r=>{
+    const brutto=r.timer*r.timelon;
+    const ferie=brutto*0.125;
+    const atp=r.timer>=130?ATP:Math.round(ATP*(r.timer/160));
+    return{...r,brutto,ferie,atp,total:brutto+ferie+atp};
+  });
+}
+function getLonTotal(){return getLonData().reduce((s,r)=>s+r.total,0);}
+function getDrift(){let b=0,r=0;driftRows.forEach(x=>{b+=x.budget;r+=x.real});return{b,r};}
+
+function renderVare(){
+  const omsk=getOmsaetning();
+  const exMoms=omsk/(1+getMomsPct()/100);
+  const tb=document.getElementById('vareforbrug-body');
+  tb.innerHTML='';
+  vareRows.forEach((r,i)=>{
+    const p=pctNum(r.real,exMoms);
+    const cl=p>38?'bad':p>33?'warn':'good';
+    tb.innerHTML+=`<tr>
+      <td><input type="text" autocomplete="off" value="${r.kat}" style="width:170px" onchange="vareRows[${i}].kat=this.value"></td>
+      <td class="r"><input type="number" value="${r.budget}" style="width:90px" onchange="vareRows[${i}].budget=+this.value;calc()"></td>
+      <td class="r"><input type="number" value="${r.real}" style="width:90px" onchange="vareRows[${i}].real=+this.value;calc()"></td>
+      <td class="r"><span class="badge ${cl}">${pct(r.real,exMoms)}</span></td>
+      <td><button class="del-btn" onclick="vareRows.splice(${i},1);calc()">x</button></td>
+    </tr>`;
+  });
+  const tot=vareRows.reduce((s,r)=>s+r.real,0);
+  const tp=pctNum(tot,exMoms);
+  const b=document.getElementById('vare-pct-total');
+  b.textContent=pct(tot,exMoms);b.className='badge '+(tp>35?'bad':tp>30?'warn':'good');
+}
+function addVare(){vareRows.push({kat:'Ny kategori',budget:0,real:0});calc();}
+
+function renderLon(){
+  const omsk=getOmsaetning();
+  const data=getLonData();
+  const tb=document.getElementById('lon-body');
+  tb.innerHTML='';
+  let total=0;
+  data.forEach((r,i)=>{
+    total+=r.total;
+    tb.innerHTML+=`<tr>
+      <td><input type="text" autocomplete="off" value="${r.navn}" style="width:130px" onchange="lonRows[${i}].navn=this.value;renderVagtplan();renderLonseddel()"></td>
+      <td class="r"><input type="number" value="${r.timer}" style="width:65px" onchange="lonRows[${i}].timer=+this.value;calc()"></td>
+      <td class="r"><input type="number" value="${r.timelon}" style="width:70px" onchange="lonRows[${i}].timelon=+this.value;calc()"></td>
+      <td class="r muted">${fmtN(r.brutto)}</td>
+      <td class="r muted">${fmtN(r.ferie)}</td>
+      <td class="r muted">${fmtN(r.atp)}</td>
+      <td class="r" style="font-weight:600">${fmtN(r.total)}</td>
+      <td><button class="del-btn" onclick="lonRows.splice(${i},1);vagtTimer.forEach(u=>u.splice(${i},1));calc()">x</button></td>
+    </tr>`;
+  });
+  const lp=pctNum(total,omsk);
+  const badge=document.getElementById('lon-pct-total');
+  badge.textContent=pct(total,omsk);badge.className='badge '+(lp>37?'bad':lp>33?'warn':'good');
+  document.getElementById('lon-total-kr').textContent=fmt(total);
+  const sel=document.getElementById('ls-valg');
+  const cur=sel.value;
+  sel.innerHTML=lonRows.map((r,i)=>`<option value="${i}"${i==cur?' selected':''}>${r.navn}</option>`).join('');
+  renderLonseddel();
+}
+function addLon(){lonRows.push({navn:'Ny medarbejder',timer:0,timelon:0});vagtTimer.forEach(u=>u.push([0,0,0,0,0,0,0]));calc();}
+
+function renderLonseddel(){
+  const i=+document.getElementById('ls-valg').value||0;
+  if(!lonRows[i])return;
+  const r=lonRows[i];
+  const brutto=r.timer*r.timelon;
+  const am=brutto*0.08;
+  const grundlag=brutto-am;
+  const askat=Math.round(grundlag*0.38);
+  const netto=Math.round(grundlag-askat);
+  const ferie=brutto*0.125;
+  const atp=r.timer>=130?ATP:Math.round(ATP*(r.timer/160));
+  document.getElementById('lonseddel-output').innerHTML=`
+    <div class="lonseddel">
+      <div style="font-family:var(--display);font-weight:600;margin-bottom:12px">${r.navn}</div>
+      <div class="ls-row"><span>Timelon</span><span style="font-family:var(--mono)">${fmtN(r.timelon)} kr/t</span></div>
+      <div class="ls-row"><span>Timer denne maaned</span><span style="font-family:var(--mono)">${r.timer} t</span></div>
+      <div class="ls-row"><span>Bruttolon</span><span style="font-family:var(--mono)">${fmtN(brutto)} kr</span></div>
+      <div class="ls-row"><span style="color:var(--text-muted)">AM-bidrag 8%</span><span style="font-family:var(--mono);color:var(--text-muted)">- ${fmtN(am)} kr</span></div>
+      <div class="ls-row"><span style="color:var(--text-muted)">A-skat (est. 38% af grundlag)</span><span style="font-family:var(--mono);color:var(--text-muted)">- ${fmtN(askat)} kr</span></div>
+      <div class="ls-row ls-total"><span>Udbetalt til medarbejder</span><span style="font-family:var(--mono);color:var(--green)">${fmtN(netto)} kr</span></div>
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+        <div class="ls-row"><span style="color:var(--text-muted);font-size:12px">Feriepenge (12,5%)</span><span style="font-family:var(--mono);font-size:12px">${fmtN(ferie)} kr</span></div>
+        <div class="ls-row"><span style="color:var(--text-muted);font-size:12px">ATP arbejdsgiver</span><span style="font-family:var(--mono);font-size:12px">${fmtN(atp)} kr</span></div>
+        <div class="ls-row ls-total"><span>Samlet omk. for arbejdsgiver</span><span style="font-family:var(--mono);color:var(--accent)">${fmtN(brutto+ferie+atp)} kr</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-hint);margin-top:8px">Estimat. Faktisk A-skat afhaenger af skattekort og trækprocent.</div>
+    </div>`;
+}
+
+function getAntalUger(){
+  const first=new Date(curYear,curMonth,1);
+  const last=new Date(curYear,curMonth+1,0);
+  const startMon=new Date(first);
+  const dow=startMon.getDay()||7;
+  startMon.setDate(startMon.getDate()-(dow-1));
+  let count=0;const d=new Date(startMon);
+  while(d<=last){count++;d.setDate(d.getDate()+7);}
+  return count;
+}
+function getISOWeek(date){
+  const d=new Date(date);d.setHours(0,0,0,0);
+  d.setDate(d.getDate()+3-(d.getDay()+6)%7);
+  const week1=new Date(d.getFullYear(),0,4);
+  return 1+Math.round(((d-week1)/86400000-3+(week1.getDay()+6)%7)/7);
+}
+function getWeekDates(){
+  const first=new Date(curYear,curMonth,1);
+  const last=new Date(curYear,curMonth+1,0);
+  const startMon=new Date(first);
+  const dow=startMon.getDay()||7;
+  startMon.setDate(startMon.getDate()-(dow-1));
+  const weeks=[];const d=new Date(startMon);
+  while(d<=last){weeks.push({ugeNr:getISOWeek(d),mon:new Date(d)});d.setDate(d.getDate()+7);}
+  return weeks;
+}
+function ensureVagtTimer(){
+  const uger=5;
+  while(vagtTimer.length<uger)vagtTimer.push(lonRows.map(()=>[0,0,0,0,0,0,0]));
+  vagtTimer.forEach(uge=>{
+    while(uge.length<lonRows.length)uge.push([0,0,0,0,0,0,0]);
+    uge.forEach(mw=>{while(mw.length<7)mw.push(0);});
+  });
+}
+
+// ── SHIFT DATA: sdShifts[ugeIdx][empIdx][dayIdx] = [{start,end,note,bStart,bEnd}, …]
+window.sdShifts = window.sdShifts || {};
+
+// Bootstrap: convert existing vagtTimer hours → fake sdShifts blocks
+// so the grid is never empty when hours already exist
+function bootstrapSdFromVagtTimer(){
+  for(let u=0;u<5;u++){
+    if(!sdShifts[u])sdShifts[u]={};
+    for(let i=0;i<lonRows.length;i++){
+      if(!sdShifts[u][i])sdShifts[u][i]={};
+      for(let d=0;d<7;d++){
+        if(!sdShifts[u][i][d])sdShifts[u][i][d]=[];
+        // If vagtTimer has hours but sdShifts is empty → generate a shift block
+        const hrs=vagtTimer[u]&&vagtTimer[u][i]?+vagtTimer[u][i][d]||0:0;
+        if(hrs>0 && sdShifts[u][i][d].length===0){
+          // Default: start 08:00, end = start + hrs
+          const endH=8+Math.floor(hrs);
+          const endM=Math.round((hrs%1)*60);
+          const pad=n=>String(n).padStart(2,'0');
+          sdShifts[u][i][d].push({
+            start:'08:00',
+            end:`${pad(endH)}:${pad(endM)}`,
+            bStart:hrs>=6?'12:00':null,
+            bEnd:hrs>=6?'12:30':null,
+            note:''
+          });
+        }
+      }
+    }
+  }
+}
+function ensureSdShifts(){
+  for(let u=0;u<5;u++){
+    if(!sdShifts[u])sdShifts[u]={};
+    for(let i=0;i<lonRows.length;i++){
+      if(!sdShifts[u][i])sdShifts[u][i]={};
+      for(let d=0;d<7;d++){if(!sdShifts[u][i][d])sdShifts[u][i][d]=[];}
+    }
+  }
+}
+
+// Role colours mapped from lonRows index
+const SD_COLORS=[
+  {color:'#bf4a0a',bg:'#fdf0e8'},
+  {color:'#1b6e40',bg:'#e4f2ec'},
+  {color:'#1b4896',bg:'#e6edf9'},
+  {color:'#5e2fa0',bg:'#ece5f8'},
+  {color:'#8a5c00',bg:'#fff3cc'},
+];
+function sdColor(i){return SD_COLORS[i%SD_COLORS.length];}
+
+function sdShiftHours(sh){
+  if(!sh.start||!sh.end)return 0;
+  const toM=t=>{const[h,m]=t.split(':').map(Number);return h*60+m;};
+  let m=toM(sh.end)-toM(sh.start);
+  if(sh.bStart&&sh.bEnd)m-=(toM(sh.bEnd)-toM(sh.bStart));
+  return Math.max(0,Math.round(m/60*10)/10);
+}
+
+function renderUgeTabs(){
+  const weeks=getWeekDates();
+  const el=document.getElementById('uge-tabs');if(!el)return;
+  let html='';
+  weeks.forEach((w,u)=>{
+    const akt=u===aktivUge;
+    const sun=new Date(w.mon);sun.setDate(sun.getDate()+6);
+    const f=d=>(d.getDate()+'/'+(d.getMonth()+1));
+    html+=`<button onclick="skiftUge(${u})" style="padding:7px 16px;border-radius:9px;border:1.5px solid ${akt?'var(--accent)':'var(--border)'};background:${akt?'var(--accent)':'var(--surface)'};color:${akt?'#1A1200':'var(--text-muted)'};font-size:13px;font-weight:${akt?'700':'500'};cursor:pointer;font-family:var(--sans);transition:all .15s;line-height:1.4;text-align:center">Uge ${w.ugeNr}<br><span style="font-size:10px;font-weight:400;opacity:.75">${f(w.mon)}–${f(sun)}</span></button>`;
+  });
+  el.innerHTML=html;
+}
+function skiftUge(u){aktivUge=u;renderVagtplan();}
+
+function renderVagtplan(){
+  ensureVagtTimer();ensureSdShifts();bootstrapSdFromVagtTimer();
+  renderUgeTabs();
+  renderSdGrid();
+  updateVagtTotals();
+  renderMaanedOversigt();
+  renderOverarb();
+  renderSdLegend();
+}
+
+function renderSdLegend(){
+  const el=document.getElementById('sd-legend');if(!el)return;
+  el.innerHTML=lonRows.map((r,i)=>{const c=sdColor(i);return`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block"></span>${r.navn.split(' ')[0]}</span>`;}).join('');
+}
+
+function renderSdGrid(){
+  ensureSdShifts();
+  const weeks=getWeekDates();
+  const w=weeks[aktivUge];
+  if(!w)return;
+  const grid=document.getElementById('sd-grid');if(!grid)return;
+  const title=document.getElementById('sd-week-title');
+  const sub=document.getElementById('sd-week-sub');
+  const sun=new Date(w.mon);sun.setDate(sun.getDate()+6);
+  const f=d=>(d.getDate()+'/'+(d.getMonth()+1));
+  if(title)title.textContent=`Vagtplan — Uge ${w.ugeNr}`;
+  if(sub)sub.textContent=`${f(w.mon)} – ${f(sun)} · Klik + for at tilføje vagt`;
+  const today=new Date();
+  const DAGE_SHORT=['Man','Tir','Ons','Tor','Fre','Lør','Søn'];
+  // Header row
+  let html=`<div class="sd-corner"><span style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)">Medarbejder</span></div>`;
+  for(let d=0;d<7;d++){
+    const dt=new Date(w.mon);dt.setDate(dt.getDate()+d);
+    const isTod=dt.toDateString()===today.toDateString();
+    html+=`<div class="sd-dh${isTod?' today':''}"><div class="dn">${DAGE_SHORT[d]}</div><div class="dd">${dt.getDate()}</div></div>`;
+  }
+  // Rows per employee
+  lonRows.forEach((r,i)=>{
+    const c=sdColor(i);
+    // Total hours this week from sd shifts
+    let wkH=0;
+    for(let d=0;d<7;d++){(sdShifts[aktivUge][i][d]||[]).forEach(s=>wkH+=sdShiftHours(s));}
+    // Also count hours-only (vagtTimer) for backwards compat
+    const timerH=(vagtTimer[aktivUge][i]||[]).reduce((s,v)=>s+(+v||0),0);
+    const totalH=wkH>0?wkH:timerH;
+    html+=`<div class="sd-name" style="border-top:2px solid ${c.color}22"><div class="nm" style="color:${c.color}">${r.navn}</div><div class="nh">${totalH}t · ${fmtN(totalH*r.timelon)} kr</div></div>`;
+    for(let d=0;d<7;d++){
+      const cellShifts=sdShifts[aktivUge][i][d]||[];
+      html+=`<div class="sd-cell">`;
+      cellShifts.forEach((sh,idx)=>{
+        html+=`<div class="sd-block" style="background:${c.bg};color:${c.color};border-left-color:${c.color}" onclick="openSdModal(${aktivUge},${i},${d},${idx})">
+          <span class="sb-time">${sh.start}–${sh.end}</span>
+          ${sh.note?`<span class="sb-note">${sh.note}</span>`:''}
+          <button class="sb-del" onclick="event.stopPropagation();quickDelSd(${aktivUge},${i},${d},${idx})">✕</button>
+        </div>`;
+      });
+      html+=`<button class="sd-add" onclick="openSdModal(${aktivUge},${i},${d},null)">+</button></div>`;
+    }
+  });
+  grid.innerHTML=html;
+}
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+let _sdEdit=null;
+function openSdModal(u,emp,day,idx){
+  ensureSdShifts();
+  _sdEdit={u,emp,day,idx};
+  const sel=document.getElementById('sd-m-emp');
+  sel.innerHTML=lonRows.map((r,i)=>`<option value="${i}"${i===emp?' selected':''}>${r.navn}</option>`).join('');
+  const isEdit=idx!==null;
+  document.getElementById('sd-modal-title').textContent=isEdit?'Rediger vagt':'Tilføj vagt';
+  document.getElementById('sd-del-btn').style.display=isEdit?'inline-flex':'none';
+  if(isEdit){
+    const sh=sdShifts[u][emp][day][idx];
+    document.getElementById('sd-m-start').value=sh.start||'09:00';
+    document.getElementById('sd-m-end').value=sh.end||'17:00';
+    document.getElementById('sd-m-bstart').value=sh.bStart||'';
+    document.getElementById('sd-m-bend').value=sh.bEnd||'';
+    document.getElementById('sd-m-note').value=sh.note||'';
+  } else {
+    document.getElementById('sd-m-start').value='09:00';
+    document.getElementById('sd-m-end').value='17:00';
+    document.getElementById('sd-m-bstart').value='';
+    document.getElementById('sd-m-bend').value='';
+    document.getElementById('sd-m-note').value='';
+  }
+  document.getElementById('sd-overlay').style.display='flex';
+}
+function closeSdModal(){document.getElementById('sd-overlay').style.display='none';_sdEdit=null;}
+function saveSdShift(){
+  if(!_sdEdit)return;
+  ensureSdShifts();
+  const emp=+document.getElementById('sd-m-emp').value;
+  const {u,day,idx}=_sdEdit;
+  // Ensure new emp row exists
+  if(!sdShifts[u][emp]){sdShifts[u][emp]={};for(let d=0;d<7;d++)sdShifts[u][emp][d]=[];}
+  const entry={
+    start:document.getElementById('sd-m-start').value,
+    end:document.getElementById('sd-m-end').value,
+    bStart:document.getElementById('sd-m-bstart').value||null,
+    bEnd:document.getElementById('sd-m-bend').value||null,
+    note:document.getElementById('sd-m-note').value.trim(),
+  };
+  if(idx!==null) sdShifts[u][emp][day][idx]=entry;
+  else sdShifts[u][emp][day].push(entry);
+  // Sync hours back to vagtTimer
+  syncSdToVagtTimer(u,emp);
+  closeSdModal();
+  renderVagtplan();
+  markUnsaved();
+}
+function deleteSdShift(){
+  if(!_sdEdit||_sdEdit.idx===null)return;
+  const {u,emp,day,idx}=_sdEdit;
+  sdShifts[u][emp][day].splice(idx,1);
+  syncSdToVagtTimer(u,emp);
+  closeSdModal();
+  renderVagtplan();
+  markUnsaved();
+}
+function quickDelSd(u,emp,day,idx){
+  sdShifts[u][emp][day].splice(idx,1);
+  syncSdToVagtTimer(u,emp);
+  renderVagtplan();
+  markUnsaved();
+}
+function syncSdToVagtTimer(u,emp){
+  // Update vagtTimer hours for each day from sdShifts
+  for(let d=0;d<7;d++){
+    const shifts=sdShifts[u][emp][d]||[];
+    vagtTimer[u][emp][d]=Math.round(shifts.reduce((s,sh)=>s+sdShiftHours(sh),0));
+  }
+  updateVagtTotals();
+  renderMaanedOversigt();
+}
+
+function updateVagtTotals(){
+  let t=0,l=0;
+  lonRows.forEach((r,i)=>{
+    let wt=0;
+    // Primary: sdShifts
+    for(let d=0;d<7;d++) wt+=((sdShifts[aktivUge]||{})[i]||{})[d]?(sdShifts[aktivUge][i][d]||[]).reduce((s,sh)=>s+sdShiftHours(sh),0):0;
+    // Fallback
+    if(wt===0) wt=(vagtTimer[aktivUge]&&vagtTimer[aktivUge][i]||[]).reduce((s,v)=>s+(+v||0),0);
+    wt=Math.round(wt);
+    t+=wt;l+=wt*r.timelon;
+  });
+  document.getElementById('vagt-timer-total').textContent=t+' timer';
+  document.getElementById('vagt-lon-total').textContent=fmt(l);
+}
+
+function getMaanedTimer(i){
+  ensureVagtTimer();ensureSdShifts();
+  const antal=getAntalUger();
+  let sum=0;
+  for(let u=0;u<antal;u++){
+    // Primary: sdShifts hours (exact from start/end times)
+    let ugeH=0;
+    for(let d=0;d<7;d++) ugeH+=((sdShifts[u]||{})[i]||{})[d]?(sdShifts[u][i][d]||[]).reduce((s,sh)=>s+sdShiftHours(sh),0):0;
+    // Fallback: vagtTimer if no sdShifts
+    if(ugeH===0) ugeH=(vagtTimer[u][i]||[]).reduce((s,v)=>s+(+v||0),0);
+    sum+=Math.round(ugeH);
+  }
+  return sum;
+}
+
+function renderMaanedOversigt(){
+  ensureVagtTimer();
+  const weeks=getWeekDates();
+  const antal=weeks.length;
+  const tb=document.getElementById('maaned-body');if(!tb)return;
+  const hdr=document.getElementById('maaned-header');
+  if(hdr){
+    let th='<th>Medarbejder</th>';
+    for(let u=0;u<5;u++){
+      if(u<antal)th+=`<th class="r">Uge ${weeks[u].ugeNr}</th>`;
+      else th+=`<th class="r" style="opacity:.3">—</th>`;
+    }
+    th+='<th class="r" style="color:var(--accent)">I alt (md)</th><th class="r">Aktuelt i løn</th><th class="r">Forskel</th>';
+    hdr.innerHTML=th;
+  }
+  let totalTimer=0,totalLon=0;let rows='';
+  lonRows.forEach((r,i)=>{
+    const ugeTimer=[];
+    for(let u=0;u<5;u++){
+      const t=u<antal?(vagtTimer[u][i]||[]).reduce((s,v)=>s+(+v||0),0):null;
+      ugeTimer.push(t);
+    }
+    const mdTimer=ugeTimer.filter(v=>v!==null).reduce((s,v)=>s+v,0);
+    const diff=mdTimer-r.timer;
+    const diffClass=diff===0?'':diff>0?'warn-color':'bad';
+    const diffStr=diff===0?'–':(diff>0?'+':'')+diff+' t';
+    totalTimer+=mdTimer;totalLon+=mdTimer*r.timelon;
+    rows+=`<tr><td style="font-weight:500">${r.navn}</td>${ugeTimer.map((v,u)=>v===null?`<td class="r muted">—</td>`:`<td class="r ${u===aktivUge?'warn-color':''}" style="${u===aktivUge?'font-weight:600':''}">${v}</td>`).join('')}<td class="r" style="font-weight:700;color:var(--accent)">${mdTimer}</td><td class="r muted">${r.timer}</td><td class="r ${diffClass}" style="font-weight:500">${diffStr}</td></tr>`;
+  });
+  tb.innerHTML=rows;
+  const el=document.getElementById('maaned-total-timer');if(el)el.textContent=totalTimer+' timer i alt denne måned';
+  const el2=document.getElementById('maaned-total-lon');if(el2)el2.textContent=fmt(totalLon);
+}
+
+
+function overfoeTimerTilLon(){
+  ensureVagtTimer();
+  lonRows.forEach((r,i)=>{r.timer=getMaanedTimer(i);});
+  calc();renderLon();
+  const besked=document.getElementById('overfoel-besked');
+  if(besked){besked.style.display='block';besked.innerHTML='<div class="alert ok"><span>✓</span><span>Timer overført til lønberegning — lønnen er opdateret automatisk.</span></div>';setTimeout(()=>{besked.style.display='none';},4000);}
+}
+
+function renderOverarb(){
+  ensureVagtTimer();
+  const tb=document.getElementById('overarb-body');if(!tb)return;
+  tb.innerHTML='';
+  lonRows.forEach((r,i)=>{
+    const planl=Math.round(r.timer/4.33);
+    const fakt=(vagtTimer[aktivUge][i]||[]).reduce((s,v)=>s+(+v||0),0);
+    const over=Math.max(0,fakt-planl);
+    const tillæg=over*r.timelon*0.5;
+    tb.innerHTML+=`<tr><td>${r.navn}</td><td class="r">${planl}</td><td class="r">${fakt}</td><td class="r ${over>0?'warn-color':''}">${over}</td><td class="r ${over>0?'warn-color':''}">${over>0?fmtN(tillæg)+' kr':'—'}</td></tr>`;
+  });
+}
+
+
+
+function renderLager(){
+  const tb=document.getElementById('lager-body');
+  tb.innerHTML='';
+  let total=0;
+  lagerRows.forEach((r,i)=>{
+    const val=r.lager*r.pris;total+=val;
+    const s=r.lager===0?'tom':r.lager<r.min?'lav':'ok';
+    const scl=s==='ok'?'lager-ok':s==='lav'?'lager-lav':'lager-tom';
+    const stxt=s==='ok'?'Ok':s==='lav'?'Lav':'Tom';
+    tb.innerHTML+=`<tr>
+      <td><input type="text" autocomplete="off" value="${r.vare}" style="width:150px" onchange="lagerRows[${i}].vare=this.value"></td>
+      <td><input type="text" autocomplete="off" value="${r.enhed}" style="width:45px;text-align:center" onchange="lagerRows[${i}].enhed=this.value"></td>
+      <td class="r"><input type="number" value="${r.lager}" min="0" style="width:65px" onchange="lagerRows[${i}].lager=+this.value;renderLager()"></td>
+      <td class="r"><input type="number" value="${r.min}" min="0" style="width:65px" onchange="lagerRows[${i}].min=+this.value;renderLager()"></td>
+      <td class="r"><input type="number" value="${r.pris}" min="0" style="width:65px" onchange="lagerRows[${i}].pris=+this.value;renderLager()"></td>
+      <td class="r">${fmtN(val)} kr</td>
+      <td class="${scl}" style="font-weight:500">${stxt}</td>
+      <td><button class="del-btn" onclick="lagerRows.splice(${i},1);renderLager()">x</button></td>
+    </tr>`;
+  });
+  document.getElementById('lager-total').textContent=fmt(total);
+}
+function addLager(){lagerRows.push({vare:'Ny vare',enhed:'stk',lager:0,min:5,pris:0});renderLager();}
+
+function renderIndkob(){
+  const tb=document.getElementById('indkob-body');
+  tb.innerHTML='';
+  let totalFaktura=0, totalKredit=0;
+  indkobRows.forEach((r,i)=>{
+    const erFaktura=r.type==='faktura';
+    const erBetalt=r.status==='betalt';
+    if(!erBetalt){ erFaktura ? totalFaktura+=r.belob : totalKredit+=r.belob; }
+    const statusCl=r.status==='betalt'?'good':r.status==='forfalden'?'bad':'warn-color';
+    const typeBg=erFaktura?'var(--blue-soft)':'var(--yellow-soft)';
+    const typeCol=erFaktura?'var(--blue)':'var(--yellow)';
+    const typeLabel=erFaktura?'Faktura':'Kreditnota';
+    const nrPlaceholder=erFaktura?'F-2026-001':'K-2026-001';
+    const belobSign=erFaktura?'':'<span style="color:var(--green);font-weight:600">−</span> ';
+    tb.innerHTML+=`<tr style="background:${erFaktura?'':'rgba(30,122,74,0.03)'}">
+      <td>
+        <select style="width:105px;font-size:12px;font-weight:600;color:${typeCol};background:${typeBg};border-color:transparent;border-radius:6px;padding:4px 6px;cursor:pointer"
+          onchange="indkobRows[${i}].type=this.value;renderIndkob()">
+          <option value="faktura" ${erFaktura?'selected':''}>📄 Faktura</option>
+          <option value="kreditnota" ${!erFaktura?'selected':''}>↩ Kreditnota</option>
+        </select>
+      </td>
+      <td><input type="text" autocomplete="off" value="${r.lev}" style="width:155px" onchange="indkobRows[${i}].lev=this.value"></td>
+      <td><input type="text" autocomplete="off" value="${r.nr||''}" placeholder="${nrPlaceholder}" style="width:110px;font-family:var(--mono);font-size:12px" onchange="indkobRows[${i}].nr=this.value"></td>
+      <td class="r"><span style="color:${erFaktura?'var(--text)':'var(--green)'};font-weight:500">${erFaktura?'':'− '}</span><input type="number" value="${r.belob}" style="width:85px" onchange="indkobRows[${i}].belob=+this.value;renderIndkob()"></td>
+      <td><input type="text" autocomplete="off" value="${r.dato}" style="width:75px;text-align:center" onchange="indkobRows[${i}].dato=this.value"></td>
+      <td><select style="width:110px" onchange="indkobRows[${i}].status=this.value;renderIndkob()">
+        <option ${r.status==='afventer'?'selected':''}>afventer</option>
+        <option ${r.status==='betalt'?'selected':''}>betalt</option>
+        <option ${r.status==='forfalden'?'selected':''}>forfalden</option>
+      </select></td>
+      <td><button class="del-btn" onclick="indkobRows.splice(${i},1);renderIndkob()">x</button></td>
+    </tr>`;
+  });
+  const netto=totalFaktura-totalKredit;
+  document.getElementById('indkob-total').textContent=fmt(netto);
+  const sub=document.getElementById('indkob-sub');
+  if(sub) sub.innerHTML=`<span style="color:var(--text-muted);font-size:12px">Fakturaer: ${fmt(totalFaktura)} &nbsp;|&nbsp; Kreditnotaer: −${fmt(totalKredit)} &nbsp;|&nbsp; <strong>Netto udestående: ${fmt(netto)}</strong></span>`;
+}
+function addFaktura(){indkobRows.push({type:'faktura',lev:'Ny leverandør',belob:0,dato:'',status:'afventer',nr:''});renderIndkob();}
+function addKreditnota(){indkobRows.push({type:'kreditnota',lev:'Ny leverandør',belob:0,dato:'',status:'afventer',nr:''});renderIndkob();}
+
+function renderDrift(){
+  const tb=document.getElementById('drift-body');
+  tb.innerHTML='';
+  driftRows.forEach((r,i)=>{
+    const afv=r.budget-r.real;
+    tb.innerHTML+=`<tr>
+      <td><input type="text" autocomplete="off" value="${r.post}" style="width:200px" onchange="driftRows[${i}].post=this.value"></td>
+      <td class="r"><input type="number" value="${r.budget}" style="width:90px" onchange="driftRows[${i}].budget=+this.value;calc()"></td>
+      <td class="r"><input type="number" value="${r.real}" style="width:90px" onchange="driftRows[${i}].real=+this.value;calc()"></td>
+      <td class="r ${afv>=0?'good':'bad'}">${afv>=0?'+':''}${fmtN(afv)}</td>
+      <td><button class="del-btn" onclick="driftRows.splice(${i},1);calc()">x</button></td>
+    </tr>`;
+  });
+}
+function addDrift(){driftRows.push({post:'Ny post',budget:0,real:0});calc();}
+
+function renderPrognose(){
+  const tb=document.getElementById('prognose-body');
+  tb.innerHTML='';
+  prognoseRows.forEach((r,i)=>{
+    const afv=r.real-r.prog;
+    const cl=r.real===0?'':afv>=0?'good':'bad';
+    tb.innerHTML+=`<tr>
+      <td>${r.uge}</td>
+      <td class="r"><input type="number" value="${r.prog}" style="width:100px" onchange="prognoseRows[${i}].prog=+this.value;calc()"></td>
+      <td class="r"><input type="number" value="${r.real}" style="width:100px" onchange="prognoseRows[${i}].real=+this.value;calc()"></td>
+      <td class="r ${cl}">${r.real===0?'—':(afv>=0?'+':'')+fmtN(afv)+' kr'}</td>
+    </tr>`;
+  });
+}
+
+function calc(){
+  const omsk=getOmsaetning();
+  const omskBudget=+document.getElementById('omsk-budget').value||0;
+  const momsPct=getMomsPct();
+  const omskExMoms=omsk/(1+momsPct/100);
+  const momsKr=omsk-omskExMoms;
+  const vare=getVare();
+  const lon=getLonTotal();
+  const drift=getDrift();
+  const lonData=getLonData();
+  const bruttoRes=omskExMoms-vare.r;
+  const dækningsb=bruttoRes-lon;
+  const resultat=dækningsb-drift.r;
+  const resPct=pctNum(resultat,omskExMoms);
+  const inputMoms=vare.r*(momsPct/100);
+  const momsBalance=momsKr-inputMoms;
+  const samletBrutto=lonRows.reduce((s,r)=>s+r.timer*r.timelon,0);
+  const amBidrag=samletBrutto*0.08;
+  const askatEst=Math.round((samletBrutto-amBidrag)*0.38);
+
+  // KPI
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi${omsk>=omskBudget?' accent':''}">
+      <div class="kpi-label">Omsaetning (inkl. moms)</div>
+      <div class="kpi-val">${fmtN(omsk)}</div>
+      <div class="kpi-sub">${omskBudget?Math.round((omsk/omskBudget)*100)+'% af budget':'—'}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Vareforbrug %</div>
+      <div class="kpi-val ${pctNum(vare.r,omskExMoms)>35?'bad':pctNum(vare.r,omskExMoms)>30?'warn-color':'good'}">${pct(vare.r,omskExMoms)}</div>
+      <div class="kpi-sub">af omsk. ekskl. moms · mål 28–35%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Lonomkostning %</div>
+      <div class="kpi-val ${pctNum(lon,omsk)>37?'bad':pctNum(lon,omsk)>33?'warn-color':'good'}">${pct(lon,omsk)}</div>
+      <div class="kpi-sub">af omsk. inkl. moms · mål 30–35%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Nettoresultat (EBIT)</div>
+      <div class="kpi-val ${resultat>=0?'good':'bad'}">${fmtN(resultat)}</div>
+      <div class="kpi-sub">${resPct.toFixed(1)}% overskudsgrad</div>
+    </div>`;
+
+  // Alerts
+  const alerts=[];
+  if(resultat<0)alerts.push({t:'bad',m:'Underskud pa '+fmtN(-resultat)+' kr. Omkostningerne overstiger omsaetningen.',tab:'resultat',link:'Se resultatopgoerelse'});
+  if(pctNum(vare.r,omskExMoms)>35)alerts.push({t:'warn',m:'Vareforbrug '+pct(vare.r,omskExMoms)+' af omsk. ekskl. moms – over normen pa 35%.',tab:'vareforbrug',link:'Gaa til vareforbrug'});
+  if(pctNum(lon,omsk)>37)alerts.push({t:'warn',m:'Lonomkostning '+pct(lon,omsk)+' – over anbefalet (max 35%). Overvej vagtplanlaegning.',tab:'lonninger',link:'Gaa til loenninger'});
+  if(omskBudget&&omsk<omskBudget*0.9)alerts.push({t:'warn',m:'Omsaetning mere end 10% under budgetmalet ('+fmtN(omskBudget)+' kr).',tab:'omsaetning',link:'Gaa til omsaetning'});
+  const lavL=lagerRows.filter(r=>r.lager<r.min);
+  if(lavL.length)alerts.push({t:'warn',m:lavL.length+' vare(r) under minimumsniveau: '+lavL.map(r=>r.vare).join(', ')+'.',tab:'lager',link:'Gaa til lager'});
+  const forfalden=indkobRows.filter(r=>r.status==='forfalden'&&r.type==='faktura');
+  if(forfalden.length)alerts.push({t:'bad',m:forfalden.length+' forfaldne faktura(er) der ikke er betalt.',tab:'lager',link:'Gaa til fakturaer'});
+  if(!alerts.length&&resultat>=0)alerts.push({t:'ok',m:'Alt ser godt ud! Overskudsgrad er '+resPct.toFixed(1)+'%.',tab:null});
+
+  document.getElementById('alert-box').innerHTML=alerts.map(a=>a.tab?
+    `<div class="alert ${a.t}" onclick="goAlert('${a.tab}')" style="cursor:pointer;justify-content:space-between;transition:opacity .15s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+      <div style="display:flex;gap:10px;align-items:flex-start"><span>${a.t==='bad'?'✕':'⚠'}</span><span>${a.m}</span></div>
+      <span style="white-space:nowrap;font-weight:500;font-size:12px;opacity:.7;margin-left:12px">${a.link} →</span>
+    </div>`:
+    `<div class="alert ${a.t}"><span>✓</span><span>${a.m}</span></div>`
+  ).join('');
+  const hasBad=alerts.some(a=>a.t!=='ok');
+  const badge=document.getElementById('alerts-badge');
+  badge.style.display=hasBad?'block':'none';
+  badge.textContent='⚠ '+alerts.filter(a=>a.t!=='ok').length+' advarsel'+( alerts.filter(a=>a.t!=='ok').length!==1?'er':'');
+
+  // Cost bars
+  const bars=[{n:'Vareforbrug',v:pctNum(vare.r,omsk),c:'#C4520A'},{n:'Lonninger',v:pctNum(lon,omsk),c:'#1A5A8A'},{n:'Driftsomk.',v:pctNum(drift.r,omsk),c:'#7A5A8A'},{n:'Nettoresultat',v:resPct*(omsk/omsk),c:resPct>=0?'#2A7A4A':'#B03030'}];
+  document.getElementById('cost-bars').innerHTML=bars.map(b=>`<div class="bar-row"><div class="bar-meta"><span class="name">${b.n}</span><span class="pct" style="color:${b.c}">${b.v.toFixed(1)}%</span></div><div class="bar-bg"><div class="bar-fill" style="width:${Math.min(Math.max(b.v,0),100)}%;background:${b.c}"></div></div></div>`).join('');
+
+  // BvA
+  document.getElementById('bva-table').innerHTML=`<table><thead><tr><th>Post</th><th class="r">Budget</th><th class="r">Realiseret</th><th class="r">Afvigelse</th></tr></thead><tbody>`+
+    [{l:'Omsaetning',b:omskBudget,r:omsk,inv:false},{l:'Vareforbrug',b:vare.b,r:vare.r,inv:true},{l:'Driftsomk.',b:drift.b,r:drift.r,inv:true}].map(x=>{const a=x.inv?x.b-x.r:x.r-x.b;return`<tr><td>${x.l}</td><td class="r muted">${fmtN(x.b)}</td><td class="r">${fmtN(x.r)}</td><td class="r ${a>=0?'good':'bad'}">${a>=0?'+':''}${fmtN(a)}</td></tr>`;}).join('')+'</tbody></table>';
+
+  // Dashboard mini
+  const pr=prognoseRows.filter(r=>r.real>0).reduce((s,r)=>s+r.real,0);
+  const pt=prognoseRows.reduce((s,r)=>s+r.prog,0);
+  document.getElementById('prognose-mini').innerHTML=`<div style="font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:4px">${fmtN(pr)} kr</div><div style="font-size:12px;color:var(--text-muted)">realiseret af ${fmtN(pt)} kr prognose</div><div class="bar-bg" style="margin-top:10px"><div class="bar-fill" style="width:${pt?Math.min(100,Math.round(pr/pt*100)):0}%;background:var(--accent)"></div></div><div style="font-size:11px;color:var(--text-hint);margin-top:4px">${pt?Math.round(pr/pt*100):0}% af maanedsprognose</div>`;
+
+  const lav=lagerRows.filter(r=>r.lager<r.min).length;
+  const tom=lagerRows.filter(r=>r.lager===0).length;
+  document.getElementById('lager-mini').innerHTML=lav===0?`<div style="color:var(--green);font-weight:500">Alt lager OK</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">${lagerRows.length} varer overvages</div>`:
+    `<div style="color:var(--yellow);font-weight:500">⚠ ${lav} vare${lav!==1?'r':''} under minimum</div>${tom?`<div style="color:var(--red);font-weight:500;margin-top:4px">✕ ${tom} tomme</div>`:''}<div style="font-size:12px;color:var(--text-muted);margin-top:6px">${lagerRows.filter(r=>r.lager<r.min).map(r=>r.vare).join(', ')}</div>`;
+
+  document.getElementById('lon-mini').innerHTML=`<div style="font-family:var(--mono);font-size:20px;font-weight:500;margin-bottom:4px">${fmtN(lon)} kr</div><div style="font-size:12px;color:var(--text-muted)">${lonRows.length} medarbejdere inkl. feriepenge & ATP</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">AM-bidrag til SKAT: ${fmtN(amBidrag)} kr</div>`;
+
+  // P&L
+  document.getElementById('pl-body').innerHTML=`
+    <div class="pl-row"><span>Omsaetning (inkl. moms)</span><span class="pl-amount">${fmt(omsk)}</span></div>
+    <div class="pl-row sub"><span class="pl-label">Moms (${momsPct}%)</span><span class="pl-amount" style="color:var(--text-muted)">(${fmt(momsKr)})</span></div>
+    <div class="pl-row" style="font-weight:600"><span>Omsaetning ekskl. moms</span><span class="pl-amount">${fmt(omskExMoms)}</span></div>
+    <div class="pl-row sub"><span class="pl-label">Vareforbrug</span><span class="pl-amount" style="color:var(--text-muted)">(${fmt(vare.r)})</span></div>
+    <div class="pl-row" style="font-weight:600"><span>Bruttoresultat</span><span class="pl-amount ${bruttoRes>=0?'good':'bad'}">${fmt(bruttoRes)}</span></div>
+    <div class="pl-row sub"><span class="pl-label">Lonomkostninger (inkl. feriepenge & ATP)</span><span class="pl-amount" style="color:var(--text-muted)">(${fmt(lon)})</span></div>
+    <div class="pl-row" style="font-weight:600"><span>Daekningsbidrag</span><span class="pl-amount ${dækningsb>=0?'good':'bad'}">${fmt(dækningsb)}</span></div>
+    <div class="pl-row sub"><span class="pl-label">Driftsomkostninger</span><span class="pl-amount" style="color:var(--text-muted)">(${fmt(drift.r)})</span></div>
+    <div class="pl-row total"><span>Nettoresultat (EBIT)</span><span class="pl-amount ${resultat>=0?'good':'bad'}">${fmt(resultat)}</span></div>
+    <div class="pl-row"><span style="color:var(--text-muted);font-size:13px">Overskudsgrad</span><span class="pl-amount" style="font-size:13px">${resPct.toFixed(1)}%</span></div>`;
+
+  document.getElementById('moms-body').innerHTML=`
+    <div class="pl-row"><span>Udgaende moms (salgsmoms)</span><span class="pl-amount">${fmt(momsKr)}</span></div>
+    <div class="pl-row"><span>Indgaende moms (varekob, est.)</span><span class="pl-amount" style="color:var(--text-muted)">(${fmt(inputMoms)})</span></div>
+    <div class="pl-row total"><span>Momstilsvar til SKAT</span><span class="pl-amount bad">${fmt(momsBalance)}</span></div>
+    <div style="font-size:11px;color:var(--text-hint);margin-top:8px">Husk: Indgaende moms pa driftsomk. reducerer tilsvaret. Angives pa skat.dk hvert kvartal.</div>`;
+
+  document.getElementById('skat-body').innerHTML=`
+    <div class="pl-row"><span>Samlet bruttolon</span><span class="pl-amount">${fmt(samletBrutto)}</span></div>
+    <div class="pl-row"><span>AM-bidrag 8% (indberettes til SKAT)</span><span class="pl-amount bad">${fmt(amBidrag)}</span></div>
+    <div class="pl-row"><span>Estimeret A-skat (38% af grundlag)</span><span class="pl-amount bad">${fmt(askatEst)}</span></div>
+    <div style="font-size:11px;color:var(--text-hint);margin-top:8px">AM-bidrag og A-skat indberettes via virk.dk (eIndkomst). A-skat er estimat – afhaenger af skattekort.</div>`;
+
+  renderVare();renderLon();renderDrift();renderPrognose();renderVagtplan();renderLager();renderIndkob();
+  markUnsaved();
+}
+
+// Load saved data for current month on startup
+try{_load();}catch(e){}
+updateMonthUI();
+calc();
+
+// ── BUDGET LOGIN — exact same pattern as payroll.html ────────────────────
+
+async function blyWait(){
+  var t=Date.now();
+  while((!window._fbReady||!window.fbGetData||!window.fbGetCustomers)&&Date.now()-t<10000){
+    await new Promise(function(r){setTimeout(r,150);});
+  }
+  return !!window._fbReady;
+}
+
+async function blyVerifyPw(pw,hash){
+  if(!hash) return false;
+  try{
+    if(window.dcodeIO&&window.dcodeIO.bcrypt&&hash.startsWith('$2')){
+      return window.dcodeIO.bcrypt.compareSync(pw,hash);
+    }
+  }catch(e){}
+  try{
+    var b=new TextEncoder().encode(pw);
+    var h=await crypto.subtle.digest('SHA-256',b);
+    var sha=Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');
+    return sha===hash;
+  }catch(e){return false;}
+}
+
+function blyShowApp(){
+  var el=document.getElementById('budgetLogin');
+  if(el){el.style.animation='blyFade .3s ease forwards';setTimeout(function(){el.style.display='none';},300);}
+}
+
+async function blyLogin(){
+  var email=(document.getElementById('blyEmail').value||'').trim().toLowerCase();
+  var pw=document.getElementById('blyPw').value;
+  var errEl=document.getElementById('blyErr');
+  var btn=document.getElementById('blyBtn');
+  errEl.style.display='none';
+  if(!email||!pw){errEl.textContent='Udfyld venligst email og adgangskode.';errEl.style.display='block';return;}
+  btn.textContent='Logger ind…';btn.disabled=true;
+  try{
+    var fbOk=await blyWait();
+    if(!fbOk) throw new Error('Kan ikke forbinde til databasen. Prøv at genindlæse siden.');
+    var custs=await window.fbGetCustomers();
+    var match=null;
+    for(var i=0;i<custs.length;i++){
+      var c=custs[i];
+      if(c.email&&c.email.toLowerCase()===email){
+        var ok=await blyVerifyPw(pw,c.password);
+        if(ok){match=c;break;}
+      }
+    }
+    if(!match) throw new Error('Forkert email eller adgangskode.');
+    if(match.status!=='active') throw new Error('Kontoen er ikke aktiv. Kontakt din administrator.');
+    if(match.expiryDate&&new Date(match.expiryDate)<new Date()) throw new Error('Abonnementet er udløbet.');
+    try{sessionStorage.setItem('_bly_auth','1');sessionStorage.setItem('_bly_cid',match.id);sessionStorage.setItem('_bly_pw',match.password||'');}catch(ex){}
+    blyShowApp();
+  }catch(err){
+    errEl.textContent=err.message||'Login fejl.';errEl.style.display='block';
+    btn.textContent='Log ind →';btn.disabled=false;
+  }
+}
+
+async function initBudget(){
+  // Try budget session
+  try{
+    if(sessionStorage.getItem('_bly_auth')==='1'){
+      var cid=sessionStorage.getItem('_bly_cid');
+      if(cid){
+        var fbOk=await blyWait();
+        if(fbOk){
+          var custs=await window.fbGetCustomers();
+          for(var i=0;i<custs.length;i++){
+            if(custs[i].id===cid&&custs[i].status==='active'&&!(custs[i].expiryDate&&new Date(custs[i].expiryDate)<new Date())){
+              blyShowApp();return;
+            }
+          }
+        }
+      }
+    }
+  }catch(e){}
+  // Try ShiftDesk session
+  try{
+    var sdA=sessionStorage.getItem('sd_auth'),sdC=sessionStorage.getItem('sd_cust_id');
+    if(sdA==='1'&&sdC){
+      var fbOk2=await blyWait();
+      if(fbOk2){
+        var custs2=await window.fbGetCustomers();
+        for(var j=0;j<custs2.length;j++){
+          if(custs2[j].id===sdC&&custs2[j].status==='active'&&!(custs2[j].expiryDate&&new Date(custs2[j].expiryDate)<new Date())){
+            blyShowApp();return;
+          }
+        }
+      }
+    }
+  }catch(e){}
+  setTimeout(function(){var el=document.getElementById('blyEmail');if(el)el.focus();},300);
+}
+
+document.addEventListener('DOMContentLoaded',function(){initBudget();});
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Customers — readable for login verification.
+    // Writes restricted to valid customer document IDs and fields only.
+    match /customers/{id} {
+      allow read: if true;
+      allow write: if id.matches('cust_[0-9]+')
+        && request.resource.data.keys().hasOnly([
+          'id','name','contact','email','password','plan','duration',
+          'startDate','expiryDate','status','notes','hasPayroll','hasBudget','createdAt'
+        ]);
+      allow delete: if id.matches('cust_[0-9]+');
+    }
+
+    // App settings — only the admin password document allowed.
+    match /appSettings/{id} {
+      allow read: if true;
+      allow write: if id == 'shiftdesk_admin_pw';
+    }
+
+    // Password reset requests — customers can create with valid fields only.
+    match /passwordResets/{id} {
+      allow read: if true;
+      allow delete: if true;
+      allow create: if request.resource.data.keys().hasOnly([
+          'email','requestedAt','note'
+        ])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0;
+    }
+
+    // Per-customer workspace data — shifts, staff, clock history, mgr_pw etc.
+    // Document ID must follow valid patterns to block random writes.
+    match /customerData/{id} {
+      allow read: if true;
+      allow write: if id.matches('cust_[0-9]+_.+')
+        || id.matches('mgr_pw_cust_[0-9]+');
+      allow delete: if id.matches('cust_[0-9]+_.+')
+        || id.matches('mgr_pw_cust_[0-9]+');
+    }
+  }
+}

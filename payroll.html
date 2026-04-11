@@ -237,6 +237,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection, getDocs, getDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // Wraps any promise with a hard timeout so it can NEVER hang forever
+  function withTimeout(promise, ms, label) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error(label + ' timed out after ' + ms + 'ms')), ms))
+    ]);
+  }
+
   try {
     const cfg = {
       apiKey: "AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M",
@@ -248,24 +257,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     };
     const app = initializeApp(cfg);
     const db  = getFirestore(app);
-    window.fbGetData      = async function(k)   { try{ const d=await getDoc(doc(db,"customerData",k)); return d.exists()?d.data().value:null; }catch(e){return null;} };
-    window.fbSetData      = async function(k,v)  { try{ await setDoc(doc(db,"customerData",k),{value:v}); }catch(e){} };
-    // Retry up to 3 times with 1s delay — Firestore can return empty on first cold load
-    window.fbGetCustomers = async function() {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        try {
-          const s = await getDocs(collection(db, "customers"));
-          const results = s.docs.map(d => ({id: d.id, ...d.data()}));
-          if (results.length > 0 || attempt === 2) return results;
-          // Got empty on attempt 0 or 1 — wait and retry
-          await new Promise(r => setTimeout(r, 1000));
-        } catch(e) {
-          if (attempt === 2) return [];
-          await new Promise(r => setTimeout(r, 1000));
-        }
-      }
-      return [];
+
+    window.fbGetData = async function(k) {
+      try {
+        const d = await withTimeout(getDoc(doc(db,"customerData",k)), 6000, 'fbGetData');
+        return d.exists() ? d.data().value : null;
+      } catch(e) { return null; }
     };
+
+    window.fbSetData = async function(k,v) {
+      try { await withTimeout(setDoc(doc(db,"customerData",k),{value:v}), 6000, 'fbSetData'); } catch(e) {}
+    };
+
+    // fbGetCustomers: hard 8s timeout — will NEVER hang the login button
+    window.fbGetCustomers = async function() {
+      try {
+        const s = await withTimeout(getDocs(collection(db,"customers")), 8000, 'fbGetCustomers');
+        return s.docs.map(d => ({id: d.id, ...d.data()}));
+      } catch(e) {
+        console.error('fbGetCustomers failed:', e.message);
+        throw e; // re-throw so login can show a real error
+      }
+    };
+
     window.fbReady = true;
   } catch(e) {
     console.error('Firebase init error:', e);
@@ -1027,7 +1041,7 @@ async function plyWait(){
     window.addEventListener('fbReady', onReady);
     var timer = setTimeout(function(){
       finish(window.fbReady===true && typeof window.fbGetCustomers==='function');
-    }, 8000);
+    }, 6000);
     // Also poll every 100ms in case event already fired
     var poller = setInterval(function(){
       if(window.fbReady===true && typeof window.fbGetCustomers==='function'){ clearInterval(poller); finish(true); }
@@ -1094,37 +1108,60 @@ async function plyLogin(){
   if(!email||!pw){errEl.textContent='Please enter email and password.';errEl.style.display='block';return;}
   btn.textContent='Connecting…';btn.disabled=true;
 
-  // Show progress so user knows it hasn't frozen
-  var step=0;
+  // Countdown message so button NEVER looks frozen
+  var dots=0;
   var msgTimer=setInterval(function(){
-    step++;
-    if(step===1) btn.textContent='Loading…';
-    if(step===3) btn.textContent='Still loading…';
-    if(step===6) btn.textContent='Taking longer than usual…';
-  },2000);
+    dots++;
+    if(dots<4) btn.textContent='Connecting'+'…'.repeat(dots%4||1);
+    if(dots===4) btn.textContent='Loading account data…';
+    if(dots===8) btn.textContent='Still working…';
+  },1500);
+
+  function done(errMsg){
+    clearInterval(msgTimer);
+    if(errMsg){
+      errEl.textContent=errMsg;
+      errEl.style.display='block';
+      btn.textContent='Sign in →';
+      btn.disabled=false;
+    }
+  }
 
   try{
+    // Wait for Firebase (max 6 seconds)
     var fbOk=await plyWait();
-    clearInterval(msgTimer);
-    if(!fbOk) {
-      if(typeof window.fbGetCustomers==='function') fbOk=true;
-      else throw new Error('Cannot connect to server. Check your internet connection and refresh the page.');
+    if(!fbOk&&typeof window.fbGetCustomers!=='function'){
+      done('Cannot reach server. Check your internet and refresh the page.');
+      return;
     }
-    btn.textContent='Signing in…';
-    var custs=await window.fbGetCustomers();
+    btn.textContent='Loading…';
+
+    // This will now ALWAYS return or throw within 8 seconds (never hang)
+    var custs;
+    try {
+      custs = await window.fbGetCustomers();
+    } catch(fetchErr) {
+      done('Server not responding: ' + (fetchErr.message||'unknown error') + '. Please refresh and try again.');
+      return;
+    }
+
     if(!custs||custs.length===0){
-      throw new Error('Could not load account data from server. Please refresh the page and try again.');
+      done('No accounts found on server. Please check admin panel or contact support.');
+      return;
     }
+
     var pwHash=await plyHashPw(pw);
     var match=null;
     for(var i=0;i<custs.length;i++){
       var c=custs[i];
-      // Match by hashed password (normal) OR plain text (legacy fallback)
       if(c.email&&c.email.toLowerCase()===email&&(c.password===pwHash||c.password===pw)){match=c;break;}
     }
-    if(!match) throw new Error('Incorrect email or password. Please try again, or contact your ShiftDesk administrator.');
-    if(match.status!=='active') throw new Error('Account not active. Contact your ShiftDesk administrator.');
-    if(match.expiryDate&&new Date(match.expiryDate)<new Date()) throw new Error('Subscription expired. Contact your administrator to renew.');
+    if(!match){done('Incorrect email or password. Please try again.');return;}
+    if(match.status!=='active'){done('Account not active. Contact your ShiftDesk administrator.');return;}
+    if(match.expiryDate&&new Date(match.expiryDate)<new Date()){done('Subscription expired. Contact your administrator.');return;}
+
+    clearInterval(msgTimer);
+    btn.textContent='Signing in…';
     _custId=match.id;
     await loadFromFirebase(match.id);
     MGR_PASSWORD=match.password||localStorage.getItem(KEYS.mgrPw)||'alex1900';
@@ -1132,10 +1169,7 @@ async function plyLogin(){
     plyShowApp();
     if(!staff.length) showEmptyState();
   }catch(err){
-    clearInterval(msgTimer);
-    var msg = err.message||'Login error. Please try again.';
-    errEl.textContent=msg; errEl.style.display='block';
-    btn.textContent='Sign in →'; btn.disabled=false;
+    done(err.message||'Login error. Please try again.');
   }
 }
 

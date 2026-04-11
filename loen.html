@@ -340,7 +340,7 @@ async function doLogin() {
 }
 window.doLogin = doLogin;
 
-// ── LOAD CUSTOMER DATA from Firebase ─────────────────────────────────────
+// ── LOAD CUSTOMER DATA: Firebase first, then localStorage fallback ────────
 async function loadCustomerData(custId) {
   var prefix = 'cust_' + custId + '_';
   try {
@@ -354,7 +354,13 @@ async function loadCustomerData(custId) {
     if (ms) { monthShiftsStore = {}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)] = ms[k]; }); }
     if (pi) { personalInfo = {}; Object.keys(pi).forEach(function(k){ personalInfo[parseInt(k)] = pi[k]; }); }
     if (ch) { clockHistory = {}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)] = ch[k]; }); }
-  } catch(e) { console.warn('loadCustomerData:', e); }
+  } catch(e) { console.warn('loadCustomerData firebase:', e); }
+  // Fallback: if Firebase gave nothing, load from localStorage (works when opened locally)
+  if (!staff.length) { try { var ls=localStorage.getItem('shiftdesk_staff'); if(ls){var p=JSON.parse(ls);if(Array.isArray(p)&&p.length)staff=p;} } catch(e){} }
+  if (!Object.keys(shifts).length) { try { var lsh=localStorage.getItem('shiftdesk_shifts'); if(lsh){var p2=JSON.parse(lsh);shifts={};Object.keys(p2).forEach(function(k){shifts[parseInt(k)]=p2[k];});} } catch(e){} }
+  if (!Object.keys(monthShiftsStore).length) { try { var lms=localStorage.getItem('shiftdesk_monthstore'); if(lms){var p3=JSON.parse(lms);monthShiftsStore={};Object.keys(p3).forEach(function(k){monthShiftsStore[parseInt(k)]=p3[k];});} } catch(e){} }
+  if (!Object.keys(personalInfo).length) { try { var lpi=localStorage.getItem('shiftdesk_pi'); if(lpi){var p4=JSON.parse(lpi);personalInfo={};Object.keys(p4).forEach(function(k){personalInfo[parseInt(k)]=p4[k];});} } catch(e){} }
+  if (!Object.keys(clockHistory).length) { try { var lch=localStorage.getItem('shiftdesk_clockhistory'); if(lch){var p5=JSON.parse(lch);clockHistory={};Object.keys(p5).forEach(function(k){clockHistory[parseInt(k)]=p5[k];});} } catch(e){} }
 }
 
 // ── SHOW APP ─────────────────────────────────────────────────────────────

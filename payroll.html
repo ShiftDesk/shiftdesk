@@ -250,7 +250,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     const db  = getFirestore(app);
     window.fbGetData      = async function(k)   { try{ const d=await getDoc(doc(db,"customerData",k)); return d.exists()?d.data().value:null; }catch(e){return null;} };
     window.fbSetData      = async function(k,v)  { try{ await setDoc(doc(db,"customerData",k),{value:v}); }catch(e){} };
-    window.fbGetCustomers = async function()     { try{ const s=await getDocs(collection(db,"customers")); return s.docs.map(d=>({id:d.id,...d.data()})); }catch(e){return[];} };
+    // Retry up to 3 times with 1s delay — Firestore can return empty on first cold load
+    window.fbGetCustomers = async function() {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const s = await getDocs(collection(db, "customers"));
+          const results = s.docs.map(d => ({id: d.id, ...d.data()}));
+          if (results.length > 0 || attempt === 2) return results;
+          // Got empty on attempt 0 or 1 — wait and retry
+          await new Promise(r => setTimeout(r, 1000));
+        } catch(e) {
+          if (attempt === 2) return [];
+          await new Promise(r => setTimeout(r, 1000));
+        }
+      }
+      return [];
+    };
     window.fbReady = true;
   } catch(e) {
     console.error('Firebase init error:', e);
@@ -1012,7 +1027,7 @@ async function plyWait(){
     window.addEventListener('fbReady', onReady);
     var timer = setTimeout(function(){
       finish(window.fbReady===true && typeof window.fbGetCustomers==='function');
-    }, 10000);
+    }, 8000);
     // Also poll every 100ms in case event already fired
     var poller = setInterval(function(){
       if(window.fbReady===true && typeof window.fbGetCustomers==='function'){ clearInterval(poller); finish(true); }
@@ -1079,31 +1094,37 @@ async function plyLogin(){
   if(!email||!pw){errEl.textContent='Please enter email and password.';errEl.style.display='block';return;}
   btn.textContent='Connecting…';btn.disabled=true;
 
-  // Show progress messages so user knows it's working
-  var msgTimer1=setTimeout(function(){if(btn.disabled)btn.textContent='Loading…';},3000);
-  var msgTimer2=setTimeout(function(){if(btn.disabled)btn.textContent='Almost there…';},8000);
+  // Show progress so user knows it hasn't frozen
+  var step=0;
+  var msgTimer=setInterval(function(){
+    step++;
+    if(step===1) btn.textContent='Loading…';
+    if(step===3) btn.textContent='Still loading…';
+    if(step===6) btn.textContent='Taking longer than usual…';
+  },2000);
 
   try{
     var fbOk=await plyWait();
-    clearTimeout(msgTimer1);clearTimeout(msgTimer2);
+    clearInterval(msgTimer);
     if(!fbOk) {
-      // Last chance: maybe fbReady got set just after deadline
       if(typeof window.fbGetCustomers==='function') fbOk=true;
-      else throw new Error('Cannot connect to the server. Please check your internet connection and refresh the page.');
+      else throw new Error('Cannot connect to server. Check your internet connection and refresh the page.');
     }
     btn.textContent='Signing in…';
     var custs=await window.fbGetCustomers();
-    if(!custs||custs.length===0) throw new Error('Could not load account data. Please try again.');
+    if(!custs||custs.length===0){
+      throw new Error('Could not load account data from server. Please refresh the page and try again.');
+    }
     var pwHash=await plyHashPw(pw);
     var match=null;
     for(var i=0;i<custs.length;i++){
       var c=custs[i];
-      // Compare hashed password; also allow plain-text fallback for legacy accounts
+      // Match by hashed password (normal) OR plain text (legacy fallback)
       if(c.email&&c.email.toLowerCase()===email&&(c.password===pwHash||c.password===pw)){match=c;break;}
     }
-    if(!match) throw new Error('Incorrect email or password. Please try again.');
+    if(!match) throw new Error('Incorrect email or password. Please try again, or contact your ShiftDesk administrator.');
     if(match.status!=='active') throw new Error('Account not active. Contact your ShiftDesk administrator.');
-    if(match.expiryDate&&new Date(match.expiryDate)<new Date()) throw new Error('Subscription expired. Contact your administrator.');
+    if(match.expiryDate&&new Date(match.expiryDate)<new Date()) throw new Error('Subscription expired. Contact your administrator to renew.');
     _custId=match.id;
     await loadFromFirebase(match.id);
     MGR_PASSWORD=match.password||localStorage.getItem(KEYS.mgrPw)||'alex1900';
@@ -1111,7 +1132,7 @@ async function plyLogin(){
     plyShowApp();
     if(!staff.length) showEmptyState();
   }catch(err){
-    clearTimeout(msgTimer1);clearTimeout(msgTimer2);
+    clearInterval(msgTimer);
     var msg = err.message||'Login error. Please try again.';
     errEl.textContent=msg; errEl.style.display='block';
     btn.textContent='Sign in →'; btn.disabled=false;

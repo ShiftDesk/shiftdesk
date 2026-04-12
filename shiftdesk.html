@@ -688,8 +688,8 @@ window.handleLogin = async function handleLogin() {
       <div class="drop-menu">
         <div class="drop-item" onclick="openClockPanel()"><span style="width:20px;text-align:center;">&#128336;</span> Clock In/Out</div>
         <div class="drop-item" onclick="openAvailability()"><span style="width:20px;text-align:center;">&#128197;</span> Availability</div>
-        <div class="drop-item" onclick="openPayroll()"><span style="width:20px;text-align:center;">&#128176;</span> Payroll Report</div>
-        <div class="drop-item" id="payrollMenuItem" onclick="openPayrollSystem()" style="background:var(--green-lt);border-left:3px solid var(--green);display:none;"><span style="width:20px;text-align:center;">&#128196;</span> <span style="color:var(--green);font-weight:700;">Lønsystem</span> <span style="font-size:.6rem;background:var(--green);color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
+        
+        
         <div class="drop-item" id="budgetMenuItem" onclick="openBudgetSystem()" style="background:#e6edf9;border-left:3px solid #1b4896;display:none;"><span style="width:20px;text-align:center;">&#128202;</span> <span style="color:#1b4896;font-weight:700;">Budget</span> <span style="font-size:.6rem;background:#1b4896;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" onclick="sendWhatsApp()"><span style="width:20px;text-align:center;">&#128172;</span> Send WhatsApp</div>
         <div class="drop-item" onclick="openPhoneView()"><span style="width:20px;text-align:center;">&#128241;</span> Phone View</div>
@@ -857,7 +857,7 @@ window.handleLogin = async function handleLogin() {
     <div class="fg"><label class="fl">Note (optional)</label><input class="fc" type="text" id="sm_note" placeholder="Floor A, Section B..." maxlength="50"></div>
     <div class="modal-actions"><button class="btn-del" id="smDel" style="display:none;" onclick="deleteShift()">&#128465; Delete</button><button class="btn btn-ghost" onclick="closeShift()">Cancel</button><button class="btn btn-acc" onclick="saveShift()">Save</button></div>
     <div id="smApproveSection" style="display:none;margin-top:14px;padding-top:14px;border-top:1.5px solid var(--border);">
-      <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:6px;">&#128273; Admin: Approve Work Hours for Payroll</div>
+      <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:6px;">&#128273; Admin: Approve Work Hours</div>
       <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px;" id="smApproveInfo">Enter actual clock times and approve with your manager password.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <div class="fg" style="margin-bottom:0;"><label class="fl">Actual Clock In</label><input class="fc" type="time" id="sm_approve_in"></div>
@@ -865,8 +865,8 @@ window.handleLogin = async function handleLogin() {
       </div>
       <div class="fg" style="margin-bottom:8px;"><label class="fl">Manager Password</label><input class="fc" type="password" id="sm_approve_pw" placeholder="Enter your manager password" onkeydown="if(event.key==='Enter')adminApproveShiftHours()"></div>
       <div id="smApproveErr" style="font-size:.71rem;color:#c0392b;background:#fdf0f0;border:1px solid #f5c0c0;border-radius:7px;padding:7px 10px;margin-bottom:8px;display:none;"></div>
-      <div id="smApproveOk" style="font-size:.71rem;color:#1b6e40;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:7px 10px;margin-bottom:8px;display:none;">&#10003; Hours approved for payroll!</div>
-      <button onclick="adminApproveShiftHours()" style="width:100%;padding:10px;border-radius:9px;border:none;background:#1b6e40;color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;">&#10003; Approve Hours for Payroll</button>
+      <div id="smApproveOk" style="font-size:.71rem;color:#1b6e40;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:7px 10px;margin-bottom:8px;display:none;">&#10003; Hours approved!</div>
+      <button onclick="adminApproveShiftHours()" style="width:100%;padding:10px;border-radius:9px;border:none;background:#1b6e40;color:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;">&#10003; Approve Hours</button>
     </div>
   </div>
 </div>
@@ -939,7 +939,7 @@ window.handleLogin = async function handleLogin() {
       <div class="fg" style="flex:1;"><label class="fl">&#9200; Clock Out</label><input class="fc" type="time" id="mc_out" style="font-size:.92rem;font-weight:600;"></div>
     </div>
     <div style="background:#f0faf4;border:1.5px solid var(--green);border-radius:10px;padding:10px 12px;margin-top:8px;">
-      <label class="fl" style="color:var(--green);font-size:.65rem;margin-bottom:5px;">&#128273; MANAGER PASSWORD — approve for payroll immediately</label>
+      <label class="fl" style="color:var(--green);font-size:.65rem;margin-bottom:5px;">&#128273; MANAGER PASSWORD — approve immediately</label>
       <input class="fc" type="password" id="mc_pw" placeholder="Enter password to approve" onkeydown="if(event.key==='Enter')saveManualClock()">
       <div style="font-size:.62rem;color:var(--muted);margin-top:4px;">Leave blank to save without approval</div>
     </div>
@@ -968,18 +968,13 @@ window.handleLogin = async function handleLogin() {
     <div style="flex:1;overflow-y:auto;padding:10px 12px;" id="availList"></div>
   </div>
 </div>
-<!-- Payroll Modal -->
-<div class="overlay" id="payrollOverlay" style="display:none;" onclick="if(event.target===this)closePayroll()">
-  <div class="modal" style="width:480px;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
-    <div style="padding:18px 20px 12px;border-bottom:1.5px solid var(--border);background:var(--s2);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
-      <div><div style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;">&#128176; Payroll Report</div><div id="payrollPeriodLabel" style="font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;"></div></div>
-      <button class="pp-close" onclick="closePayroll()">&#10005;</button>
+      
     </div>
     <div style="flex:1;overflow-y:auto;padding:12px 14px;" id="payrollList"></div>
     <div style="padding:10px 14px;border-top:1.5px solid var(--border);background:var(--s2);display:flex;gap:8px;flex-shrink:0;">
-      <button class="btn btn-ghost" onclick="downloadPayroll()">&#11015; Download</button>
-      <button class="btn btn-ghost" onclick="emailPayroll()">&#9993; Send</button>
-      <button class="btn btn-ghost" style="margin-left:auto;" onclick="closePayroll()">Close</button>
+      
+      
+      
     </div>
   </div>
 </div>
@@ -1379,7 +1374,7 @@ function nextMonth(){monthDate=new Date(monthDate.getFullYear(),monthDate.getMon
 function toggleExport(){document.getElementById('exportWrap').classList.toggle('open');}
 function doPrint(){document.getElementById('exportWrap').classList.remove('open');window.print();}
 function doEmail(){document.getElementById('exportWrap').classList.remove('open');var ws=fmtS(weekStart)+' \u2013 '+fmtS(addDays(weekStart,6));var body='SCHEDULE: '+ws+'\n'+'='.repeat(38)+'\n\n';ROLE_ORDER.forEach(function(role){var mem=staff.filter(function(s){return s.role===role;});if(!mem.length)return;body+='[ '+role.toUpperCase()+' ]\n';mem.forEach(function(s){var sd=shifts[s.id]||{},lines=[];for(var d=0;d<7;d++){(sd[d]||[]).forEach(function(sh){var bm=brkMin(sh);lines.push('  '+DN[d]+': '+sh.start+'\u2013'+sh.end+(bm?' (break '+bm+'m)':'')+(sh.note?' \u00b7 '+sh.note:''));});}if(lines.length)body+=s.name+' ('+staffH(s.id)+'h):\n'+lines.join('\n')+'\n';});body+='\n';});window.location.href='mailto:?subject='+encodeURIComponent('Schedule '+ws)+'&body='+encodeURIComponent(body);}
-function doPublish(){var b=document.getElementById('pubBtn');b.disabled=true;b.textContent='Saving…';saveDataCloud().then(function(){b.textContent='✓ Published!';b.style.background='var(--green)';b.disabled=false;setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule saved to cloud ✓');}).catch(function(){b.textContent='Publish';b.style.background='';b.disabled=false;toast('Saved locally ✓');});}
+function doPublish(){var b=document.getElementById('pubBtn');b.textContent='\u2713 Published!';b.style.background='var(--green)';setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule published!');}
 document.addEventListener('click',function(e){var ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');var tw=document.getElementById('toolsWrap');if(tw&&!tw.contains(e.target))tw.classList.remove('open');});
 
 // ── TOOLS ────────────────────────────────────────────────────────────────
@@ -1813,7 +1808,7 @@ function renderClockPanel(){
       var _appr=_chE&&_chE.approved;
       html+='<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">';
       if(_appr){
-        html+='<div style="flex:1;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;color:var(--green);">&#10003; Approved for payroll</div>';
+        html+='<div style="flex:1;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;color:var(--green);">&#10003; Approved</div>';
       } else {
         html+='<div style="flex:1;background:#fff8e8;border:1px solid #f5d87a;border-radius:7px;padding:5px 10px;font-size:.72rem;color:#8c7000;">&#9888; Pending approval</div>';
         html+='<button onclick="approveClockEntry('+s.id+',\''+todayStr()+'\')" style="padding:5px 12px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--green);background:#e4f2ec;color:var(--green);">&#10003; Approve</button>';
@@ -1887,8 +1882,8 @@ async function saveManualClock(){
   closeManualClock();
   renderClockPanel();
   if(activeProfileId!==null) renderProfileClock();
-  if(approved) toast('✓ Hours saved & approved for payroll — '+(staff.find(function(x){return x.id===manualClockSid;})||{name:''}).name.split(' ')[0]);
-  else toast('Hours saved — approve in clock panel to count in payroll');
+  if(approved) toast('✓ Hours saved & approved — '+(staff.find(function(x){return x.id===manualClockSid;})||{name:''}).name.split(' ')[0]);
+  else toast('Hours saved — approve in clock panel');
 }
 function clearClockEntry(){delete clockLog[manualClockSid];saveClockLog();closeManualClock();renderClockPanel();toast('Entry cleared');}
 
@@ -2015,13 +2010,7 @@ async function saveMyNewPassword() {
 }
 
 // ── PAYROLL SYSTEM (external addon page) ────────────────────────────────
-function openPayrollSystem(){
-  document.getElementById('toolsWrap').classList.remove('open');
-  // Save to cloud first so loen.html can read it
-  saveDataCloud().finally(function(){
-    window.open('loen.html','_blank');
-  });
-}
+
 function openBudgetSystem(){
   document.getElementById('toolsWrap').classList.remove('open');
   saveData();
@@ -2061,15 +2050,7 @@ function sendWhatsApp(){
 }
 
 // ── PAYROLL ──────────────────────────────────────────────────────────────
-function openPayroll(){
-  document.getElementById('toolsWrap').classList.remove('open');
-  syncMonthStore();
-  var year=monthDate.getFullYear(),month=monthDate.getMonth();
-  var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('payrollPeriodLabel').textContent=MN[month]+' '+year+' \u2014 All Staff';
-  var html='',grandH=0,grandS=0;
-  ROLE_ORDER.forEach(function(role){
-    var mem=staff.filter(function(s){return s.role===role;});if(!mem.length)return;
+);if(!mem.length)return;
     var rc=ROLES[role];
     html+='<div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border);">'+role+'</div>';
     mem.forEach(function(s){
@@ -2085,35 +2066,14 @@ function openPayroll(){
   document.getElementById('payrollList').innerHTML=html;
   document.getElementById('payrollOverlay').style.display='flex';
 }
-function closePayroll(){document.getElementById('payrollOverlay').style.display='none';}
-function downloadPayroll(){
-  syncMonthStore();
-  var year=monthDate.getFullYear(),month=monthDate.getMonth();
-  var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var rows='',grandH=0,grandS=0;
-  staff.forEach(function(s){
-    var rc=ROLES[s.role],firstDay=new Date(year,month,1),lastDay=new Date(year,month+1,0);
-    var totalW=0,totalB=0,daysW=0;
-    for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];if(ds.length){daysW++;ds.forEach(function(sh){totalW+=workedH(sh);totalB+=brkMin(sh);});}}
-    totalW=Math.round(totalW*10)/10;var salary=s.rate>0?Math.round(totalW*s.rate):null;grandH+=totalW;if(salary)grandS+=salary;
-    rows+='<tr><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;font-weight:600;color:'+rc.color+';">'+s.name+'</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;color:#8c8880;">'+s.role+'</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;text-align:center;">'+daysW+'</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;text-align:center;font-weight:600;">'+totalW+'h</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;text-align:center;color:#8c8880;">'+totalB+'min</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;text-align:center;">'+(s.rate?s.rate+' DKK/h':'\u2014')+'</td><td style="padding:8px 10px;border-bottom:1px solid #e8e3da;text-align:right;font-weight:700;color:#1b6e40;">'+(salary!==null?salary.toLocaleString()+' DKK':'\u2014')+'</td></tr>';
-  });
-  var doc='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Payroll '+MN[month]+' '+year+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;padding:28px;color:#18160f;-webkit-print-color-adjust:exact;print-color-adjust:exact;}h1{font-size:1.5rem;font-weight:700;margin-bottom:4px;}p{color:#8c8880;font-size:.82rem;margin-bottom:20px;}table{width:100%;border-collapse:collapse;font-size:.85rem;}th{background:#f0ede7;padding:8px 10px;text-align:left;font-size:.7rem;text-transform:uppercase;color:#8c8880;border-bottom:2px solid #c9c3b8;}.tfoot td{background:#f0ede7;font-weight:700;border-top:2px solid #c9c3b8;padding:9px 10px;}.tb{background:#1b6e40;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-radius:10px;font-family:Arial,sans-serif;}.tb button{background:#fff;color:#1b6e40;border:none;border-radius:7px;padding:7px 16px;font-weight:700;cursor:pointer;}@media print{.tb{display:none!important;}@page{margin:1.5cm;}}<\/style><\/head><body><div class="tb"><span>Payroll \u2014 '+MN[month]+' '+year+'</span><button onclick="window.print()">\uD83D\uDDA8 Print / Save PDF</button></div><h1>Payroll Report</h1><p>'+MN[month]+' '+year+' \u00b7 '+staff.length+' staff \u00b7 ShiftDesk</p><table><thead><tr><th>Name</th><th>Role</th><th>Days</th><th>Hours</th><th>Break</th><th>Rate</th><th style="text-align:right;">Salary</th></tr></thead><tbody>'+rows+'<tr class="tfoot"><td colspan="3">TOTAL</td><td>'+Math.round(grandH*10)/10+'h</td><td colspan="2"></td><td style="text-align:right;color:#1b6e40;">'+(grandS>0?grandS.toLocaleString()+' DKK':'\u2014')+'</td></tr></tbody></table><\/body><\/html>';
-  var blob=new Blob([doc],{type:'text/html;charset=utf-8'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='Payroll_'+MN[month]+'_'+year+'.html';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},5000);toast('Payroll downloaded \u2713');
-}
-function emailPayroll(){
-  syncMonthStore();
-  var year=monthDate.getFullYear(),month=monthDate.getMonth();
-  var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var body2='PAYROLL: '+MN[month]+' '+year+'\n'+'='.repeat(38)+'\n\n',grandH=0,grandS=0;
-  staff.forEach(function(s){
-    var firstDay=new Date(year,month,1),lastDay=new Date(year,month+1,0);var totalW=0,totalB=0,daysW=0;
-    for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];if(ds.length){daysW++;ds.forEach(function(sh){totalW+=workedH(sh);totalB+=brkMin(sh);});}}
+
+
+);}}
     totalW=Math.round(totalW*10)/10;var salary=s.rate>0?Math.round(totalW*s.rate):null;grandH+=totalW;if(salary)grandS+=salary;
     body2+=s.name+' ('+s.role+')\n  Days: '+daysW+' | Hours: '+totalW+'h | Break: '+totalB+'min'+(salary?' | Salary: '+salary.toLocaleString()+' DKK':'')+'\n';
   });
   body2+='\nTOTAL HOURS: '+Math.round(grandH*10)/10+'h\n';if(grandS>0)body2+='TOTAL SALARY: '+grandS.toLocaleString()+' DKK\n';
-  window.location.href='mailto:?subject='+encodeURIComponent('Payroll '+MN[month]+' '+year)+'&body='+encodeURIComponent(body2);
+  window.location.href='mailto:?subject='+encodeURIComponent('Hours Report '+MN[month]+' '+year)+'&body='+encodeURIComponent(body2);
 }
 
 // ── PHONE VIEW ───────────────────────────────────────────────────────────
@@ -2213,7 +2173,7 @@ async function showMyFingerprint(){var fp=await getBrowserFingerprint(),k=toKey(
 function checkDaysLeft(){var a=localStorage.getItem(atob('c2hpZnRkZXNrX2xpY19kYXRl'));if(!a){console.log('No activation date.');return;}var days=LICENSE_DAYS-Math.floor((Date.now()-parseInt(a))/86400000);console.log('%c Days remaining: '+days,'background:#1b6e40;color:#fff;padding:6px;');return days;}
 
 // ── PUBLISH ──────────────────────────────────────────────────────────────
-function doPublish(){var b=document.getElementById('pubBtn');b.disabled=true;b.textContent='Saving…';saveDataCloud().then(function(){b.textContent='✓ Published!';b.style.background='var(--green)';b.disabled=false;setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule saved to cloud ✓');}).catch(function(){b.textContent='Publish';b.style.background='';b.disabled=false;toast('Saved locally ✓');});}
+function doPublish(){var b=document.getElementById('pubBtn');b.textContent='\u2713 Published!';b.style.background='var(--green)';setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule published!');}
 
 // ── PERSISTENCE ──────────────────────────────────────────────────────────
 function saveData(){
@@ -2254,7 +2214,7 @@ function approveClockEntry(sid,dateStr){
   clockHistory[sid][dateStr].approvedBy='Manager';
   saveClockHistory();
   if(typeof renderClockPanel==='function') renderClockPanel();
-  toast('✓ Entry approved for payroll');
+  toast('✓ Entry approved');
 }
 
 function adminApproveShiftHours(){
@@ -2277,7 +2237,7 @@ function adminApproveShiftHours(){
   if(!clockHistory[sid]) clockHistory[sid]={};
   clockHistory[sid][dateStr]={inTime:inT,outTime:outT,approved:true,approvedBy:'Manager',note:'Admin approved via Edit Shift',dateStr:dateStr};
   if(typeof saveClockHistory==='function') saveClockHistory();
-  if(okEl){okEl.textContent='✓ Approved! '+inT+'–'+outT+' counted in payroll.';okEl.style.display='block';}
+  if(okEl){okEl.textContent='✓ Approved! '+inT+'–'+outT+' counted.';okEl.style.display='block';}
   document.getElementById('sm_approve_pw').value='';
   setTimeout(function(){closeShift();toast('✓ Hours approved — '+inT+' – '+outT);},1200);
 }
@@ -2444,8 +2404,7 @@ window.bootApp = function bootApp(email, customer){
       updateLicBtn();
     }catch(ex){}
   }
-  var _pm=document.getElementById('payrollMenuItem');
-  if(_pm) _pm.style.display=(customer&&customer.hasPayroll===true)?'flex':'none';
+  
   var _bm=document.getElementById('budgetMenuItem');
   if(_bm) _bm.style.display=(customer&&customer.hasBudget===true)?'flex':'none';
   var displayName = customer ? (customer.name || email) : email;

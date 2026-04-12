@@ -1119,7 +1119,7 @@ var ppClockTimer=null;
 var personReportId=null;
 
 // Password (stored in localStorage, default alex1900)
-var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||atob('YWxleDE5MDA=');
+var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||'';
 
 // ── MANAGER PASSWORD — saved in Firebase customerData per customer ────────
 async function waitForFbFunctions() {
@@ -1893,8 +1893,8 @@ function closeSetRate(){document.getElementById('srOverlay').style.display='none
 function saveRate(){var r=parseFloat(document.getElementById('sr_rate').value)||0;var s=staff.find(function(x){return x.id===setRateSid;});if(s){s.rate=r;}closeSetRate();saveData();if(activeProfileId!==null)openProfile(activeProfileId);renderClockPanel();toast('Rate updated \u2713');}
 
 // ── PASSWORD GATE ────────────────────────────────────────────────────────
-function requirePassword(title,msg,onSuccess){pwGateCallback=onSuccess;document.getElementById('pwGateTitle').textContent=title;document.getElementById('pwGateMsg').textContent=msg;document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';document.getElementById('pwGateOverlay').style.display='flex';setTimeout(function(){document.getElementById('pwGateInput').focus();},100);}
-function submitPwGate(){var val=document.getElementById('pwGateInput').value;if(val===PI_PASSWORD){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}}else{document.getElementById('pwGateError').style.display='block';var inp=document.getElementById('pwGateInput');inp.style.borderColor='#c0392b';inp.value='';setTimeout(function(){inp.style.borderColor='';},400);}}
+function requirePassword(title,msg,onSuccess){pwGateCallback=onSuccess;document.getElementById('pwGateTitle').textContent=title;document.getElementById('pwGateMsg').textContent=PI_PASSWORD===''?'No password set yet. Type a new password (min 4 chars) to create one.':msg;document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';document.getElementById('pwGateOverlay').style.display='flex';setTimeout(function(){document.getElementById('pwGateInput').focus();},100);}
+function submitPwGate(){var val=document.getElementById('pwGateInput').value;if(PI_PASSWORD===''&&val.length>=4){PI_PASSWORD=val;try{localStorage.setItem(atob('c2hpZnRkZXNrX21ncl9wdw=='),val);}catch(e){}document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}return;}if(val===PI_PASSWORD){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}}else{document.getElementById('pwGateError').style.display='block';var inp=document.getElementById('pwGateInput');inp.style.borderColor='#c0392b';inp.value='';setTimeout(function(){inp.style.borderColor='';},400);}}
 function closePwGate(){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';pwGateCallback=null;}
 
 // ── SALARY UNLOCK ────────────────────────────────────────────────────────

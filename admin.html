@@ -393,16 +393,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <label class="fl">Notes (optional)</label>
       <input class="fc" type="text" id="f_notes" placeholder="e.g. Trial period, referred by…" autocomplete="off">
     </div>
-
-    <!-- BUDGET ADDON -->
-    <div class="fg" style="background:#e8f0fd;border:1.5px solid #1b4896;border-radius:10px;padding:12px 14px;margin-top:8px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <label style="font-size:.78rem;font-weight:700;color:#1b4896;display:block;margin-bottom:2px;">&#128200; Budget &amp; Finance Add-on</label>
-          <div style="font-size:.68rem;color:#3a5a96;">Grants access to the Restaurant Budget finance module</div>
         </div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <input type="checkbox" id="f_hasBudget" style="width:18px;height:18px;accent-color:#1b4896;cursor:pointer;">
+          
+          <span style="font-size:.75rem;font-weight:600;color:var(--green,#1b6e40);">Enabled</span>
+        </label>
+      </div>
+    </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          
           <span style="font-size:.75rem;font-weight:600;color:#1b4896;">Enabled</span>
         </label>
       </div>
@@ -717,7 +717,7 @@ function renderTable() {
     html += '<div class="cust-row">';
     html += '<div><div class="cust-name">' + esc(c.name) + '</div><div class="cust-email">' + esc(c.contact || '') + '</div></div>';
     html += '<div style="font-size:.75rem;font-family:\'DM Mono\',monospace;">' + esc(c.email) + '</div>';
-    html += '<div><span class="plan-badge ' + (c.plan === 'pro' ? 'plan-pro' : 'plan-starter') + '">' + (c.plan === 'pro' ? 'Pro' : 'Starter') + '</span>' + (c.hasPayroll ? '<span style="margin-left:4px;background:#e4f2ec;color:#1b6e40;border-radius:4px;padding:2px 5px;font-size:.58rem;font-weight:700;border:1px solid #a8d5bc;">&#128176; Payroll</span>' : '') + '</div>';
+    html += '<div><span class="plan-badge ' + (c.plan === 'pro' ? 'plan-pro' : 'plan-starter') + '">' + (c.plan === 'pro' ? 'Pro' : 'Starter') + '</span>' + '</div>';
     html += '<div>' + subCell + '</div>';
     html += '<div><span class="status-badge ' + (effectiveStatus === 'active' ? 'status-active' : effectiveStatus === 'expired' ? 'status-expired' : 'status-inactive') + '">';
     html += '<span style="width:6px;height:6px;border-radius:50%;background:' + (effectiveStatus === 'active' ? 'var(--green)' : effectiveStatus === 'expired' ? '#b45309' : 'var(--b2)') + ';display:inline-block;"></span>';
@@ -754,8 +754,6 @@ function openAddCustomer() {
   document.getElementById('f_startdate').value = new Date().toISOString().split('T')[0];
   document.getElementById('f_status').value = 'active';
   document.getElementById('f_notes').value = '';
-  
-  
   document.getElementById('customerModal').classList.add('open');
   setTimeout(function(){ document.getElementById('f_name').focus(); }, 100);
 }
@@ -777,8 +775,6 @@ function openEditCustomer(id) {
   document.getElementById('f_startdate').value = c.startDate || new Date().toISOString().split('T')[0];
   document.getElementById('f_status').value = c.status || 'active';
   document.getElementById('f_notes').value = c.notes || '';
-  
-  
   document.getElementById('customerModal').classList.add('open');
 }
 
@@ -824,7 +820,6 @@ async function saveCustomer() {
     var idx = customers.findIndex(function(c){ return c.id === editingId; });
     if (idx >= 0) {
       var updatedPassword = password ? passwordHashed : customers[idx].password;
-      var hasBudget = document.getElementById('f_hasBudget').checked;
       customers[idx] = Object.assign(customers[idx], { name, contact, email, password: updatedPassword, plan, duration, startDate, expiryDate, status, notes });
       if (window._fbReady) {
         await window.fbSaveCustomer(customers[idx]);
@@ -838,7 +833,6 @@ async function saveCustomer() {
     var newCust = {
       id: 'cust_' + Date.now(),
       name, contact, email, password: passwordHashed, plan, duration, startDate, expiryDate, status, notes,
-      
       createdAt: new Date().toISOString()
     };
     customers.push(newCust);

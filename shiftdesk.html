@@ -205,7 +205,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .avail-day{width:28px;height:28px;border-radius:6px;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--b2);background:#fff;color:var(--muted);transition:all .13s;user-select:none;}
 .avail-day.unavail{background:#fdf0e8;border-color:var(--acc);color:var(--acc);}
 .avail-day.sick{background:#fdf0f0;border-color:#c0392b;color:#c0392b;}
-/* PAYROLL */
+
 .pr-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);background:var(--bg);margin-bottom:6px;}
 .pr-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem;flex-shrink:0;border:1.5px solid rgba(0,0,0,.06);overflow:hidden;}
 .pr-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
@@ -688,8 +688,6 @@ window.handleLogin = async function handleLogin() {
       <div class="drop-menu">
         <div class="drop-item" onclick="openClockPanel()"><span style="width:20px;text-align:center;">&#128336;</span> Clock In/Out</div>
         <div class="drop-item" onclick="openAvailability()"><span style="width:20px;text-align:center;">&#128197;</span> Availability</div>
-        
-        
         <div class="drop-item" id="budgetMenuItem" onclick="openBudgetSystem()" style="background:#e6edf9;border-left:3px solid #1b4896;display:none;"><span style="width:20px;text-align:center;">&#128202;</span> <span style="color:#1b4896;font-weight:700;">Budget</span> <span style="font-size:.6rem;background:#1b4896;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" onclick="sendWhatsApp()"><span style="width:20px;text-align:center;">&#128172;</span> Send WhatsApp</div>
         <div class="drop-item" onclick="openPhoneView()"><span style="width:20px;text-align:center;">&#128241;</span> Phone View</div>
@@ -968,70 +966,7 @@ window.handleLogin = async function handleLogin() {
     <div style="flex:1;overflow-y:auto;padding:10px 12px;" id="availList"></div>
   </div>
 </div>
-      
-    </div>
-    <div style="flex:1;overflow-y:auto;padding:12px 14px;" id="payrollList"></div>
-    <div style="padding:10px 14px;border-top:1.5px solid var(--border);background:var(--s2);display:flex;gap:8px;flex-shrink:0;">
-      
-      
-      
-    </div>
-  </div>
-</div>
-<!-- Phone View -->
-<div class="phone-ol" id="phoneOverlay" style="display:none;" onclick="if(event.target===this)closePhoneView()">
-  <div class="phone-frame">
-    <div class="phone-bar"><span style="font-size:.85rem;font-weight:700;">&#128241; ShiftDesk</span><button onclick="closePhoneView()" style="background:none;border:none;color:#fff;font-size:1rem;cursor:pointer;">&#10005;</button></div>
-    <div class="phone-content" id="phoneContent"></div>
-  </div>
-</div>
-<!-- Person Report Modal -->
-<div class="overlay" id="prOverlay" style="display:none;" onclick="if(event.target===this)closePersonReport()">
-  <div class="modal" style="width:520px;max-width:calc(100vw - 24px);max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
-    <div class="pp-head">
-      <div class="pp-av" id="prAv"></div>
-      <div style="flex:1;"><div class="pp-kpi-val" id="prName"></div><div id="prMeta" style="font-size:.67rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;"></div></div>
-      <button class="pp-close" onclick="closePersonReport()">&#10005;</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1.5px solid var(--border);flex-shrink:0;">
-      <div class="pp-kpi"><div class="pp-kpi-val" id="prKpi0"></div><div class="pp-kpi-lbl">Days</div></div>
-      <div class="pp-kpi"><div class="pp-kpi-val" id="prKpi1" style="color:var(--green)"></div><div class="pp-kpi-lbl">Hours</div></div>
-      <div class="pp-kpi"><div class="pp-kpi-val" id="prKpi2" style="color:var(--muted)"></div><div class="pp-kpi-lbl">Break</div></div>
-      <div class="pp-kpi"><div class="pp-kpi-val" id="prKpi3"></div><div class="pp-kpi-lbl">Shifts</div></div>
-    </div>
-    <div style="flex:1;overflow-y:auto;" id="prBody"></div>
-    <div style="display:flex;gap:8px;padding:12px 16px;border-top:1.5px solid var(--border);background:var(--s2);flex-shrink:0;">
-      <button class="btn btn-ghost" onclick="printPersonReport()">&#128424; Print</button>
-      <button class="btn btn-acc" style="margin-left:auto;" onclick="closePersonReport()">Close</button>
-    </div>
-  </div>
-</div>
-<!-- License Status Modal -->
-<div class="overlay" id="licStatusModal" style="display:none;" onclick="if(event.target===this)closeLicStatus()">
-  <div class="modal" style="width:360px;text-align:center;padding:32px 28px;">
-    <div style="font-size:2.2rem;margin-bottom:10px;" id="licStatIcon"></div>
-    <div style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin-bottom:6px;" id="licStatTitle"></div>
-    <div id="licStatBody" style="margin-bottom:20px;"></div>
-    <div id="licProgWrap" style="display:none;margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;font-size:.68rem;color:#8c8880;margin-bottom:5px;"><span>Activated</span><span id="licProgRight"></span></div>
-      <div style="background:#f0ede7;border-radius:20px;height:10px;overflow:hidden;"><div id="licProgBar" style="height:100%;border-radius:20px;transition:width .5s ease;"></div></div>
-      <div style="font-size:.68rem;color:#8c8880;margin-top:5px;text-align:right;" id="licProgDates"></div>
-    </div>
-    <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="closeLicStatus()">Close</button>
-  </div>
-</div>
-<!-- Change Password Modal -->
-<div class="overlay" id="changePwOverlay" style="display:none;" onclick="if(event.target===this)closeChangePw()">
-  <div class="modal" style="width:360px;">
-    <div class="modal-title">&#128273; Change Manager Password</div>
-    <div class="fg"><label class="fl">Current Password</label><input class="fc" type="password" id="cpw_cur" placeholder="Enter current password" onkeydown="if(event.key==='Enter')saveNewPassword()"></div>
-    <div class="fg"><label class="fl">New Password</label><input class="fc" type="password" id="cpw_new" placeholder="Minimum 4 characters" onkeydown="if(event.key==='Enter')saveNewPassword()"></div>
-    <div class="fg"><label class="fl">Confirm New Password</label><input class="fc" type="password" id="cpw_conf" placeholder="Repeat new password" onkeydown="if(event.key==='Enter')saveNewPassword()"></div>
-    <div id="cpw_err" style="font-size:.73rem;color:#c0392b;margin-bottom:6px;min-height:16px;"></div>
-    <div id="cpw_ok" style="font-size:.73rem;color:var(--green);margin-bottom:6px;display:none;">&#10003; Password changed!</div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeChangePw()">Cancel</button><button class="btn btn-acc" onclick="saveNewPassword()">Change Password</button></div>
-  </div>
-</div>
+
 
 <!-- Change MY Login Password Modal -->
 <div class="overlay" id="changeMyPwOverlay" style="display:none;" onclick="if(event.target===this)closeChangeMyPw()">
@@ -1119,7 +1054,7 @@ var ppClockTimer=null;
 var personReportId=null;
 
 // Password (stored in localStorage, default alex1900)
-var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||'';
+var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||atob('YWxleDE5MDA=');
 
 // ── MANAGER PASSWORD — saved in Firebase customerData per customer ────────
 async function waitForFbFunctions() {
@@ -1808,7 +1743,7 @@ function renderClockPanel(){
       var _appr=_chE&&_chE.approved;
       html+='<div style="margin-top:6px;display:flex;align-items:center;gap:6px;">';
       if(_appr){
-        html+='<div style="flex:1;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;color:var(--green);">&#10003; Approved</div>';
+        html+='<div style="flex:1;background:#e4f2ec;border:1px solid #a8d5bc;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;color:var(--green);">&#10003; Approved for payroll</div>';
       } else {
         html+='<div style="flex:1;background:#fff8e8;border:1px solid #f5d87a;border-radius:7px;padding:5px 10px;font-size:.72rem;color:#8c7000;">&#9888; Pending approval</div>';
         html+='<button onclick="approveClockEntry('+s.id+',\''+todayStr()+'\')" style="padding:5px 12px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--green);background:#e4f2ec;color:var(--green);">&#10003; Approve</button>';
@@ -1893,8 +1828,8 @@ function closeSetRate(){document.getElementById('srOverlay').style.display='none
 function saveRate(){var r=parseFloat(document.getElementById('sr_rate').value)||0;var s=staff.find(function(x){return x.id===setRateSid;});if(s){s.rate=r;}closeSetRate();saveData();if(activeProfileId!==null)openProfile(activeProfileId);renderClockPanel();toast('Rate updated \u2713');}
 
 // ── PASSWORD GATE ────────────────────────────────────────────────────────
-function requirePassword(title,msg,onSuccess){pwGateCallback=onSuccess;document.getElementById('pwGateTitle').textContent=title;document.getElementById('pwGateMsg').textContent=PI_PASSWORD===''?'No password set yet. Type a new password (min 4 chars) to create one.':msg;document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';document.getElementById('pwGateOverlay').style.display='flex';setTimeout(function(){document.getElementById('pwGateInput').focus();},100);}
-function submitPwGate(){var val=document.getElementById('pwGateInput').value;if(PI_PASSWORD===''&&val.length>=4){PI_PASSWORD=val;try{localStorage.setItem(atob('c2hpZnRkZXNrX21ncl9wdw=='),val);}catch(e){}document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}return;}if(val===PI_PASSWORD){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}}else{document.getElementById('pwGateError').style.display='block';var inp=document.getElementById('pwGateInput');inp.style.borderColor='#c0392b';inp.value='';setTimeout(function(){inp.style.borderColor='';},400);}}
+function requirePassword(title,msg,onSuccess){pwGateCallback=onSuccess;document.getElementById('pwGateTitle').textContent=title;document.getElementById('pwGateMsg').textContent=msg;document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';document.getElementById('pwGateOverlay').style.display='flex';setTimeout(function(){document.getElementById('pwGateInput').focus();},100);}
+function submitPwGate(){var val=document.getElementById('pwGateInput').value;if(val===PI_PASSWORD){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';if(pwGateCallback){pwGateCallback();pwGateCallback=null;}}else{document.getElementById('pwGateError').style.display='block';var inp=document.getElementById('pwGateInput');inp.style.borderColor='#c0392b';inp.value='';setTimeout(function(){inp.style.borderColor='';},400);}}
 function closePwGate(){document.getElementById('pwGateOverlay').style.display='none';document.getElementById('pwGateInput').value='';document.getElementById('pwGateError').style.display='none';pwGateCallback=null;}
 
 // ── SALARY UNLOCK ────────────────────────────────────────────────────────
@@ -2050,33 +1985,10 @@ function sendWhatsApp(){
 }
 
 // ── PAYROLL ──────────────────────────────────────────────────────────────
-);if(!mem.length)return;
-    var rc=ROLES[role];
-    html+='<div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin:10px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border);">'+role+'</div>';
-    mem.forEach(function(s){
-      var firstDay=new Date(year,month,1),lastDay=new Date(year,month+1,0);
-      var totalW=0,totalB=0,daysW=0;
-      for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];if(ds.length){daysW++;ds.forEach(function(sh){totalW+=workedH(sh);totalB+=brkMin(sh);});}}
-      totalW=Math.round(totalW*10)/10;var salary=s.rate>0?Math.round(totalW*s.rate):null;grandH+=totalW;if(salary)grandS+=salary;
-      var av=s.photo?'<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">':ini(s.name);
-      html+='<div class="pr-row"><div class="pr-av" style="background:'+rc.bg+';color:'+rc.color+'">'+av+'</div><div style="flex:1;"><div style="font-size:.82rem;font-weight:600;">'+s.name+'</div><div style="font-size:.62rem;color:var(--muted);font-family:monospace;">'+daysW+' days \u00b7 '+totalB+'min break</div></div><div style="text-align:right;font-family:\'DM Mono\',monospace;"><div style="font-size:.78rem;font-weight:600;">'+totalW+'h</div>'+(salary!==null?'<div style="font-size:.9rem;font-weight:700;color:var(--green);">'+salary.toLocaleString()+' DKK</div>':'<div style="font-size:.65rem;color:var(--muted);">no rate</div>')+'</div></div>';
-    });
-  });
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--s2);border-radius:9px;margin-top:8px;font-weight:700;"><span>Total</span><div style="text-align:right;font-family:\'DM Mono\',monospace;"><div>'+Math.round(grandH*10)/10+'h</div>'+(grandS>0?'<div style="color:var(--green);">'+grandS.toLocaleString()+' DKK</div>':'')+'</div></div>';
-  document.getElementById('payrollList').innerHTML=html;
-  document.getElementById('payrollOverlay').style.display='flex';
-}
 
 
-);}}
-    totalW=Math.round(totalW*10)/10;var salary=s.rate>0?Math.round(totalW*s.rate):null;grandH+=totalW;if(salary)grandS+=salary;
-    body2+=s.name+' ('+s.role+')\n  Days: '+daysW+' | Hours: '+totalW+'h | Break: '+totalB+'min'+(salary?' | Salary: '+salary.toLocaleString()+' DKK':'')+'\n';
-  });
-  body2+='\nTOTAL HOURS: '+Math.round(grandH*10)/10+'h\n';if(grandS>0)body2+='TOTAL SALARY: '+grandS.toLocaleString()+' DKK\n';
-  window.location.href='mailto:?subject='+encodeURIComponent('Hours Report '+MN[month]+' '+year)+'&body='+encodeURIComponent(body2);
-}
 
-// ── PHONE VIEW ───────────────────────────────────────────────────────────
+
 function openPhoneView(){document.getElementById('toolsWrap').classList.remove('open');renderPhoneHome();document.getElementById('phoneOverlay').style.display='flex';}
 function closePhoneView(){document.getElementById('phoneOverlay').style.display='none';}
 function renderPhoneHome(){
@@ -2404,9 +2316,7 @@ window.bootApp = function bootApp(email, customer){
       updateLicBtn();
     }catch(ex){}
   }
-  
   var _bm=document.getElementById('budgetMenuItem');
-  if(_bm) _bm.style.display=(customer&&customer.hasBudget===true)?'flex':'none';
   var displayName = customer ? (customer.name || email) : email;
   var tb = document.querySelector('.topbar-r');
   if(tb && email){

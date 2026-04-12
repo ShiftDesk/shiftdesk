@@ -340,7 +340,7 @@ async function doLogin() {
 }
 window.doLogin = doLogin;
 
-// ── LOAD CUSTOMER DATA: Firebase first, then localStorage fallback ────────
+// ── LOAD CUSTOMER DATA: exact mirror of shiftdesk.html loadDataCloud ─────
 async function loadCustomerData(custId) {
   var prefix = 'cust_' + custId + '_';
   try {
@@ -349,18 +349,51 @@ async function loadCustomerData(custId) {
     var ms = await window.fbGetData(prefix + 'monthStore');
     var pi = await window.fbGetData(prefix + 'pi');
     var ch = await window.fbGetData(prefix + 'clockHistory');
+    // staff: array, keep as-is
     if (s && Array.isArray(s) && s.length) staff = s;
+    // shifts: keys are staff IDs (integers)
     if (sh) { shifts = {}; Object.keys(sh).forEach(function(k){ shifts[parseInt(k)] = sh[k]; }); }
+    // monthShiftsStore: keys are staff IDs (integers), values are {mondayKey: {dayIdx: [shifts]}}
     if (ms) { monthShiftsStore = {}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)] = ms[k]; }); }
+    // personalInfo: keys are staff IDs (integers)
     if (pi) { personalInfo = {}; Object.keys(pi).forEach(function(k){ personalInfo[parseInt(k)] = pi[k]; }); }
+    // clockHistory: keys are staff IDs (integers), values are {dateStr: entry}
     if (ch) { clockHistory = {}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)] = ch[k]; }); }
   } catch(e) { console.warn('loadCustomerData firebase:', e); }
-  // Fallback: if Firebase gave nothing, load from localStorage (works when opened locally)
-  if (!staff.length) { try { var ls=localStorage.getItem('shiftdesk_staff'); if(ls){var p=JSON.parse(ls);if(Array.isArray(p)&&p.length)staff=p;} } catch(e){} }
-  if (!Object.keys(shifts).length) { try { var lsh=localStorage.getItem('shiftdesk_shifts'); if(lsh){var p2=JSON.parse(lsh);shifts={};Object.keys(p2).forEach(function(k){shifts[parseInt(k)]=p2[k];});} } catch(e){} }
-  if (!Object.keys(monthShiftsStore).length) { try { var lms=localStorage.getItem('shiftdesk_monthstore'); if(lms){var p3=JSON.parse(lms);monthShiftsStore={};Object.keys(p3).forEach(function(k){monthShiftsStore[parseInt(k)]=p3[k];});} } catch(e){} }
-  if (!Object.keys(personalInfo).length) { try { var lpi=localStorage.getItem('shiftdesk_pi'); if(lpi){var p4=JSON.parse(lpi);personalInfo={};Object.keys(p4).forEach(function(k){personalInfo[parseInt(k)]=p4[k];});} } catch(e){} }
-  if (!Object.keys(clockHistory).length) { try { var lch=localStorage.getItem('shiftdesk_clockhistory'); if(lch){var p5=JSON.parse(lch);clockHistory={};Object.keys(p5).forEach(function(k){clockHistory[parseInt(k)]=p5[k];});} } catch(e){} }
+
+  // localStorage fallback — use same base64 keys as shiftdesk.html
+  function b64(s){ try{return atob(s);}catch(e){return s;} }
+  if (!staff.length) {
+    try {
+      var ls = localStorage.getItem(b64('c2hpZnRkZXNrX3N0YWZm'));
+      if (!ls) ls = localStorage.getItem('shiftdesk_staff');
+      if (ls) { var p = JSON.parse(ls); if (Array.isArray(p) && p.length) staff = p; }
+    } catch(e) {}
+  }
+  if (!Object.keys(shifts).length) {
+    try {
+      var lsh = localStorage.getItem(b64('c2hpZnRkZXNrX3NoaWZ0cw=='));
+      if (!lsh) lsh = localStorage.getItem('shiftdesk_shifts');
+      if (lsh) { var p2 = JSON.parse(lsh); shifts = {}; Object.keys(p2).forEach(function(k){ shifts[parseInt(k)] = p2[k]; }); }
+    } catch(e) {}
+  }
+  if (!Object.keys(monthShiftsStore).length) {
+    try {
+      var lms = localStorage.getItem(b64('c2hpZnRkZXNrX21vbnRoc3RvcmU='));
+      if (!lms) lms = localStorage.getItem('shiftdesk_monthstore');
+      if (lms) { var p3 = JSON.parse(lms); monthShiftsStore = {}; Object.keys(p3).forEach(function(k){ monthShiftsStore[parseInt(k)] = p3[k]; }); }
+    } catch(e) {}
+  }
+  if (!Object.keys(clockHistory).length) {
+    try {
+      var lch = localStorage.getItem(b64('c2hpZnRkZXNrX2Nsb2NraGlzdG9yeQ=='));
+      if (!lch) lch = localStorage.getItem('shiftdesk_clockhistory');
+      if (lch) { var p4 = JSON.parse(lch); clockHistory = {}; Object.keys(p4).forEach(function(k){ clockHistory[parseInt(k)] = p4[k]; }); }
+    } catch(e) {}
+  }
+  // Debug log
+  console.log('Loaded: staff='+staff.length+' monthShiftsStore keys='+Object.keys(monthShiftsStore).length+' shifts keys='+Object.keys(shifts).length);
+  if (staff.length) console.log('First staff:', JSON.stringify(staff[0]));
 }
 
 // ── SHOW APP ─────────────────────────────────────────────────────────────
@@ -528,7 +561,14 @@ function renderPayslip() {
   var cfg = getDefaultSettings();
   try { var saved = localStorage.getItem('sd_pay_settings_'+s.id); if(saved) cfg = Object.assign(cfg, JSON.parse(saved)); } catch(e){}
 
+  // Debug: log what we have
+  console.log('Staff ID:', s.id, 'type:', typeof s.id);
+  console.log('monthShiftsStore keys:', Object.keys(monthShiftsStore));
+  console.log('shifts keys:', Object.keys(shifts));
+  var testKey = Object.keys(monthShiftsStore)[0];
+  if (testKey) console.log('First monthStore entry:', testKey, JSON.stringify(monthShiftsStore[testKey]).substring(0,200));
   var data = collectShifts(s.id, range);
+  console.log('Hours found:', data.hours, 'Days:', data.days);
   var wage = s.hourlyWage || s.rate || 0;
   var bruttoLøn = Math.round(data.hours * wage);
 

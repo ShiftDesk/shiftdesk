@@ -1379,7 +1379,7 @@ function nextMonth(){monthDate=new Date(monthDate.getFullYear(),monthDate.getMon
 function toggleExport(){document.getElementById('exportWrap').classList.toggle('open');}
 function doPrint(){document.getElementById('exportWrap').classList.remove('open');window.print();}
 function doEmail(){document.getElementById('exportWrap').classList.remove('open');var ws=fmtS(weekStart)+' \u2013 '+fmtS(addDays(weekStart,6));var body='SCHEDULE: '+ws+'\n'+'='.repeat(38)+'\n\n';ROLE_ORDER.forEach(function(role){var mem=staff.filter(function(s){return s.role===role;});if(!mem.length)return;body+='[ '+role.toUpperCase()+' ]\n';mem.forEach(function(s){var sd=shifts[s.id]||{},lines=[];for(var d=0;d<7;d++){(sd[d]||[]).forEach(function(sh){var bm=brkMin(sh);lines.push('  '+DN[d]+': '+sh.start+'\u2013'+sh.end+(bm?' (break '+bm+'m)':'')+(sh.note?' \u00b7 '+sh.note:''));});}if(lines.length)body+=s.name+' ('+staffH(s.id)+'h):\n'+lines.join('\n')+'\n';});body+='\n';});window.location.href='mailto:?subject='+encodeURIComponent('Schedule '+ws)+'&body='+encodeURIComponent(body);}
-function doPublish(){var b=document.getElementById('pubBtn');b.textContent='\u2713 Published!';b.style.background='var(--green)';setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule published!');}
+function doPublish(){var b=document.getElementById('pubBtn');b.disabled=true;b.textContent='Saving…';saveDataCloud().then(function(){b.textContent='✓ Published!';b.style.background='var(--green)';b.disabled=false;setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule saved to cloud ✓');}).catch(function(){b.textContent='Publish';b.style.background='';b.disabled=false;toast('Saved locally ✓');});}
 document.addEventListener('click',function(e){var ew=document.getElementById('exportWrap');if(ew&&!ew.contains(e.target))ew.classList.remove('open');var tw=document.getElementById('toolsWrap');if(tw&&!tw.contains(e.target))tw.classList.remove('open');});
 
 // ── TOOLS ────────────────────────────────────────────────────────────────
@@ -2017,10 +2017,10 @@ async function saveMyNewPassword() {
 // ── PAYROLL SYSTEM (external addon page) ────────────────────────────────
 function openPayrollSystem(){
   document.getElementById('toolsWrap').classList.remove('open');
-  // Save current data so payroll.html can read it immediately
-  saveData();
-  // Open payroll.html in a new tab (same folder)
-  window.open('payroll.html','_blank');
+  // Save to cloud first so loen.html can read it
+  saveDataCloud().finally(function(){
+    window.open('loen.html','_blank');
+  });
 }
 function openBudgetSystem(){
   document.getElementById('toolsWrap').classList.remove('open');
@@ -2213,7 +2213,7 @@ async function showMyFingerprint(){var fp=await getBrowserFingerprint(),k=toKey(
 function checkDaysLeft(){var a=localStorage.getItem(atob('c2hpZnRkZXNrX2xpY19kYXRl'));if(!a){console.log('No activation date.');return;}var days=LICENSE_DAYS-Math.floor((Date.now()-parseInt(a))/86400000);console.log('%c Days remaining: '+days,'background:#1b6e40;color:#fff;padding:6px;');return days;}
 
 // ── PUBLISH ──────────────────────────────────────────────────────────────
-function doPublish(){var b=document.getElementById('pubBtn');b.textContent='\u2713 Published!';b.style.background='var(--green)';setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule published!');}
+function doPublish(){var b=document.getElementById('pubBtn');b.disabled=true;b.textContent='Saving…';saveDataCloud().then(function(){b.textContent='✓ Published!';b.style.background='var(--green)';b.disabled=false;setTimeout(function(){b.textContent='Publish';b.style.background='';},2400);toast('Schedule saved to cloud ✓');}).catch(function(){b.textContent='Publish';b.style.background='';b.disabled=false;toast('Saved locally ✓');});}
 
 // ── PERSISTENCE ──────────────────────────────────────────────────────────
 function saveData(){

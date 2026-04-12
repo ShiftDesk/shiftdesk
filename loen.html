@@ -465,7 +465,7 @@ function renderSidebar() {
     div.className = 'staff-card' + (s.id === selectedStaffId ? ' active' : '');
     div.onclick = function(){ selectedStaffId = s.id; renderSidebar(); renderPayslip(); };
     var r = rc(s.role);
-    var wage = (s.hourlyWage||0);
+    var wage = s.hourlyWage || s.rate || 0;
     div.innerHTML = '<div class="av" style="background:'+r.bg+';color:'+r.color+';">'+ini(s.name)+'</div>'
       + '<div><div class="sc-name">'+s.name+'</div><div class="sc-role">'+(s.role||'')+'</div></div>'
       + '<div class="sc-sal">'+(wage?Math.round(wage)+' kr/t':'')+'</div>';
@@ -478,46 +478,45 @@ function getDefaultSettings() {
   return { amBidrag:8, pension:4, pensionFirma:8, atp:99, personfradrag:48900, trækprocent:38, kosttillæg:0, drikkepenge:0, kostfradrag:0 };
 }
 
+function getMonday(d){var c=new Date(d),day=c.getDay(),diff=c.getDate()-day+(day===0?-6:1);c.setDate(diff);c.setHours(0,0,0,0);return c;}
+function minsFromHHMM(t){if(!t)return 0;var p=t.split(':').map(Number);return p[0]*60+(p[1]||0);}
+
 function collectShifts(staffId, range) {
-  var hours = 0, days = 0;
-  var cur = new Date(range.first);
-  while (cur <= range.last) {
-    var key = staffId; // shifts keyed by staffId→date
-    // Try monthShiftsStore first
-    var dateStr = cur.getFullYear()+'-'+(cur.getMonth()+1)+'-'+cur.getDate();
-    // Walk all shift sources
-    Object.values(shifts).forEach(function(dayShifts){
-      if (!Array.isArray(dayShifts)) return;
-      dayShifts.forEach(function(sh){
-        if (sh.staffId !== staffId) return;
-        var sd = sh.date ? new Date(sh.date) : null;
-        if (!sd) return;
-        if (sd >= range.first && sd <= range.last) {
-          var h = workedH(sh);
-          if (h > 0) { hours += h; days++; }
+  // Exact same logic as payroll.html getShiftsForPeriod
+  var totalH = 0, daysSet = {};
+  for (var d = new Date(range.first); d <= range.last; d.setDate(d.getDate()+1)) {
+    var dayIdx = (d.getDay()+6)%7;
+    var dateStr = d.toISOString().slice(0,10);
+    var ds;
+    if (range.isWeek) {
+      ds = (shifts[staffId] || {})[dayIdx] || [];
+    } else {
+      var monKey = getMonday(new Date(d)).toISOString().slice(0,10);
+      var stored = monthShiftsStore[staffId] && monthShiftsStore[staffId][monKey];
+      ds = (stored && stored[dayIdx]) || [];
+    }
+    var ce = clockHistory[staffId] && clockHistory[staffId][dateStr];
+    if (ds.length === 0 && !ce) continue;
+    if (ds.length > 0) {
+      ds.forEach(function(sh) {
+        var ah = 0;
+        if (ce && ce.inTime && ce.outTime && ce.approved) {
+          var rawH = Math.max(0,(minsFromHHMM(ce.outTime)-minsFromHHMM(ce.inTime))/60);
+          ah = Math.max(0, rawH - brkMin(sh)/60);
+          totalH += ah;
+          daysSet[dateStr] = true;
+        } else {
+          // Use scheduled hours if no clock record
+          var sh2 = workedH(sh);
+          if (sh2 > 0) { totalH += sh2; daysSet[dateStr] = true; }
         }
       });
-    });
-    // Also try monthShiftsStore
-    Object.values(monthShiftsStore).forEach(function(monthData){
-      if (!monthData || !monthData.shifts) return;
-      Object.values(monthData.shifts).forEach(function(dayArr){
-        if (!Array.isArray(dayArr)) return;
-        dayArr.forEach(function(sh){
-          if (sh.staffId !== staffId) return;
-          var sd = sh.date ? new Date(sh.date) : null;
-          if (!sd) return;
-          if (sd >= range.first && sd <= range.last) {
-            var h = workedH(sh);
-            if (h > 0) { hours += h; days++; }
-          }
-        });
-      });
-    });
-    cur = addDays(cur, 1);
+    } else if (ce && ce.inTime && ce.outTime) {
+      var ah2 = Math.max(0,(minsFromHHMM(ce.outTime)-minsFromHHMM(ce.inTime))/60);
+      totalH += ah2; daysSet[dateStr] = true;
+    }
   }
-  // Deduplicate (shifts may appear in both stores)
-  return { hours: Math.round(hours * 10) / 10, days: days };
+  return { hours: Math.round(totalH * 10) / 10, days: Object.keys(daysSet).length };
 }
 
 function renderPayslip() {
@@ -530,7 +529,7 @@ function renderPayslip() {
   try { var saved = localStorage.getItem('sd_pay_settings_'+s.id); if(saved) cfg = Object.assign(cfg, JSON.parse(saved)); } catch(e){}
 
   var data = collectShifts(s.id, range);
-  var wage = s.hourlyWage || 0;
+  var wage = s.hourlyWage || s.rate || 0;
   var bruttoLøn = Math.round(data.hours * wage);
 
   // Danish payroll calc

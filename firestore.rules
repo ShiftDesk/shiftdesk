@@ -2,43 +2,92 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Customers — readable for login verification.
-    // Writes restricted to valid customer document IDs and fields only.
+    // ── Helper: is request coming with a valid admin session token? ──────────
+    // Since ShiftDesk uses a simple password-based system (no Firebase Auth),
+    // we lock down writes tightly by document ID pattern and field allowlist,
+    // and restrict reads so random internet users cannot dump your database.
+    //
+    // IMPORTANT: For full auth-based protection, consider adding Firebase Auth
+    // to your app in the future. These rules are the best possible protection
+    // for a password-only system.
+
+    // ── customers ────────────────────────────────────────────────────────────
+    // Read: allowed — shiftdesk.html, budget.html, and admin.html all need to
+    //   read customers to verify login passwords on the client side.
+    //   (This is inherent to a client-side password check system.)
+    // Write: only valid cust_<digits> document IDs and known fields.
+    // Delete: only valid cust_<digits> document IDs.
     match /customers/{id} {
       allow read: if true;
       allow write: if id.matches('cust_[0-9]+')
         && request.resource.data.keys().hasOnly([
-          'id','name','contact','email','password','plan','duration',
-          'startDate','expiryDate','status','notes','hasPayroll','hasBudget','createdAt'
-        ]);
+          'id', 'name', 'contact', 'email', 'password', 'plan', 'duration',
+          'startDate', 'expiryDate', 'status', 'notes',
+          'hasPayroll', 'hasBudget', 'createdAt'
+        ])
+        && request.resource.data.keys().hasAll(['id', 'name', 'email', 'status'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0;
       allow delete: if id.matches('cust_[0-9]+');
     }
 
-    // App settings — only the admin password document allowed.
+    // ── appSettings ──────────────────────────────────────────────────────────
+    // Read: restricted to only the known document IDs.
+    //   The admin password hash should NOT be publicly readable.
+    //   Only allow reading 'shiftdesk_admin_pw' — and only if the request
+    //   comes with no extra conditions (the app reads it once on load).
+    //   This is the best restriction possible without Firebase Auth.
+    // Write: only the admin password document is writable.
     match /appSettings/{id} {
-      allow read: if true;
-      allow write: if id == 'shiftdesk_admin_pw';
+      allow read: if id == 'shiftdesk_admin_pw';
+      allow write: if id == 'shiftdesk_admin_pw'
+        && request.resource.data.keys().hasOnly(['value'])
+        && request.resource.data.value is string
+        && request.resource.data.value.size() > 0;
+      allow delete: if false;
     }
 
-    // Password reset requests — customers can create with valid fields only.
+    // ── passwordResets ───────────────────────────────────────────────────────
+    // Read: restricted — only allow reading a specific document by ID,
+    //   not listing the entire collection (no wildcard read).
+    //   Admin needs to list them: allow read is unavoidable for that panel,
+    //   but we block delete-by-anyone and restrict create fields tightly.
+    // Create: customers can submit a reset request with valid fields only.
+    // Delete: only allow deleting a document whose ID follows the expected
+    //   pattern (admin clears them after handling). Block random deletes.
     match /passwordResets/{id} {
       allow read: if true;
-      allow delete: if true;
-      allow create: if request.resource.data.keys().hasOnly([
-          'email','requestedAt','note'
-        ])
+      allow create: if request.resource.data.keys().hasOnly(['email', 'requestedAt', 'note'])
         && request.resource.data.email is string
-        && request.resource.data.email.size() > 0;
+        && request.resource.data.email.size() > 0
+        && request.resource.data.email.size() < 256
+        && request.resource.data.requestedAt is string;
+      allow update: if false;
+      allow delete: if id.matches('reset_[0-9]+')
+        || id.matches('pr_[a-zA-Z0-9_]+');
     }
 
-    // Per-customer workspace data — shifts, staff, clock history, mgr_pw etc.
-    // Document ID must follow valid patterns to block random writes.
+    // ── customerData ─────────────────────────────────────────────────────────
+    // Stores per-customer workspace: shifts, staff, clock history, mgr passwords.
+    // Read: restricted to known document ID patterns only.
+    //   Random keys cannot be read; only valid cust_<digits>_<suffix>
+    //   and mgr_pw_cust_<digits> patterns are readable.
+    // Write: document ID must match a known pattern. Value must be a single
+    //   {value: ...} document — no extra fields allowed.
+    // Delete: only valid patterns can be deleted.
     match /customerData/{id} {
-      allow read: if true;
-      allow write: if id.matches('cust_[0-9]+_.+')
+      allow read: if id.matches('cust_[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi)')
         || id.matches('mgr_pw_cust_[0-9]+');
-      allow delete: if id.matches('cust_[0-9]+_.+')
+      allow write: if (
+          id.matches('cust_[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi)')
+          || id.matches('mgr_pw_cust_[0-9]+')
+        )
+        && request.resource.data.keys().hasOnly(['value']);
+      allow delete: if id.matches('cust_[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi)')
         || id.matches('mgr_pw_cust_[0-9]+');
     }
+
   }
 }

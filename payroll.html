@@ -188,6 +188,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="fg"><label class="fl">Gik hjem</label><input class="fc" type="time" id="hm_out"></div>
     </div>
     <div class="fg"><label class="fl">Note (valgfri)</label><input class="fc" type="text" id="hm_note" placeholder="f.eks. Admin godkendt"></div>
+    <div class="fg">
+      <label class="fl">Pause (minutter) — trækkes fra betalt tid</label>
+      <input class="fc" type="number" id="hm_break" min="0" step="5" value="0" placeholder="0">
+    </div>
     <div class="fg" style="background:var(--green-lt);border:1.5px solid var(--green);border-radius:9px;padding:10px 13px;">
       <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--green);">
         <input type="checkbox" id="hm_approved" checked style="width:16px;height:16px;accent-color:var(--green);">
@@ -320,10 +324,12 @@ try {
 'use strict';
 
 // ── State ────────────────────────────────────────────────────────────────────
-var _cust       = null;   // logged-in customer object
-var _staff      = [];     // [{id,name,role,rate,...}]
-var _clock      = {};     // clock history from shiftdesk
-var _extra      = {};     // admin-added/edited entries
+var _cust       = null;
+var _staff      = [];
+var _clock      = {};
+var _extra      = {};
+var _monthStore = {}; // {staffId: {weekKey: {dayIdx: [{start,end,breakStart,breakEnd}]}}}
+var _shifts     = {}; // current week shifts as fallback
 var _selMonth   = new Date().getMonth();
 var _selYear    = new Date().getFullYear();
 var _psStaffId  = null;   // which staff payslip is open for
@@ -469,6 +475,25 @@ async function loadAllData() {
       _staff=_staff.map(s=>{ var r=rv[String(s.id)]; return r!==undefined?Object.assign({},s,{rate:r}):s; });
     }
 
+    // Month shift store — needed to look up break times per date
+    // Structure: {staffId: {weekMondayKey: {dayIdx: [{start,end,breakStart,breakEnd}]}}}
+    var monthKey='cust_'+cid+'_monthStore';
+    var mv=await window.fb.get(monthKey);
+    _monthStore=(mv&&typeof mv==='object'&&!Array.isArray(mv))?mv:{};
+
+    // Current week shifts as additional fallback
+    var shiftsKey='cust_'+cid+'_shifts';
+    var shv=await window.fb.get(shiftsKey);
+    _shifts=(shv&&typeof shv==='object'&&!Array.isArray(shv))?shv:{};
+
+    // monthStore — {staffId: {weekKey: {dayIdx: [shifts]}}} — for break lookup
+    var msv=await window.fb.get('cust_'+cid+'_monthStore');
+    _monthStore=(msv&&typeof msv==='object'&&!Array.isArray(msv))?msv:{};
+
+    // shifts (current week) — fallback for break lookup
+    var shv=await window.fb.get('cust_'+cid+'_shifts');
+    _shifts=(shv&&typeof shv==='object'&&!Array.isArray(shv))?shv:{};
+
   } catch(err) { toast('Fejl: '+err.message); }
 
   document.getElementById('loadingState').style.display='none';
@@ -478,6 +503,7 @@ async function loadAllData() {
 // ── Get entries for period ────────────────────────────────────────────────────
 function getEntries(sid) {
   var entries=[], sidStr=String(sid);
+
   // Clock history — try both int and string keys
   var ch=_clock[sid]||_clock[sidStr]||{};
   Object.keys(ch).forEach(ds=>{
@@ -485,8 +511,14 @@ function getEntries(sid) {
     if(!e||!e.inTime||!e.outTime) return;
     var d=new Date(ds+'T12:00:00');
     if(isNaN(d)||d.getMonth()!==_selMonth||d.getFullYear()!==_selYear) return;
-    entries.push({dateStr:ds,inTime:e.inTime,outTime:e.outTime,approved:!!e.approved,note:e.note||'',source:'shiftdesk'});
+    var breakMins = getBreakMins(sid, ds);
+    entries.push({
+      dateStr:ds, inTime:e.inTime, outTime:e.outTime,
+      approved:!!e.approved, note:e.note||'',
+      breakMins:breakMins, source:'shiftdesk'
+    });
   });
+
   // Extra admin entries
   var ex=_extra[sidStr]||{};
   Object.keys(ex).forEach(ds=>{
@@ -494,18 +526,76 @@ function getEntries(sid) {
     if(!e||!e.inTime||!e.outTime) return;
     var d=new Date(ds+'T12:00:00');
     if(isNaN(d)||d.getMonth()!==_selMonth||d.getFullYear()!==_selYear) return;
+    var breakMins = e.breakMins !== undefined ? e.breakMins : getBreakMins(sid, ds);
     var idx=entries.findIndex(x=>x.dateStr===ds);
-    if(idx>=0) entries[idx]=Object.assign({},entries[idx],e,{source:'admin'});
-    else entries.push(Object.assign({dateStr:ds,source:'admin'},e));
+    var merged = Object.assign({dateStr:ds, source:'admin', breakMins:breakMins}, e);
+    if(idx>=0) entries[idx]=Object.assign({},entries[idx],merged);
+    else entries.push(merged);
   });
+
   return entries.sort((a,b)=>a.dateStr.localeCompare(b.dateStr));
 }
 
+// ── Time helpers ─────────────────────────────────────────────────────────────
+function timeToMins(t) {
+  if (!t) return 0;
+  var p = t.split(':').map(Number);
+  return p[0] * 60 + (p[1] || 0);
+}
+
+function getMonday(dateStr) {
+  var dt = new Date(dateStr + 'T12:00:00');
+  var day = dt.getDay();
+  var diff = day === 0 ? -6 : 1 - day;
+  dt.setDate(dt.getDate() + diff);
+  return dt.toISOString().slice(0, 10);
+}
+
+// Look up break minutes from the shift schedule for a given staff + date.
+// monthStore: {staffId: {weekMondayKey: {dayIdx: [{start,end,breakStart,breakEnd}]}}}
+// dayIdx: Mon=0 ... Sun=6 (shiftdesk.html convention)
+function getBreakMins(staffId, dateStr, inTime) {
+  var sidStr = String(staffId);
+  var dt     = new Date(dateStr + 'T12:00:00');
+  var dayOfWeek = dt.getDay();                  // JS: 0=Sun, 1=Mon...
+  var dayIdx    = (dayOfWeek + 6) % 7;          // shiftdesk: Mon=0...Sun=6
+  var weekKey   = getMonday(dateStr);
+
+  // Try monthStore (historical + current weeks)
+  var staffStore = _monthStore[staffId] || _monthStore[sidStr] || {};
+  var weekShifts = staffStore[weekKey] || {};
+  var dayShifts  = weekShifts[dayIdx] || weekShifts[String(dayIdx)] || [];
+
+  // Fallback: current week shifts
+  if (!dayShifts.length) {
+    var ss = _shifts[staffId] || _shifts[sidStr] || {};
+    dayShifts = ss[dayIdx] || ss[String(dayIdx)] || [];
+  }
+
+  if (!dayShifts.length) return 0;
+
+  // Find shift closest to the clock-in time
+  var best = null, bestDiff = Infinity;
+  dayShifts.forEach(function(sh) {
+    if (!sh.breakStart || !sh.breakEnd) return;
+    var diff = Math.abs(timeToMins(sh.start || '00:00') - timeToMins(inTime || '00:00'));
+    if (diff < bestDiff) { bestDiff = diff; best = sh; }
+  });
+
+  if (!best || !best.breakStart || !best.breakEnd) return 0;
+  return Math.max(0, timeToMins(best.breakEnd) - timeToMins(best.breakStart));
+}
+
 // ── Calculate payroll ─────────────────────────────────────────────────────────
-function calcMins(inT,outT) {
-  if(!inT||!outT) return 0;
-  var [ih,im]=inT.split(':').map(Number), [oh,om]=outT.split(':').map(Number);
-  return Math.max(0,(oh*60+om)-(ih*60+im));
+// breakMins is subtracted from worked time — unpaid break
+function calcMins(inT, outT, breakMins) {
+  if (!inT || !outT) return 0;
+  var start = timeToMins(inT);
+  var end   = timeToMins(outT);
+  if (end < start) end += 24 * 60; // overnight
+  var worked = end - start;
+  if (breakMins > 0) worked = Math.max(0, worked - breakMins);
+  return worked;
 }
 
 function calcPay(s, entries, overrides) {
@@ -522,7 +612,11 @@ function calcPay(s, entries, overrides) {
   var beskMax       = DEF.beskfradrag_max;
 
   var approved  = entries.filter(e=>e.approved);
-  var totalMins = approved.reduce((sum,e)=>sum+calcMins(e.inTime,e.outTime),0);
+  var totalMins = approved.reduce((sum,e)=>{
+    // calcMins(inT, outT, breakMins) already subtracts unpaid break
+    return sum + calcMins(e.inTime, e.outTime, e.breakMins||0);
+  }, 0);
+  var totalBreakMins = approved.reduce((sum,e)=>sum+(e.breakMins||0), 0);
   var totalHours= totalMins/60;
 
   // Bruttoløn = timeløn + drikkepenge (A-indkomst) + måltidsgodtgørelse
@@ -558,7 +652,7 @@ function calcPay(s, entries, overrides) {
   var nettoLon = amGrundlag - amBidrag - atpDeduct - pensionEDkk - aSkat;
 
   return {
-    totalHours, totalMins, rate, timelon, meal, drikkepenge,
+    totalHours, totalMins, totalBreakMins, rate, timelon, meal, drikkepenge,
     bruttoLon, feriePenge, amGrundlag, amBidrag,
     atp:atpDeduct, pensionEDkk, pensionCDkk,
     personfradrag, beskFradrag, aSkGrundlag, aSkat, nettoLon,
@@ -602,10 +696,18 @@ function renderAll() {
     if(!entries.length) {
       html+='<div class="no-hours">Ingen registrerede timer denne periode</div>';
     } else {
-      html+='<table class="hours-table"><thead><tr><th>Dato</th><th>Ind</th><th>Ud</th><th>Timer</th><th>Status</th></tr></thead><tbody>';
+      html+='<table class="hours-table"><thead><tr><th>Dato</th><th>Ind</th><th>Ud</th><th>Pause</th><th>Betalt</th><th>Status</th></tr></thead><tbody>';
       entries.forEach(e=>{
-        var hrs=(calcMins(e.inTime,e.outTime)/60).toFixed(1);
-        html+='<tr><td>'+fmtDateShort(e.dateStr)+'</td><td style="font-family:\'DM Mono\',monospace;">'+e.inTime+'</td><td style="font-family:\'DM Mono\',monospace;">'+e.outTime+'</td><td style="font-family:\'DM Mono\',monospace;font-weight:600;">'+hrs+'t</td><td><span class="'+(e.approved?'badge-ok':'badge-no')+'">'+(e.approved?'✓ Godkendt':'Afventer')+'</span></td></tr>';
+        var brk  = e.breakMins||0;
+        var paid = (calcMins(e.inTime,e.outTime,brk)/60).toFixed(1);
+        html+='<tr>';
+        html+='<td>'+fmtDateShort(e.dateStr)+'</td>';
+        html+='<td style="font-family:\'DM Mono\',monospace;">'+e.inTime+'</td>';
+        html+='<td style="font-family:\'DM Mono\',monospace;">'+e.outTime+'</td>';
+        html+='<td style="font-family:\'DM Mono\',monospace;color:var(--muted);">'+(brk>0?brk+'m':'—')+'</td>';
+        html+='<td style="font-family:\'DM Mono\',monospace;font-weight:600;color:var(--green);">'+paid+'t</td>';
+        html+='<td><span class="'+(e.approved?'badge-ok':'badge-no')+'">'+(e.approved?'✓':'Afv.')+'</span></td>';
+        html+='</tr>';
       });
       html+='</tbody></table>';
     }
@@ -702,6 +804,7 @@ function openAddHours(preId) {
   document.getElementById('hm_in').value='';
   document.getElementById('hm_out').value='';
   document.getElementById('hm_note').value='';
+  document.getElementById('hm_break').value='0';
   document.getElementById('hm_approved').checked=true;
   document.getElementById('hmErr').style.display='none';
   document.getElementById('hoursModal').classList.add('open');
@@ -714,6 +817,7 @@ async function saveHours() {
   var inTime=document.getElementById('hm_in').value;
   var outTime=document.getElementById('hm_out').value;
   var note=document.getElementById('hm_note').value.trim();
+  var breakMins=parseInt(document.getElementById('hm_break').value)||0;
   var approved=document.getElementById('hm_approved').checked;
   var errEl=document.getElementById('hmErr');
   errEl.style.display='none';
@@ -726,7 +830,7 @@ async function saveHours() {
   try {
     var sidStr=String(sid);
     if(!_extra[sidStr]) _extra[sidStr]={};
-    _extra[sidStr][date]={inTime,outTime,approved,note,dateStr:date,source:'admin'};
+    _extra[sidStr][date]={inTime,outTime,approved,note,breakMins,dateStr:date,source:'admin'};
     await window.fb.set('cust_'+_cust.id+'_payrollExtra', _extra);
     document.getElementById('hoursModal').classList.remove('open');
     renderAll();
@@ -785,7 +889,9 @@ function renderPayslip() {
   html+='<div class="ps-info-row"><span>Stilling</span><span>'+esc(s.role||'—')+'</span></div>';
   html+='<div class="ps-info-row"><span>Timelønssats</span><span>'+fmt(pay.rate)+' DKK/t</span></div>';
   html+='<div class="ps-info-row"><span>Godkendte dage</span><span>'+pay.approvedCount+'</span></div>';
-  html+='<div class="ps-info-row"><span>Godkendte timer</span><span>'+pay.totalHours.toFixed(2)+'</span></div>';
+  html+='<div class="ps-info-row"><span>Total mødetid</span><span>'+(pay.totalHours+(pay.totalBreakMins/60)).toFixed(2)+' t</span></div>';
+  html+='<div class="ps-info-row"><span>Heraf pause (ikke betalt)</span><span>'+(pay.totalBreakMins||0)+' min</span></div>';
+  html+='<div class="ps-info-row" style="font-weight:600;color:var(--green);"><span>Betalt tid</span><span>'+pay.totalHours.toFixed(2)+' t</span></div>';
   html+='</div>';
   html+='<div class="ps-info-box"><div class="ps-info-title">Lønperiode</div>';
   html+='<div class="ps-info-row"><span>Periode</span><span>'+month+'</span></div>';
@@ -798,12 +904,15 @@ function renderPayslip() {
   // Hours table
   if(pay.approved.length) {
     html+='<div class="ps-info-title" style="margin-bottom:10px;">Registrerede timer</div>';
-    html+='<table class="ps-table"><thead><tr><th>Dato</th><th>Mødte ind</th><th>Gik hjem</th><th>Timer</th></tr></thead><tbody>';
+    html+='<table class="ps-table"><thead><tr><th>Dato</th><th>Mødte ind</th><th>Gik hjem</th><th>Pause</th><th>Betalt tid</th></tr></thead><tbody>';
     pay.approved.forEach(e=>{
-      var hrs=(calcMins(e.inTime,e.outTime)/60).toFixed(2);
-      html+='<tr><td>'+fmtDate(e.dateStr)+'</td><td>'+e.inTime+'</td><td>'+e.outTime+'</td><td>'+hrs+'</td></tr>';
+      var brk  = e.breakMins||0;
+      var paid = (calcMins(e.inTime,e.outTime,brk)/60).toFixed(2);
+      html+='<tr><td>'+fmtDate(e.dateStr)+'</td><td>'+e.inTime+'</td><td>'+e.outTime+'</td>';
+      html+='<td style="color:var(--muted);">'+(brk>0?brk+' min':'—')+'</td>';
+      html+='<td style="color:var(--green);font-weight:600;">'+paid+'</td></tr>';
     });
-    html+='<tr class="sub"><td colspan="3">Total godkendte timer</td><td>'+pay.totalHours.toFixed(2)+'</td></tr>';
+    html+='<tr class="sub"><td colspan="4">Total betalt tid</td><td>'+pay.totalHours.toFixed(2)+'</td></tr>';
     html+='</tbody></table>';
   }
 

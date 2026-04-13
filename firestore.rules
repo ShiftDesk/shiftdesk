@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── customers ─────────────────────────────────────────────────────────
+    // Read: open — all pages verify login passwords client-side.
+    // Write: document ID must be cust_<digits>, and must include the
+    //        four core fields so garbage documents can't be created.
+    // Delete: only valid cust_<digits> IDs.
+    match /customers/{id} {
+      allow read: if true;
+      allow write: if id.matches('cust_[0-9]+')
+        && request.resource.data.keys().hasAll(['id', 'name', 'email', 'status']);
+      allow delete: if id.matches('cust_[0-9]+');
+    }
+
+    // ── appSettings ───────────────────────────────────────────────────────
+    // Only the admin password document — readable and writable by ID only.
+    match /appSettings/{id} {
+      allow read:   if id == 'shiftdesk_admin_pw';
+      allow write:  if id == 'shiftdesk_admin_pw';
+      allow delete: if false;
+    }
+
+    // ── passwordResets ────────────────────────────────────────────────────
+    // Customers can create reset requests (fields validated below).
+    // Anyone can read and delete — admin panel needs both.
+    match /passwordResets/{id} {
+      allow read:   if true;
+      allow delete: if true;
+      allow create: if request.resource.data.keys().hasAll(['email', 'requestedAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.email.size() < 256;
+      allow update: if false;
+    }
+
+    // ── customerData ──────────────────────────────────────────────────────
+    // Per-customer workspace: shifts, staff, clock history, mgr passwords.
+    //
+    // Key patterns used in production:
+    //   cust_cust_<timestamp>_<suffix>   (shiftdesk.html — double prefix)
+    //   mgr_pw_cust_<timestamp>          (admin.html)
+    //
+    // Both single and double prefix variants are accepted for safety.
+    match /customerData/{id} {
+      allow read: if
+        id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile)')
+        || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+
+      allow write: if
+        id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile)')
+        || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+
+      allow delete: if
+        id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile)')
+        || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+    }
+
+  }
+}

@@ -91,9 +91,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .empty-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
 
 /* ── MODALS ─────────────────────────────────────────────────────────────── */
-.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:center;justify-content:center;}
+.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px;}
 .overlay.open{display:flex;}
-.modal{background:#fff;border-radius:16px;padding:28px;width:440px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto;}
+.modal{background:#fff;border-radius:16px;padding:24px;width:440px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;margin:auto;}
 @keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:20px;}
 .fg{margin-bottom:14px;}
@@ -346,6 +346,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
           <input type="checkbox" id="f_hasBudget" style="width:18px;height:18px;accent-color:#1b4896;cursor:pointer;">
           <span style="font-size:.75rem;font-weight:600;color:#1b4896;">Enabled</span>
+        </label>
+      </div>
+    </div>
+    <div class="fg" style="background:#f5f0ff;border:1.5px solid #6b21a8;border-radius:10px;padding:12px 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:.78rem;font-weight:700;color:#6b21a8;margin-bottom:2px;">💰 Lønsystem Add-on</div>
+          <div style="font-size:.68rem;color:#7c3aed;">Giver adgang til lønsystem med timeregistrering og lønsedler</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="f_hasPayroll" style="width:18px;height:18px;accent-color:#6b21a8;cursor:pointer;">
+          <span style="font-size:.75rem;font-weight:600;color:#6b21a8;">Aktiveret</span>
         </label>
       </div>
     </div>
@@ -663,7 +675,8 @@ function renderTable() {
     var planLabel  = c.plan === 'pro' ? 'Pro' : 'Starter';
     var planClass  = c.plan === 'pro' ? 'plan-pro' : 'plan-starter';
     var budgetTag  = c.hasBudget ? '<span class="budget-tag">📊 Budget</span>' : '';
-    var planCell   = '<span class="plan-badge ' + planClass + '">' + planLabel + '</span>' + budgetTag;
+    var payrollTag = c.hasPayroll ? '<span class="budget-tag" style="background:#f5f0ff;color:#6b21a8;border-color:#c4b5fd;">💰 Løn</span>' : '';
+    var planCell   = '<span class="plan-badge ' + planClass + '">' + planLabel + '</span>' + budgetTag + payrollTag;
 
     // Subscription cell
     var subCell = '';
@@ -735,6 +748,7 @@ function openAdd() {
   document.getElementById('f_status').value             = 'active';
   document.getElementById('f_notes').value              = '';
   document.getElementById('f_hasBudget').checked        = false;
+  document.getElementById('f_hasPayroll').checked       = false;
   document.getElementById('customerModal').classList.add('open');
   setTimeout(function(){ document.getElementById('f_name').focus(); }, 100);
 }
@@ -758,6 +772,7 @@ function openEdit(id) {
   document.getElementById('f_status').value             = c.status   || 'active';
   document.getElementById('f_notes').value              = c.notes    || '';
   document.getElementById('f_hasBudget').checked        = c.hasBudget === true;
+  document.getElementById('f_hasPayroll').checked       = c.hasPayroll === true;
   document.getElementById('customerModal').classList.add('open');
 }
 
@@ -777,7 +792,8 @@ async function saveCustomer() {
   var startDate = document.getElementById('f_startdate').value || today();
   var status    = document.getElementById('f_status').value;
   var notes     = document.getElementById('f_notes').value.trim();
-  var hasBudget = document.getElementById('f_hasBudget').checked;
+  var hasBudget  = document.getElementById('f_hasBudget').checked;
+  var hasPayroll = document.getElementById('f_hasPayroll').checked;
   var expiryDate= calcExpiry(startDate, duration);
   var errEl     = document.getElementById('formErr');
   errEl.style.display = 'none';
@@ -814,7 +830,7 @@ async function saveCustomer() {
         customers[idx] = Object.assign({}, customers[idx], {
           name:name, contact:contact, email:email, password:finalPw,
           plan:plan, duration:duration, startDate:startDate,
-          expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget
+          expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, hasPayroll:hasPayroll
         });
         if (window._fbReady && window.fb) {
           await window.fb.saveCustomer(customers[idx]);
@@ -830,7 +846,7 @@ async function saveCustomer() {
         name:name, contact:contact, email:email, password:pwHash,
         plan:plan, duration:duration, startDate:startDate,
         expiryDate:expiryDate, status:status, notes:notes,
-        hasBudget:hasBudget, createdAt:new Date().toISOString()
+        hasBudget:hasBudget, hasPayroll:hasPayroll, createdAt:new Date().toISOString()
       };
       customers.push(newCust);
       if (window._fbReady && window.fb) {

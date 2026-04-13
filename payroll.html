@@ -536,11 +536,13 @@ async function loadAllData() {
     var shv=await window.fb.get('cust_'+cid+'_shifts');
     _shifts=(shv&&typeof shv==='object'&&!Array.isArray(shv))?shv:{};
 
-    // Payroll profile — company info + per-employee CPR/address/tel
-    var pv=await window.fb.get('cust_'+cid+'_payrollProfile');
-    _profile=(pv&&typeof pv==='object'&&!Array.isArray(pv))?pv:{company:{},employees:{}};
-    if(!_profile.company) _profile.company={};
-    if(!_profile.employees) _profile.employees={};
+    // Payroll profile — company + per-employee info
+    try {
+      var pv = await window.fb.get('cust_'+cid+'_payrollProfile');
+      _profile = (pv && typeof pv==='object' && !Array.isArray(pv)) ? pv : {};
+    } catch(e) { _profile = {}; }
+    if(!_profile.company)   _profile.company   = {};
+    if(!_profile.employees) _profile.employees = {};
 
   } catch(err) { toast('Fejl: '+err.message); }
 
@@ -1166,43 +1168,71 @@ document.getElementById('psDownloadBtn').addEventListener('click',()=>{
 // ── Refresh ──────────────────────────────────────────────────────────────────
 // ── Settings modal ────────────────────────────────────────────────────────────
 document.getElementById('settingsBtn').addEventListener('click', openSettings);
-document.getElementById('settingsCancelBtn').addEventListener('click', ()=>document.getElementById('settingsModal').classList.remove('open'));
-document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target===document.getElementById('settingsModal')) document.getElementById('settingsModal').classList.remove('open'); });
+document.getElementById('settingsCancelBtn').addEventListener('click', closeSettings);
+document.getElementById('settingsModal').addEventListener('click', function(e){ if(e.target===this) closeSettings(); });
 document.getElementById('settingsSaveBtn').addEventListener('click', saveCompany);
 document.getElementById('empSaveBtn').addEventListener('click', saveEmployee);
 document.getElementById('emp_sel').addEventListener('change', loadEmployeeFields);
 
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
 function openSettings() {
-  // Fill company fields
-  var co = _profile.company||{};
-  document.getElementById('co_name').value    = co.name    || _cust.name || '';
-  document.getElementById('co_cvr').value     = co.cvr     || '';
-  document.getElementById('co_address').value = co.address || '';
-  document.getElementById('co_tel').value     = co.tel     || '';
-  document.getElementById('co_email').value   = co.email   || _cust.email || '';
+  try {
+    // Ensure profile exists
+    if(!_profile||typeof _profile!=='object') _profile={};
+    if(!_profile.company) _profile.company={};
+    if(!_profile.employees) _profile.employees={};
 
-  // Fill employee dropdown
-  var sel = document.getElementById('emp_sel');
-  sel.innerHTML = _staff.map(s=>'<option value="'+s.id+'">'+esc(s.name)+' ('+esc(s.role||'')+')</option>').join('');
-  loadEmployeeFields();
+    var co = _profile.company;
 
-  document.getElementById('settingsErr').style.display='none';
-  document.getElementById('empSaveOk').style.display='none';
-  document.getElementById('settingsModal').classList.add('open');
+    // Fill company fields
+    document.getElementById('co_name').value    = co.name    || (_cust?_cust.name:'') || '';
+    document.getElementById('co_cvr').value     = co.cvr     || '';
+    document.getElementById('co_address').value = co.address || '';
+    document.getElementById('co_tel').value     = co.tel     || '';
+    document.getElementById('co_email').value   = co.email   || (_cust?_cust.email:'') || '';
+
+    // Fill employee dropdown
+    var sel = document.getElementById('emp_sel');
+    if(_staff && _staff.length) {
+      sel.innerHTML = _staff.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+' ('+esc(s.role||'')+')</option>'; }).join('');
+    } else {
+      sel.innerHTML = '<option value="">Ingen medarbejdere endnu</option>';
+    }
+
+    loadEmployeeFields();
+
+    document.getElementById('settingsErr').style.display='none';
+    document.getElementById('empSaveOk').style.display='none';
+
+    // Open the modal
+    document.getElementById('settingsModal').classList.add('open');
+
+  } catch(err) {
+    toast('Fejl ved åbning: '+err.message);
+    console.error('openSettings error:', err);
+  }
 }
 
 function loadEmployeeFields() {
-  var sid = document.getElementById('emp_sel').value;
-  var ep  = (_profile.employees&&_profile.employees[sid])||{};
-  document.getElementById('emp_cpr').value     = ep.cpr     || '';
-  document.getElementById('emp_tel').value     = ep.tel     || '';
-  document.getElementById('emp_address').value = ep.address || '';
-  document.getElementById('emp_bank').value    = ep.bank    || '';
-  document.getElementById('empSaveOk').style.display='none';
+  try {
+    var sid = String(document.getElementById('emp_sel').value);
+    if(!sid) return;
+    var ep = (_profile.employees&&_profile.employees[sid]) || {};
+    document.getElementById('emp_cpr').value     = ep.cpr     || '';
+    document.getElementById('emp_tel').value     = ep.tel     || '';
+    document.getElementById('emp_address').value = ep.address || '';
+    document.getElementById('emp_bank').value    = ep.bank    || '';
+    document.getElementById('empSaveOk').style.display='none';
+  } catch(err) { console.error('loadEmployeeFields:', err); }
 }
 
 async function saveCompany() {
   var btn = document.getElementById('settingsSaveBtn');
+  var errEl = document.getElementById('settingsErr');
+  errEl.style.display='none';
   btn.disabled=true; btn.textContent='Gemmer…';
   try {
     if(!_profile.company) _profile.company={};
@@ -1212,31 +1242,34 @@ async function saveCompany() {
     _profile.company.tel     = document.getElementById('co_tel').value.trim();
     _profile.company.email   = document.getElementById('co_email').value.trim();
     await window.fb.set('cust_'+_cust.id+'_payrollProfile', _profile);
+    closeSettings();
     toast('✓ Virksomhedsoplysninger gemt');
-    document.getElementById('settingsModal').classList.remove('open');
-    if(_psStaffId) renderPayslip(); // refresh open payslip
-  } catch(err) { showErr(document.getElementById('settingsErr'),'Fejl: '+err.message); }
+    if(_psStaffId) renderPayslip();
+  } catch(err) { showErr(errEl,'Fejl: '+err.message); }
   btn.disabled=false; btn.textContent='💾 Gem virksomhedsoplysninger';
 }
 
 async function saveEmployee() {
+  var btn   = document.getElementById('empSaveBtn');
+  var errEl = document.getElementById('settingsErr');
+  var okEl  = document.getElementById('empSaveOk');
+  errEl.style.display='none';
   var sid = document.getElementById('emp_sel').value;
-  var btn = document.getElementById('empSaveBtn');
+  if(!sid){ showErr(errEl,'Vælg en medarbejder.'); return; }
   btn.disabled=true; btn.textContent='Gemmer…';
   try {
     if(!_profile.employees) _profile.employees={};
-    _profile.employees[sid] = {
+    _profile.employees[sid]={
       cpr:     document.getElementById('emp_cpr').value.trim(),
       tel:     document.getElementById('emp_tel').value.trim(),
       address: document.getElementById('emp_address').value.trim(),
       bank:    document.getElementById('emp_bank').value.trim()
     };
     await window.fb.set('cust_'+_cust.id+'_payrollProfile', _profile);
-    var okEl = document.getElementById('empSaveOk');
-    okEl.textContent = '✓ Gemt';
-    okEl.style.display='block';
+    okEl.textContent='✓ Gemt'; okEl.style.display='block';
+    toast('✓ Medarbejderoplysninger gemt');
     if(_psStaffId===parseInt(sid)) renderPayslip();
-  } catch(err) { showErr(document.getElementById('settingsErr'),'Fejl: '+err.message); }
+  } catch(err) { showErr(errEl,'Fejl: '+err.message); }
   btn.disabled=false; btn.textContent='✓ Gem medarbejder';
 }
 

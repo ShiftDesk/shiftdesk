@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShiftDesk — Løn</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f1;--white:#fff;--s2:#f0ede7;--border:#e3ddd4;--b2:#c9c3b8;
+  --text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--acc-lt:#fdf0e8;
+  --green:#1b6e40;--green-lt:#e4f2ec;--blue:#1b4896;--blue-lt:#e6edf9;
+  --red:#c0392b;--red-lt:#fdf0f0;--shadow:0 4px 16px rgba(0,0,0,.11);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
+.login-box{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:48px 40px;width:400px;max-width:calc(100vw - 32px);box-shadow:0 24px 80px rgba(0,0,0,.11);}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.login-dot{width:12px;height:12px;border-radius:50%;background:var(--acc);}
+.login-brand{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;}
+.login-tagline{font-size:.75rem;color:var(--muted);margin-bottom:32px;padding-left:22px;}
+.login-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;margin-bottom:18px;}
+.lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+.inp{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:9px;padding:11px 13px;font-family:'DM Mono',monospace;font-size:.85rem;outline:none;transition:border-color .13s;margin-bottom:12px;}
+.inp:focus{border-color:var(--acc);background:#fff;}
+.login-btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .14s;}
+.login-btn:hover{background:#9d3c07;}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-err{font-size:.73rem;color:var(--red);margin-bottom:8px;display:none;padding:8px 10px;background:var(--red-lt);border-radius:7px;border:1px solid #f5c0c0;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.logo{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);}
+.pay-badge{background:#f0e8ff;color:#6b21a8;border:1px solid #d0b8f0;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace;}
+.topbar-r{display:flex;align-items:center;gap:8px;}
+.user-pill{font-size:.72rem;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:6px;}
+.upd{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.tbtn{background:transparent;border:1.5px solid var(--b2);color:var(--muted);border-radius:7px;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;}
+.tbtn:hover{background:var(--red-lt);border-color:var(--red);color:var(--red);}
+
+/* LAYOUT */
+.page{max-width:1100px;margin:0 auto;padding:28px 20px;}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:gap;}
+.page-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;}
+.page-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
+
+/* BTN */
+.btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .14s;white-space:nowrap;}
+.btn:hover{transform:translateY(-1px);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
+.btn-acc{background:var(--acc);color:#fff;}
+.btn-acc:hover{background:#9d3c07;}
+.btn-ghost{background:#fff;border:1.5px solid var(--b2);color:var(--text);}
+.btn-ghost:hover{border-color:var(--text);background:var(--text);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:#145530;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:hover{background:#133870;}
+.btn-sm{padding:5px 10px;font-size:.7rem;}
+
+/* PERIOD PICKER */
+.period-bar{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.period-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;}
+.period-sel{background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:8px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;cursor:pointer;}
+.period-sel:focus{border-color:var(--acc);}
+
+/* STAFF CARDS */
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:24px;}
+.staff-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .15s;}
+.staff-card:hover{box-shadow:var(--shadow);}
+.sc-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--s2);}
+.sc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;border:2px solid rgba(0,0,0,.06);}
+.sc-name{font-weight:700;font-size:.88rem;}
+.sc-role{font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.sc-rate{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--green);font-weight:700;margin-left:auto;}
+.sc-body{padding:12px 16px;}
+.sc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.79rem;}
+.sc-row:last-child{border-bottom:none;}
+.sc-key{color:var(--muted);}
+.sc-val{font-family:'DM Mono',monospace;font-weight:600;}
+.sc-val.approved{color:var(--green);}
+.sc-val.pending{color:#b45309;}
+.sc-foot{padding:12px 16px;border-top:1.5px solid var(--border);background:var(--s2);display:flex;gap:8px;align-items:center;}
+.no-hours{text-align:center;padding:16px;color:var(--muted);font-size:.78rem;font-style:italic;}
+
+/* HOURS TABLE */
+.hours-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:10px;}
+.hours-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;border-bottom:1.5px solid var(--border);}
+.hours-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.hours-table tr:last-child td{border-bottom:none;}
+.ap-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;}
+.ap-ok{background:var(--green-lt);color:var(--green);}
+.ap-pending{background:#fff3e0;color:#b45309;}
+
+/* ADD HOURS MODAL */
+.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:26px;width:440px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;margin-bottom:18px;}
+.fg{margin-bottom:13px;}
+.fl{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+.fc{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:8px;padding:9px 11px;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;transition:border-color .13s;}
+.fc:focus{border-color:var(--acc);background:#fff;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+.form-err{font-size:.73rem;color:var(--red);margin-bottom:6px;display:none;background:var(--red-lt);border-radius:7px;padding:7px 10px;border:1px solid #f5c0c0;}
+
+/* PAYSLIP */
+#payslipArea{display:none;}
+.payslip-wrap{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:32px;max-width:700px;margin:0 auto;font-size:.82rem;}
+.ps-header{display:flex;justify-content:space-between;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--border);}
+.ps-company{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;}
+.ps-sub{font-size:.72rem;color:var(--muted);margin-top:3px;}
+.ps-meta table{width:100%;border-collapse:collapse;}
+.ps-meta td{padding:2px 4px;font-size:.76rem;vertical-align:top;}
+.ps-meta td:first-child{color:var(--muted);min-width:110px;}
+.ps-meta td:last-child{font-family:'DM Mono',monospace;font-weight:600;}
+.ps-section{margin-bottom:20px;}
+.ps-sec-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+.ps-table{width:100%;border-collapse:collapse;}
+.ps-table th{background:var(--s2);padding:6px 10px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.ps-table th:not(:first-child){text-align:right;}
+.ps-table td{padding:7px 10px;border-bottom:1px solid var(--border);font-size:.79rem;}
+.ps-table td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
+.ps-table tr:last-child td{border-bottom:none;}
+.ps-total{background:var(--green-lt);border:1.5px solid var(--green);border-radius:9px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.ps-total-lbl{font-weight:700;font-size:.9rem;}
+.ps-total-val{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--green);}
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.ps-box{background:var(--s2);border-radius:9px;padding:12px 14px;}
+.ps-box-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.ps-box-row{display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;}
+.ps-box-row span:last-child{font-family:'DM Mono',monospace;font-weight:600;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--text);color:#fff;padding:10px 18px;border-radius:9px;font-size:.77rem;font-weight:500;box-shadow:var(--shadow);animation:fadeIn .18s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOADING */
+.spinner{display:inline-block;width:22px;height:22px;border:2.5px solid var(--s2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-state{text-align:center;padding:60px;color:var(--muted);}
+
+/* PRINT */
+@media print{
+  .topbar,.period-bar,.page-hdr,.staff-grid,.no-print{display:none!important;}
+  #payslipArea{display:block!important;}
+  .payslip-wrap{border:none;box-shadow:none;padding:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><div class="login-dot"></div><div class="login-brand">ShiftDesk</div></div>
+    <div class="login-tagline">Lønsystem</div>
+    <div class="login-title">Log ind</div>
+    <label class="lbl">Email</label>
+    <input class="inp" type="email" id="loginEmail" placeholder="din@email.dk" autocomplete="email">
+    <label class="lbl">Adgangskode</label>
+    <input class="inp" type="password" id="loginPw" placeholder="Adgangskode" autocomplete="current-password">
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" id="loginBtn">Log ind →</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<nav class="topbar" id="topbar" style="display:none;">
+  <div class="logo"><div class="logo-dot"></div>ShiftDesk <span class="pay-badge">LØN</span></div>
+  <div class="topbar-r">
+    <div class="user-pill"><div class="upd"></div><span id="userDisplay"></span></div>
+    <button class="tbtn" id="logoutBtn">Log ud</button>
+  </div>
+</nav>
+
+<!-- ADD/EDIT HOURS MODAL -->
+<div class="overlay" id="hoursModal">
+  <div class="modal">
+    <div class="modal-title" id="hoursModalTitle">Tilføj timer</div>
+    <div class="fg">
+      <label class="fl">Medarbejder</label>
+      <select class="fc" id="hm_staff"></select>
+    </div>
+    <div class="fg">
+      <label class="fl">Dato</label>
+      <input class="fc" type="date" id="hm_date">
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label class="fl">Mødte ind</label>
+        <input class="fc" type="time" id="hm_in">
+      </div>
+      <div class="fg">
+        <label class="fl">Gik hjem</label>
+        <input class="fc" type="time" id="hm_out">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Note (valgfri)</label>
+      <input class="fc" type="text" id="hm_note" placeholder="f.eks. Admin godkendt">
+    </div>
+    <div class="fg" style="background:var(--green-lt);border:1.5px solid var(--green);border-radius:9px;padding:10px 13px;">
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--green);">
+        <input type="checkbox" id="hm_approved" checked style="width:16px;height:16px;accent-color:var(--green);">
+        Godkendt til løn
+      </label>
+    </div>
+    <div class="form-err" id="hmErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="hmCancelBtn">Annuller</button>
+      <button class="btn btn-green" id="hmSaveBtn">Gem timer</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYSLIP MODAL -->
+<div class="overlay" id="payslipModal">
+  <div class="modal" style="width:740px;max-width:calc(100vw - 16px);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div class="modal-title" style="margin-bottom:0;">Lønseddel</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print</button>
+        <button class="btn btn-ghost btn-sm" id="psCloseBtn">✕ Luk</button>
+      </div>
+    </div>
+    <div id="payslipArea"></div>
+  </div>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="page" id="mainPage" style="display:none;">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">Lønoversigt</div>
+      <div class="page-sub" id="periodLabel"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost no-print" id="addHoursBtn">+ Tilføj / Ret timer</button>
+      <button class="btn btn-ghost no-print" id="refreshBtn">↻ Opdater</button>
+    </div>
+  </div>
+
+  <!-- Period picker -->
+  <div class="period-bar no-print">
+    <span class="period-lbl">Lønperiode</span>
+    <select class="period-sel" id="monthSel"></select>
+    <select class="period-sel" id="yearSel"></select>
+    <button class="btn btn-acc btn-sm" id="loadPeriodBtn">Hent data</button>
+  </div>
+
+  <!-- Staff cards -->
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <div style="margin-top:10px;font-size:.8rem;">Henter medarbejdere og timer…</div>
+  </div>
+  <div id="staffGrid" class="staff-grid" style="display:none;"></div>
+
+  <!-- Summary -->
+  <div id="summaryArea" style="display:none;"></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, getDocs, getDoc, setDoc, doc }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const CFG = {
+  apiKey:            'AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M',
+  authDomain:        'shiftdesk-admin.firebaseapp.com',
+  projectId:         'shiftdesk-admin',
+  storageBucket:     'shiftdesk-admin.firebasestorage.app',
+  messagingSenderId: '942500137972',
+  appId:             '1:942500137972:web:c0e0755c97f3590bcb07a1'
+};
+
+try {
+  const app = getApps().length ? getApps()[0] : initializeApp(CFG);
+  const db  = getFirestore(app);
+
+  window.fb = {
+    loadCustomers: async () => {
+      const s = await getDocs(collection(db,'customers'));
+      return s.docs.map(d => ({id:d.id,...d.data()}));
+    },
+    getCustData: async (key) => {
+      try {
+        const d = await getDoc(doc(db,'customerData',key));
+        return d.exists() ? d.data().value : null;
+      } catch(e) { return null; }
+    },
+    setCustData: async (key, val) => {
+      await setDoc(doc(db,'customerData',key), {value: val});
+    }
+  };
+  window._fbReady = true;
+} catch(e) {
+  console.error('Firebase error:', e);
+  window._fbReady = false;
+}
+</script>
+
+<!-- APP -->
+<script>
+'use strict';
+
+// ── State ────────────────────────────────────────────────────────────────────
+var _customer   = null;
+var _staff      = [];
+var _clockData  = {}; // {staffId: {dateStr: {inTime,outTime,approved,note}}}
+var _payrollData= {}; // extra entries added via admin
+var _selMonth   = new Date().getMonth();
+var _selYear    = new Date().getFullYear();
+
+// ── Danish tax constants ─────────────────────────────────────────────────────
+var ATP_RATE     = 99;      // DKK per month (standard)
+var AM_RATE      = 0.08;    // 8% AM-bidrag
+var A_SKAT_RATE  = 0.37;    // ~37% A-skat on remainder (simplified)
+var FERIE_RATE   = 0.125;   // 12.5% feriepenge
+var PENSION_EMP  = 0.04;    // 4% employee pension
+var PENSION_EMP_CO = 0.08;  // 8% employer pension
+var MEAL_ALLOW   = 0;       // set per customer if needed
+
+// ── Colours for avatars ──────────────────────────────────────────────────────
+var AV_COLS = ['#bf4a0a','#1b6e40','#1b4896','#6b21a8','#b45309','#0e7490'];
+function avCol(i){ return AV_COLS[i % AV_COLS.length]; }
+function initials(name){ return (name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+
+// ── Wait for Firebase ────────────────────────────────────────────────────────
+function waitFb() {
+  return new Promise(res => {
+    if (window._fbReady !== undefined) { res(window._fbReady); return; }
+    var t = 0, iv = setInterval(() => {
+      if (window._fbReady !== undefined || ++t > 50) { clearInterval(iv); res(!!window._fbReady); }
+    }, 100);
+  });
+}
+
+// ── Password hash ────────────────────────────────────────────────────────────
+async function hashPw(pw) {
+  try {
+    var buf  = new TextEncoder().encode(pw);
+    var hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  } catch(e) { return pw; }
+}
+
+// ── LOGIN ────────────────────────────────────────────────────────────────────
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  var email = (document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  var pw    = document.getElementById('loginPw').value;
+  var errEl = document.getElementById('loginErr');
+  var btn   = document.getElementById('loginBtn');
+  errEl.style.display = 'none';
+  if (!email || !pw) { showErr(errEl,'Udfyld email og adgangskode.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Logger ind…';
+  try {
+    var ok = await waitFb();
+    if (!ok) throw new Error('Kan ikke forbinde til databasen.');
+    var custs = await window.fb.loadCustomers();
+    var match = null;
+    for (var c of custs) {
+      if (c.email && c.email.toLowerCase() === email) {
+        var h = await hashPw(pw);
+        if (h === c.password) { match = c; break; }
+      }
+    }
+    if (!match) throw new Error('Forkert email eller adgangskode.');
+    if (match.status !== 'active') throw new Error('Kontoen er ikke aktiv.');
+    if (match.expiryDate && new Date(match.expiryDate) < new Date()) throw new Error('Abonnementet er udløbet.');
+    _customer = match;
+    enterApp();
+  } catch(err) {
+    showErr(errEl, err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Log ind →';
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display      = 'flex';
+  document.getElementById('mainPage').style.display    = 'block';
+  document.getElementById('userDisplay').textContent   = _customer.name || _customer.email;
+  buildPeriodPicker();
+  loadAllData();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  _customer = null; _staff = []; _clockData = {};
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('topbar').style.display      = 'none';
+  document.getElementById('mainPage').style.display    = 'none';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPw').value    = '';
+});
+
+// ── PERIOD PICKER ────────────────────────────────────────────────────────────
+var MONTHS_DA = ['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+
+function buildPeriodPicker() {
+  var ms = document.getElementById('monthSel');
+  var ys = document.getElementById('yearSel');
+  ms.innerHTML = MONTHS_DA.map((m,i) => '<option value="'+i+'"'+(i===_selMonth?' selected':'')+'>'+m+'</option>').join('');
+  var yr = new Date().getFullYear();
+  ys.innerHTML = [yr-1,yr,yr+1].map(y => '<option value="'+y+'"'+(y===_selYear?' selected':'')+'>'+y+'</option>').join('');
+}
+
+document.getElementById('loadPeriodBtn').addEventListener('click', () => {
+  _selMonth = parseInt(document.getElementById('monthSel').value);
+  _selYear  = parseInt(document.getElementById('yearSel').value);
+  loadAllData();
+});
+
+// ── LOAD ALL DATA ────────────────────────────────────────────────────────────
+async function loadAllData() {
+  document.getElementById('loadingState').style.display = 'flex';
+  document.getElementById('staffGrid').style.display    = 'none';
+  document.getElementById('summaryArea').style.display  = 'none';
+
+  try {
+    var custId = _customer.id;
+
+    // Load staff — key: cust_cust_XXXX_staff
+    var staffKey = 'cust_' + custId + '_staff';
+    var staffRaw = await window.fb.getCustData(staffKey);
+    _staff = staffRaw ? JSON.parse(staffRaw) : [];
+
+    // Load clock history — key: cust_cust_XXXX_clockHistory
+    var clockKey = 'cust_' + custId + '_clockHistory';
+    var clockRaw = await window.fb.getCustData(clockKey);
+    _clockData = clockRaw ? JSON.parse(clockRaw) : {};
+
+    // Load extra payroll entries added via this page
+    var payKey = 'cust_' + custId + '_payrollEntries';
+    var payRaw = await window.fb.getCustData(payKey);
+    _payrollData = payRaw ? JSON.parse(payRaw) : {};
+
+    renderStaffGrid();
+  } catch(err) {
+    toast('Fejl: ' + err.message);
+  }
+
+  document.getElementById('loadingState').style.display = 'none';
+}
+
+// ── GET HOURS FOR PERIOD ─────────────────────────────────────────────────────
+function getPeriodEntries(staffId) {
+  var entries = [];
+  var sid = String(staffId);
+
+  // From ShiftDesk clock history
+  var ch = _clockData[staffId] || _clockData[sid] || {};
+  Object.keys(ch).forEach(dateStr => {
+    var e = ch[dateStr];
+    var d = new Date(dateStr);
+    if (d.getMonth() === _selMonth && d.getFullYear() === _selYear) {
+      entries.push({
+        dateStr:  dateStr,
+        inTime:   e.inTime,
+        outTime:  e.outTime,
+        approved: e.approved || false,
+        note:     e.note || '',
+        source:   'shiftdesk'
+      });
+    }
+  });
+
+  // From payroll admin entries (overrides or additions)
+  var pe = _payrollData[sid] || {};
+  Object.keys(pe).forEach(dateStr => {
+    var e = pe[dateStr];
+    var d = new Date(dateStr);
+    if (d.getMonth() === _selMonth && d.getFullYear() === _selYear) {
+      // Override existing or add new
+      var idx = entries.findIndex(x => x.dateStr === dateStr);
+      if (idx >= 0) { entries[idx] = Object.assign({}, entries[idx], e, {source:'admin'}); }
+      else { entries.push(Object.assign({}, e, {dateStr, source:'admin'})); }
+    }
+  });
+
+  return entries.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+}
+
+function calcHours(inTime, outTime) {
+  if (!inTime || !outTime) return 0;
+  var [ih,im] = inTime.split(':').map(Number);
+  var [oh,om] = outTime.split(':').map(Number);
+  var mins = (oh*60+om) - (ih*60+im);
+  return Math.max(0, mins / 60);
+}
+
+function calcPayroll(staffMember, entries) {
+  var approvedEntries = entries.filter(e => e.approved);
+  var totalHours = approvedEntries.reduce((sum, e) => sum + calcHours(e.inTime, e.outTime), 0);
+  var rate       = staffMember.rate || 0;
+  var bruttoLon  = Math.round(totalHours * rate);
+  var ferieAf    = Math.round(bruttoLon * FERIE_RATE);
+  var amGrundlag = bruttoLon + ferieAf;
+  var amBidrag   = Math.round(amGrundlag * AM_RATE);
+  var atp        = totalHours > 0 ? ATP_RATE : 0;
+  var pensionEmp = Math.round(bruttoLon * PENSION_EMP);
+  var pensionCo  = Math.round(bruttoLon * PENSION_EMP_CO);
+  var aSkattegrundlag = amGrundlag - amBidrag - atp - pensionEmp;
+  var aSkat      = Math.round(Math.max(0, aSkattegrundlag) * A_SKAT_RATE);
+  var nettoLon   = amGrundlag - amBidrag - atp - pensionEmp - aSkat;
+
+  return {
+    totalHours, bruttoLon, ferieAf, amGrundlag, amBidrag,
+    atp, pensionEmp, pensionCo, aSkat, nettoLon, rate
+  };
+}
+
+// ── RENDER STAFF GRID ────────────────────────────────────────────────────────
+function renderStaffGrid() {
+  var grid  = document.getElementById('staffGrid');
+  var month = MONTHS_DA[_selMonth] + ' ' + _selYear;
+  document.getElementById('periodLabel').textContent = 'Periode: ' + month;
+
+  if (!_staff.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">Ingen medarbejdere fundet. Opret medarbejdere i ShiftDesk først.</div>';
+    grid.style.display = 'grid';
+    return;
+  }
+
+  var html = '';
+  var totalPay = 0;
+  var totalHrs = 0;
+
+  _staff.forEach((s, idx) => {
+    var entries = getPeriodEntries(s.id);
+    var pay     = calcPayroll(s, entries);
+    var approvedCount = entries.filter(e=>e.approved).length;
+    totalPay += pay.nettoLon;
+    totalHrs += pay.totalHours;
+
+    html += '<div class="staff-card">';
+    html += '<div class="sc-head">';
+    html += '<div class="sc-av" style="background:'+avCol(idx)+';color:#fff;">'+initials(s.name)+'</div>';
+    html += '<div><div class="sc-name">'+esc(s.name)+'</div><div class="sc-role">'+esc(s.role||'')+'</div></div>';
+    html += '<div class="sc-rate">'+(s.rate?s.rate+' DKK/t':'Ingen sats')+'</div>';
+    html += '</div>';
+    html += '<div class="sc-body">';
+
+    if (!entries.length) {
+      html += '<div class="no-hours">Ingen registrerede timer denne periode</div>';
+    } else {
+      html += '<table class="hours-table">';
+      html += '<thead><tr><th>Dato</th><th>Ind</th><th>Ud</th><th>Timer</th><th>Status</th></tr></thead><tbody>';
+      entries.forEach(e => {
+        var hrs = calcHours(e.inTime, e.outTime);
+        var dFmt = e.dateStr ? new Date(e.dateStr).toLocaleDateString('da-DK',{day:'2-digit',month:'short'}) : '—';
+        html += '<tr>';
+        html += '<td>'+dFmt+'</td>';
+        html += '<td>'+(e.inTime||'—')+'</td>';
+        html += '<td>'+(e.outTime||'—')+'</td>';
+        html += '<td style="font-family:\'DM Mono\',monospace;font-weight:600;">'+hrs.toFixed(1)+'t</td>';
+        html += '<td><span class="ap-badge '+(e.approved?'ap-ok':'ap-pending')+'">'+(e.approved?'✓ Godkendt':'Afventer')+'</span></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    html += '<div class="sc-row"><span class="sc-key">Godkendte dage</span><span class="sc-val approved">'+approvedCount+'</span></div>';
+    html += '<div class="sc-row"><span class="sc-key">Godkendte timer</span><span class="sc-val approved">'+pay.totalHours.toFixed(1)+'t</span></div>';
+    html += '<div class="sc-row"><span class="sc-key">Bruttoløn</span><span class="sc-val">'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</span></div>';
+    html += '<div class="sc-row"><span class="sc-key">Nettoløn (ca.)</span><span class="sc-val approved">'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+    html += '</div>';
+    html += '<div class="sc-foot">';
+    html += '<button class="btn btn-blue btn-sm" data-sid="'+s.id+'">📄 Lønseddel</button>';
+    html += '<button class="btn btn-ghost btn-sm" data-edit="'+s.id+'">✏ Ret timer</button>';
+    html += '</div>';
+    html += '</div>';
+  });
+
+  grid.innerHTML = html;
+  grid.style.display = 'grid';
+
+  // Payslip buttons
+  grid.querySelectorAll('[data-sid]').forEach(btn => {
+    btn.addEventListener('click', () => openPayslip(parseInt(btn.getAttribute('data-sid'))));
+  });
+  // Edit hours buttons
+  grid.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openAddHours(parseInt(btn.getAttribute('data-edit'))));
+  });
+
+  // Summary
+  var sumEl = document.getElementById('summaryArea');
+  sumEl.innerHTML = '<div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:18px 22px;display:flex;gap:32px;flex-wrap:wrap;align-items:center;">' +
+    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Totale timer</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;">'+totalHrs.toFixed(1)+'t</div></div>' +
+    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Total nettoløn</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;color:var(--green);">'+totalPay.toLocaleString('da-DK')+' DKK</div></div>' +
+    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Medarbejdere</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;">'+_staff.length+'</div></div>' +
+    '</div>';
+  sumEl.style.display = 'block';
+}
+
+// ── ADD / EDIT HOURS MODAL ───────────────────────────────────────────────────
+document.getElementById('addHoursBtn').addEventListener('click', () => openAddHours(null));
+document.getElementById('hmCancelBtn').addEventListener('click', closeHoursModal);
+document.getElementById('hmSaveBtn').addEventListener('click', saveHours);
+
+document.getElementById('hoursModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('hoursModal')) closeHoursModal();
+});
+
+function openAddHours(preselectedSid) {
+  var sel = document.getElementById('hm_staff');
+  sel.innerHTML = _staff.map(s => '<option value="'+s.id+'"'+(s.id===preselectedSid?' selected':'')+'>'+esc(s.name)+' ('+esc(s.role||'')+')</option>').join('');
+  document.getElementById('hm_date').value     = new Date().toISOString().split('T')[0];
+  document.getElementById('hm_in').value       = '';
+  document.getElementById('hm_out').value      = '';
+  document.getElementById('hm_note').value     = '';
+  document.getElementById('hm_approved').checked = true;
+  document.getElementById('hmErr').style.display = 'none';
+  document.getElementById('hoursModal').classList.add('open');
+  setTimeout(() => document.getElementById('hm_date').focus(), 100);
+}
+
+function closeHoursModal() {
+  document.getElementById('hoursModal').classList.remove('open');
+}
+
+async function saveHours() {
+  var sid     = parseInt(document.getElementById('hm_staff').value);
+  var date    = document.getElementById('hm_date').value;
+  var inTime  = document.getElementById('hm_in').value;
+  var outTime = document.getElementById('hm_out').value;
+  var note    = document.getElementById('hm_note').value.trim();
+  var approved= document.getElementById('hm_approved').checked;
+  var errEl   = document.getElementById('hmErr');
+  errEl.style.display = 'none';
+
+  if (!date)    { showErr(errEl,'Vælg en dato.'); return; }
+  if (!inTime)  { showErr(errEl,'Angiv mødetidspunkt.'); return; }
+  if (!outTime) { showErr(errEl,'Angiv hjemgangstidspunkt.'); return; }
+  if (inTime >= outTime) { showErr(errEl,'Hjemgang skal være efter mødetid.'); return; }
+
+  var btn = document.getElementById('hmSaveBtn');
+  btn.disabled = true; btn.textContent = 'Gemmer…';
+
+  try {
+    var custId = _customer.id;
+    var sidStr = String(sid);
+
+    if (!_payrollData[sidStr]) _payrollData[sidStr] = {};
+    _payrollData[sidStr][date] = { inTime, outTime, approved, note, dateStr: date, source: 'admin' };
+
+    var payKey = 'cust_' + custId + '_payrollEntries';
+    await window.fb.setCustData(payKey, JSON.stringify(_payrollData));
+
+    closeHoursModal();
+    renderStaffGrid();
+    toast('✓ Timer gemt');
+  } catch(err) {
+    showErr(errEl, 'Fejl: ' + err.message);
+  }
+
+  btn.disabled = false; btn.textContent = 'Gem timer';
+}
+
+// ── PAYSLIP ──────────────────────────────────────────────────────────────────
+document.getElementById('psCloseBtn').addEventListener('click', () => {
+  document.getElementById('payslipModal').classList.remove('open');
+});
+document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+function openPayslip(sid) {
+  var s       = _staff.find(x => x.id === sid);
+  if (!s) return;
+  var entries = getPeriodEntries(sid);
+  var pay     = calcPayroll(s, entries);
+  var month   = MONTHS_DA[_selMonth] + ' ' + _selYear;
+  var today   = new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'long',year:'numeric'});
+  var approvedEntries = entries.filter(e=>e.approved);
+
+  var html = '<div class="payslip-wrap">';
+
+  // Header
+  html += '<div class="ps-header">';
+  html += '<div><div class="ps-company">'+esc(_customer.name||'Virksomhed')+'</div><div class="ps-sub">Lønseddel — '+month+'</div></div>';
+  html += '<div class="ps-meta"><table>';
+  html += '<tr><td>Medarbejder:</td><td>'+esc(s.name)+'</td></tr>';
+  html += '<tr><td>Stilling:</td><td>'+esc(s.role||'—')+'</td></tr>';
+  html += '<tr><td>Betalingsdato:</td><td>'+today+'</td></tr>';
+  html += '<tr><td>Lønperiode:</td><td>'+month+'</td></tr>';
+  html += '<tr><td>Timelønssats:</td><td>'+(s.rate||0)+' DKK/t</td></tr>';
+  html += '</table></div>';
+  html += '</div>';
+
+  // Hours detail
+  if (approvedEntries.length) {
+    html += '<div class="ps-section">';
+    html += '<div class="ps-sec-title">Godkendte timer</div>';
+    html += '<table class="ps-table"><thead><tr><th>Dato</th><th>Mødte</th><th>Gik</th><th>Timer</th></tr></thead><tbody>';
+    approvedEntries.forEach(e => {
+      var hrs = calcHours(e.inTime, e.outTime);
+      var dFmt = new Date(e.dateStr).toLocaleDateString('da-DK',{weekday:'short',day:'2-digit',month:'short'});
+      html += '<tr><td>'+dFmt+'</td><td>'+e.inTime+'</td><td>'+e.outTime+'</td><td>'+hrs.toFixed(2)+'</td></tr>';
+    });
+    html += '<tr style="font-weight:700;background:var(--s2);"><td colspan="3">Total timer</td><td>'+pay.totalHours.toFixed(2)+'</td></tr>';
+    html += '</tbody></table>';
+    html += '</div>';
+  }
+
+  // Salary calculation
+  html += '<div class="ps-section">';
+  html += '<div class="ps-sec-title">Lønberegning</div>';
+  html += '<table class="ps-table"><thead><tr><th>Beskrivelse</th><th>Grundlag</th><th>Sats</th><th>Beløb</th></tr></thead><tbody>';
+  html += '<tr><td>Timeløn</td><td>'+pay.totalHours.toFixed(2)+' t</td><td>'+pay.rate+' DKK/t</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr><td>Feriepenge (12,5%)</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td><td>12,5%</td><td>'+pay.ferieAf.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr style="font-weight:600;"><td>AM-grundlag</td><td></td><td></td><td>'+pay.amGrundlag.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr style="color:var(--red);"><td>AM-bidrag (8%)</td><td>'+pay.amGrundlag.toLocaleString('da-DK')+' DKK</td><td>8%</td><td>−'+pay.amBidrag.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr style="color:var(--red);"><td>ATP</td><td></td><td>Fast</td><td>−'+pay.atp.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr style="color:var(--red);"><td>Pension (medarbejder 4%)</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td><td>4%</td><td>−'+pay.pensionEmp.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '<tr style="color:var(--red);"><td>A-skat (ca. 37%)</td><td>'+(pay.amGrundlag-pay.amBidrag-pay.atp-pay.pensionEmp).toLocaleString('da-DK')+' DKK</td><td>37%</td><td>−'+pay.aSkat.toLocaleString('da-DK')+' DKK</td></tr>';
+  html += '</tbody></table>';
+  html += '<div class="ps-total"><span class="ps-total-lbl">Til udbetaling</span><span class="ps-total-val">'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '</div>';
+
+  // Bottom grid
+  html += '<div class="ps-grid" style="margin-top:16px;">';
+  html += '<div class="ps-box">';
+  html += '<div class="ps-box-title">Ferie & Pension</div>';
+  html += '<div class="ps-box-row"><span>Feriepenge optjent</span><span>'+pay.ferieAf.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Pension medarbejder</span><span>'+pay.pensionEmp.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Pension arbejdsgiver</span><span>'+pay.pensionCo.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '</div>';
+  html += '<div class="ps-box">';
+  html += '<div class="ps-box-title">Opsummering</div>';
+  html += '<div class="ps-box-row"><span>Bruttoløn</span><span>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>AM-bidrag</span><span>'+pay.amBidrag.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>A-skat</span><span>'+pay.aSkat.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row" style="font-weight:700;color:var(--green);border-top:1px solid var(--border);padding-top:4px;margin-top:4px;"><span>Nettoløn</span><span>'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '</div>';
+  html += '</div>';
+  html += '</div>'; // payslip-wrap
+
+  document.getElementById('payslipArea').innerHTML = html;
+  document.getElementById('payslipModal').classList.add('open');
+}
+
+// ── REFRESH ──────────────────────────────────────────────────────────────────
+document.getElementById('refreshBtn').addEventListener('click', loadAllData);
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// ── AUTO LOGIN from ShiftDesk session ───────────────────────────────────────
+(async function() {
+  try {
+    var sdAuth = sessionStorage.getItem('sd_auth');
+    var sdCid  = sessionStorage.getItem('sd_cust_id');
+    if (sdAuth === '1' && sdCid) {
+      var ok = await waitFb();
+      if (ok) {
+        var custs = await window.fb.loadCustomers();
+        var match = custs.find(c => c.id === sdCid && c.status === 'active');
+        if (match) { _customer = match; enterApp(); return; }
+      }
+    }
+  } catch(e) {}
+  setTimeout(() => { try { document.getElementById('loginEmail').focus(); } catch(e){} }, 300);
+})();
+</script>
+</body>
+</html>

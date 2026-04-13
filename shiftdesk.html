@@ -2315,8 +2315,7 @@ window.bootApp = function bootApp(email, customer){
       updateLicBtn();
     }catch(ex){}
   }
-  var _bm=document.getElementById('budgetMenuItem');
-  var displayName = customer ? (customer.name || email) : email;
+var _bm=document.getElementById('budgetMenuItem');if(_bm){_bm.style.display=(customer&&customer.hasBudget)?'flex':'none';}  var displayName = customer ? (customer.name || email) : email;
   var tb = document.querySelector('.topbar-r');
   if(tb && email){
     var badge = document.createElement('div');

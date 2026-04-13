@@ -432,35 +432,52 @@ async function loadAllData() {
   try {
     var custId = _customer.id;
 
-    // Keys follow the same pattern as shiftdesk.html:
+    // Keys follow shiftdesk.html custKey() pattern:
     // custKey(k) = 'cust_' + customer.id + '_' + k
-    // customer.id is already 'cust_TIMESTAMP' so keys are 'cust_cust_TIMESTAMP_staff' etc.
+    // customer.id is already 'cust_TIMESTAMP' → keys are 'cust_cust_TIMESTAMP_staff' etc.
+    // fbGetData returns d.data().value — already a JS object, NOT a JSON string.
+    // localStorage stores JSON strings — need JSON.parse().
+
     var staffKey = 'cust_' + custId + '_staff';
     var clockKey = 'cust_' + custId + '_clockHistory';
     var payKey   = 'cust_' + custId + '_payrollEntries';
 
-    // Try Firebase first, fall back to localStorage
-    var staffRaw = await window.fb.getCustData(staffKey);
-    if (!staffRaw) {
-      // Fallback: try localStorage (shiftdesk.html base64 keys)
-      try { staffRaw = localStorage.getItem('shiftdesk_staff'); } catch(e) {}
+    // ── Staff ─────────────────────────────────────────────────────────────
+    var staffVal = await window.fb.getCustData(staffKey);
+    if (staffVal && Array.isArray(staffVal)) {
+      _staff = staffVal; // already a JS array from Firebase
+    } else {
+      // Fallback to localStorage (stored as JSON string by shiftdesk.html)
+      try {
+        var ls = localStorage.getItem('shiftdesk_staff');
+        _staff = ls ? JSON.parse(ls) : [];
+      } catch(e) { _staff = []; }
     }
-    _staff = staffRaw ? JSON.parse(staffRaw) : [];
 
-    var clockRaw = await window.fb.getCustData(clockKey);
-    if (!clockRaw) {
-      try { clockRaw = localStorage.getItem('shiftdesk_clockhistory'); } catch(e) {}
+    // ── Clock history ─────────────────────────────────────────────────────
+    var clockVal = await window.fb.getCustData(clockKey);
+    if (clockVal && typeof clockVal === 'object') {
+      _clockData = clockVal; // already a JS object from Firebase
+    } else {
+      // Fallback to localStorage
+      try {
+        var lc = localStorage.getItem('shiftdesk_clockhistory');
+        _clockData = lc ? JSON.parse(lc) : {};
+      } catch(e) { _clockData = {}; }
     }
-    _clockData = clockRaw ? JSON.parse(clockRaw) : {};
 
-    // Payroll entries (admin-added) — Firebase only
-    var payRaw = await window.fb.getCustData(payKey);
-    _payrollData = payRaw ? JSON.parse(payRaw) : {};
+    // ── Payroll entries (admin-added, stored by this page) ────────────────
+    var payVal = await window.fb.getCustData(payKey);
+    if (payVal && typeof payVal === 'object') {
+      _payrollData = payVal;
+    } else {
+      _payrollData = {};
+    }
 
-    // If staff still empty show clear message
     renderStaffGrid();
   } catch(err) {
     toast('Fejl ved indlæsning: ' + err.message);
+    document.getElementById('loadingState').style.display = 'none';
   }
 
   document.getElementById('loadingState').style.display = 'none';
@@ -674,7 +691,7 @@ async function saveHours() {
     _payrollData[sidStr][date] = { inTime, outTime, approved, note, dateStr: date, source: 'admin' };
 
     var payKey = 'cust_' + custId + '_payrollEntries';
-    await window.fb.setCustData(payKey, JSON.stringify(_payrollData));
+    await window.fb.setCustData(payKey, _payrollData);
 
     closeHoursModal();
     renderStaffGrid();

@@ -7,38 +7,34 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f2f0ec;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px;}
-.box{background:#fff;border-radius:18px;padding:36px 32px;width:520px;max-width:100%;box-shadow:0 8px 48px rgba(0,0,0,.13);border:1.5px solid #e8e4dd;}
+.box{background:#fff;border-radius:18px;padding:36px 32px;width:540px;max-width:100%;box-shadow:0 8px 48px rgba(0,0,0,.13);border:1.5px solid #e8e4dd;}
 h2{font-size:1.15rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .subtitle{color:#666;font-size:.85rem;margin-bottom:22px;line-height:1.6;}
 
-/* Safe / Danger key lists */
-.key-list{background:#f7f5f1;border:1.5px solid #e3ddd4;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:.78rem;}
-.key-list h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:8px;font-weight:700;}
-.key-row{display:flex;align-items:center;gap:7px;padding:3px 0;font-family:'Courier New',monospace;}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.key-list{background:#f7f5f1;border:1.5px solid #e3ddd4;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.78rem;}
+.key-list h3{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:8px;font-weight:700;}
+.key-row{display:flex;align-items:flex-start;gap:7px;padding:3px 0;font-family:'Courier New',monospace;line-height:1.4;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
 .dot-green{background:#1b6e40;}
 .dot-red{background:#c0392b;}
 .dot-orange{background:#e67e22;}
-.key-desc{color:#888;font-size:.72rem;margin-left:4px;}
+.key-desc{color:#888;font-size:.72rem;margin-left:4px;font-family:'Segoe UI',system-ui,sans-serif;}
 
-/* Confirm box */
 #confirmBox{background:#fff8f0;border:2px solid #e67e22;border-radius:12px;padding:16px 18px;margin-bottom:18px;display:none;}
 #confirmBox p{font-size:.85rem;color:#7a3d00;margin-bottom:12px;line-height:1.5;}
 .confirm-row{display:flex;gap:8px;}
 
-/* Buttons */
 .btn{border:none;border-radius:9px;padding:11px 18px;font-size:.88rem;font-weight:700;cursor:pointer;flex:1;transition:all .15s;}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
 .btn-danger{background:#c0392b;color:#fff;}
 .btn-danger:hover:not(:disabled){background:#a53125;}
 .btn-cancel{background:#f0ede7;color:#333;}
 .btn-cancel:hover:not(:disabled){background:#e3ddd4;}
-.btn-primary{width:100%;background:#c0392b;color:#fff;margin-bottom:10px;}
-.btn-primary:hover:not(:disabled){background:#a53125;transform:translateY(-1px);}
+.btn-primary{width:100%;background:#1b4896;color:#fff;margin-bottom:14px;}
+.btn-primary:hover:not(:disabled){background:#153a7a;transform:translateY(-1px);}
 
-/* Log */
 #logWrap{display:none;margin-top:16px;}
-#log{font-size:.78rem;line-height:2;max-height:280px;overflow-y:auto;background:#f7f5f1;border:1.5px solid #e3ddd4;border-radius:10px;padding:10px 12px;}
+#log{font-size:.78rem;line-height:2;max-height:300px;overflow-y:auto;background:#f7f5f1;border:1.5px solid #e3ddd4;border-radius:10px;padding:10px 12px;}
 .ok{color:#1b6e40;font-weight:700;}
 .err{color:#c0392b;font-weight:700;}
 .info{color:#666;}
@@ -46,10 +42,9 @@ h2{font-size:1.15rem;font-weight:700;margin-bottom:8px;display:flex;align-items:
 .summary{margin-top:10px;padding:10px 12px;background:#e4f2ec;border:1.5px solid #a8d5bc;border-radius:9px;font-size:.82rem;color:#1b6e40;font-weight:700;line-height:1.6;}
 .summary-err{background:#fdecea;border-color:#f5a89a;color:#c0392b;}
 
-/* Progress bar */
 #progressWrap{display:none;margin-top:10px;}
-#progressBar{height:5px;border-radius:3px;background:#1b6e40;width:0%;transition:width .3s;}
 #progressBg{background:#e3ddd4;border-radius:3px;overflow:hidden;}
+#progressBar{height:5px;border-radius:3px;background:#1b6e40;width:0%;transition:width .3s;}
 #progressLabel{font-size:.72rem;color:#888;margin-top:4px;text-align:right;}
 </style>
 </head>
@@ -57,50 +52,45 @@ h2{font-size:1.15rem;font-weight:700;margin-bottom:8px;display:flex;align-items:
 <div class="box">
   <h2>🗑️ Cleanup Old Payroll Data</h2>
   <p class="subtitle">
-    Safely removes only the old <strong>payroll / loen</strong> keys from Firebase.<br>
-    All scheduling data (staff, shifts, clock history, etc.) is <strong>preserved</strong>.
+    Safely removes only unknown / old payroll keys from Firebase.<br>
+    All scheduling data (staff, shifts, clock history, etc.) is <strong>always preserved</strong>.
   </p>
 
-  <!-- What will be deleted vs kept -->
   <div class="key-list">
-    <h3>✅ Data that will be KEPT (not touched)</h3>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_staff</code><span class="key-desc">— Staff members</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_shifts</code><span class="key-desc">— Shift schedule</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_meetings</code><span class="key-desc">— Meetings</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_monthStore</code><span class="key-desc">— Monthly shifts</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_monthMeet</code><span class="key-desc">— Monthly meetings</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_avail</code><span class="key-desc">— Availability</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_clockHistory</code><span class="key-desc">— Clock in/out history</span></div>
-    <div class="key-row"><span class="dot dot-green"></span><code>cust_XXX_pi</code><span class="key-desc">— Personal info</span></div>
+    <h3>✅ Keys that will always be KEPT</h3>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_staff</code><span class="key-desc">— Staff members</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_shifts</code><span class="key-desc">— Shift schedule</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_meetings</code><span class="key-desc">— Meetings</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_monthStore</code><span class="key-desc">— Monthly shifts</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_monthMeet</code><span class="key-desc">— Monthly meetings</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_avail</code><span class="key-desc">— Availability</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_clockHistory</code><span class="key-desc">— Clock in/out history</span></div>
+    <div class="key-row"><span class="dot dot-green"></span><code>cust_cust_XXX_pi</code><span class="key-desc">— Personal info</span></div>
     <div class="key-row"><span class="dot dot-green"></span><code>mgr_pw_cust_XXX</code><span class="key-desc">— Manager passwords</span></div>
   </div>
 
   <div class="key-list">
-    <h3>🗑️ Data that will be DELETED (unknown / old payroll keys)</h3>
-    <div class="key-row"><span class="dot dot-red"></span><code>cust_XXX_payroll</code><span class="key-desc">— Old payroll.html data</span></div>
-    <div class="key-row"><span class="dot dot-red"></span><code>cust_XXX_loen</code><span class="key-desc">— Old loen.html data</span></div>
-    <div class="key-row"><span class="dot dot-orange"></span><code>cust_XXX_[anything else]</code><span class="key-desc">— Any unrecognised key</span></div>
+    <h3>🗑️ Keys that will be flagged for deletion</h3>
+    <div class="key-row"><span class="dot dot-red"></span><code>cust_cust_XXX_payroll</code><span class="key-desc">— Old payroll.html data</span></div>
+    <div class="key-row"><span class="dot dot-red"></span><code>cust_cust_XXX_loen</code><span class="key-desc">— Old loen.html data</span></div>
+    <div class="key-row"><span class="dot dot-orange"></span><code>[any other unrecognised key]</code><span class="key-desc">— Anything not in the safe list above</span></div>
   </div>
 
-  <!-- Step 1: Scan button -->
   <button class="btn btn-primary" id="btnScan">🔍 Scan Firebase First →</button>
 
-  <!-- Step 2: Confirmation box (shown after scan) -->
   <div id="confirmBox">
     <p id="confirmText"></p>
     <div class="confirm-row">
-      <button class="btn btn-cancel" id="btnCancel">Cancel</button>
+      <button class="btn btn-cancel" id="btnCancel">Cancel — Keep Everything</button>
       <button class="btn btn-danger" id="btnDelete">Yes, Delete These Keys →</button>
     </div>
   </div>
 
-  <!-- Progress -->
   <div id="progressWrap">
     <div id="progressBg"><div id="progressBar"></div></div>
-    <div id="progressLabel" id="progressLabel">0 / 0</div>
+    <div id="progressLabel">0 / 0</div>
   </div>
 
-  <!-- Log output -->
   <div id="logWrap">
     <div id="log"></div>
   </div>
@@ -110,7 +100,7 @@ h2{font-size:1.15rem;font-weight:700;margin-bottom:8px;display:flex;align-items:
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ─── Firebase config ──────────────────────────────────────────────────────────
+// ── Firebase config ────────────────────────────────────────────────────────
 const cfg = {
   apiKey:            "AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M",
   authDomain:        "shiftdesk-admin.firebaseapp.com",
@@ -120,66 +110,69 @@ const cfg = {
   appId:             "1:942500137972:web:c0e0755c97f3590bcb07a1"
 };
 
-// ─── Keys that are actively used by shiftdesk.html / admin.html ──────────────
-// These will NEVER be deleted, no matter what.
-const SAFE_SUFFIXES = new Set([
-  'staff',
-  'shifts',
-  'meetings',
-  'monthStore',
-  'monthMeet',
-  'avail',
-  'clockHistory',
-  'pi',
-]);
+// ── Safe key rules ─────────────────────────────────────────────────────────
+//
+// shiftdesk.html builds keys as:
+//   custKey(suffix) = 'cust_' + customer.id + '_' + suffix
+// customer.id is already  'cust_<timestamp>'
+// so the final key is:    'cust_cust_<timestamp>_<suffix>'
+//
+// admin.html builds manager password keys as:
+//   'mgr_pw_' + customer.id  →  'mgr_pw_cust_<timestamp>'
+//
+// The regex below matches both patterns (and also tolerates single-prefix
+// cust_<digits>_suffix just in case any old keys exist that way).
+
+const SAFE_SUFFIXES = [
+  'staff', 'shifts', 'meetings',
+  'monthStore', 'monthMeet',
+  'avail', 'clockHistory', 'pi',
+];
+
+// Matches: cust_cust_<digits>_<suffix>  OR  cust_<digits>_<suffix>
+const CUST_SAFE = new RegExp(
+  '^cust_(?:cust_)?\\d+_(' + SAFE_SUFFIXES.join('|') + ')$'
+);
+
+// Matches: mgr_pw_cust_<digits>  OR  mgr_pw_cust_cust_<digits>
+const MGR_SAFE = /^mgr_pw_(?:cust_)?(?:cust_)?\d+$/;
 
 function isSafeKey(id) {
-  // Manager password keys — always safe
-  if (id.startsWith('mgr_pw_cust_')) return true;
-
-  // Pattern: cust_<digits>_<suffix>
-  const match = id.match(/^cust_\d+_(.+)$/);
-  if (!match) return false; // Doesn't match expected pattern — not safe to assume
-
-  const suffix = match[1];
-  return SAFE_SUFFIXES.has(suffix);
+  return CUST_SAFE.test(id) || MGR_SAFE.test(id);
 }
 
-// ─── DOM refs ─────────────────────────────────────────────────────────────────
-const btnScan    = document.getElementById('btnScan');
-const btnDelete  = document.getElementById('btnDelete');
-const btnCancel  = document.getElementById('btnCancel');
-const confirmBox = document.getElementById('confirmBox');
-const confirmTxt = document.getElementById('confirmText');
-const logWrap    = document.getElementById('logWrap');
-const logEl      = document.getElementById('log');
+// ── DOM refs ──────────────────────────────────────────────────────────────
+const btnScan       = document.getElementById('btnScan');
+const btnDelete     = document.getElementById('btnDelete');
+const btnCancel     = document.getElementById('btnCancel');
+const confirmBox    = document.getElementById('confirmBox');
+const confirmTxt    = document.getElementById('confirmText');
+const logWrap       = document.getElementById('logWrap');
+const logEl         = document.getElementById('log');
 const progressWrap  = document.getElementById('progressWrap');
 const progressBar   = document.getElementById('progressBar');
 const progressLabel = document.getElementById('progressLabel');
 
-// ─── Logging helpers ──────────────────────────────────────────────────────────
-function log(cls, msg) {
+function addLog(cls, msg) {
   logWrap.style.display = 'block';
   logEl.innerHTML += '<div class="' + cls + '">' + msg + '</div>';
   logEl.scrollTop = logEl.scrollHeight;
 }
-function clearLog() {
-  logEl.innerHTML = '';
-}
+function clearLog() { logEl.innerHTML = ''; }
 
-// ─── Get Firestore instance ───────────────────────────────────────────────────
 function getDB() {
   const app = getApps().length ? getApps()[0] : initializeApp(cfg);
   return getFirestore(app);
 }
 
-// ─── STEP 1: Scan ─────────────────────────────────────────────────────────────
+// ── STEP 1 — Scan ─────────────────────────────────────────────────────────
 let toDelete = [];
 
 btnScan.addEventListener('click', async () => {
   btnScan.disabled = true;
   btnScan.textContent = 'Scanning…';
-  confirmBox.style.display = 'none';
+  confirmBox.style.display   = 'none';
+  progressWrap.style.display = 'none';
   clearLog();
   toDelete = [];
 
@@ -187,8 +180,8 @@ btnScan.addEventListener('click', async () => {
     const db   = getDB();
     const snap = await getDocs(collection(db, 'customerData'));
 
-    log('info', '📡 Connected to Firebase.');
-    log('info', '🔎 Found <strong>' + snap.docs.length + '</strong> total documents in customerData.');
+    addLog('info', '📡 Connected to Firebase.');
+    addLog('info', '🔎 Found <strong>' + snap.docs.length + '</strong> total documents in customerData.');
 
     let safeCount = 0;
 
@@ -196,57 +189,57 @@ btnScan.addEventListener('click', async () => {
       const id = docSnap.id;
       if (isSafeKey(id)) {
         safeCount++;
-        log('skip', '✅ KEEP &nbsp; — <code>' + id + '</code>');
+        addLog('skip', '✅ KEEP &nbsp;&nbsp; — <code>' + id + '</code>');
       } else {
         toDelete.push(id);
-        log('err', '🗑️ DELETE — <code>' + id + '</code>');
+        addLog('err',  '🗑️ DELETE — <code>' + id + '</code>');
       }
     }
 
     if (toDelete.length === 0) {
-      log('ok', '<br>✅ Nothing to delete. Firebase is already clean!');
+      addLog('ok', '<br>✅ Nothing to delete — Firebase is already clean!');
       btnScan.textContent = '✅ Already Clean';
+      btnScan.disabled = false;
       return;
     }
 
-    // Show confirmation
     confirmTxt.innerHTML =
-      '⚠️ Found <strong>' + toDelete.length + ' key(s)</strong> to delete and ' +
-      '<strong>' + safeCount + ' key(s)</strong> to keep.<br><br>' +
-      'Are you sure you want to permanently delete these <strong>' + toDelete.length + '</strong> keys?';
+      'Found <strong>' + toDelete.length + ' key(s) to delete</strong> and ' +
+      '<strong>' + safeCount + ' key(s) to keep</strong>.<br><br>' +
+      'Permanently delete the <strong>' + toDelete.length + '</strong> key(s) shown in red above?';
     confirmBox.style.display = 'block';
     btnScan.textContent = '🔍 Re-Scan';
     btnScan.disabled = false;
 
   } catch (err) {
-    log('err', '❌ Error during scan: ' + err.message);
+    addLog('err', '❌ Scan error: ' + err.message);
     btnScan.textContent = '🔍 Retry Scan';
     btnScan.disabled = false;
   }
 });
 
-// ─── Cancel ───────────────────────────────────────────────────────────────────
+// ── Cancel ────────────────────────────────────────────────────────────────
 btnCancel.addEventListener('click', () => {
   confirmBox.style.display = 'none';
   toDelete = [];
-  log('info', '🚫 Cancelled. No data was deleted.');
+  addLog('info', '🚫 Cancelled — no data was deleted.');
 });
 
-// ─── STEP 2: Delete ───────────────────────────────────────────────────────────
+// ── STEP 2 — Delete ───────────────────────────────────────────────────────
 btnDelete.addEventListener('click', async () => {
-  if (toDelete.length === 0) return;
+  if (!toDelete.length) return;
 
   btnDelete.disabled = true;
   btnCancel.disabled = true;
   btnScan.disabled   = true;
-  confirmBox.style.display = 'none';
+  confirmBox.style.display   = 'none';
   progressWrap.style.display = 'block';
-  progressBar.style.width = '0%';
+  progressBar.style.width    = '0%';
 
   clearLog();
-  log('info', '🗑️ Starting deletion of <strong>' + toDelete.length + '</strong> key(s)…');
+  addLog('info', '🗑️ Deleting <strong>' + toDelete.length + '</strong> key(s)…');
 
-  const db = getDB();
+  const db    = getDB();
   let deleted = 0;
   let failed  = 0;
   const total = toDelete.length;
@@ -255,29 +248,26 @@ btnDelete.addEventListener('click', async () => {
     try {
       await deleteDoc(doc(db, 'customerData', id));
       deleted++;
-      log('ok', '✓ Deleted: <code>' + id + '</code>');
+      addLog('ok', '✓ Deleted: <code>' + id + '</code>');
     } catch (err) {
       failed++;
-      log('err', '✗ Failed to delete <code>' + id + '</code>: ' + err.message);
+      addLog('err', '✗ Failed: <code>' + id + '</code> — ' + err.message);
     }
-
-    // Update progress bar
     const pct = Math.round(((deleted + failed) / total) * 100);
-    progressBar.style.width = pct + '%';
+    progressBar.style.width   = pct + '%';
     progressLabel.textContent = (deleted + failed) + ' / ' + total;
   }
 
-  // Final summary
-  const summaryClass = failed > 0 ? 'summary summary-err' : 'summary';
-  logEl.innerHTML += '<div class="' + summaryClass + '">' +
-    (failed === 0
+  const clean = failed === 0;
+  logEl.innerHTML += '<div class="summary' + (clean ? '' : ' summary-err') + '">' +
+    (clean
       ? '✅ Done! Deleted <strong>' + deleted + '</strong> key(s) successfully. All scheduling data is safe.'
-      : '⚠️ Completed with errors: <strong>' + deleted + '</strong> deleted, <strong>' + failed + '</strong> failed. Check errors above.') +
-    '</div>';
+      : '⚠️ Finished with errors: <strong>' + deleted + '</strong> deleted, <strong>' + failed + '</strong> failed. Check errors above.')
+    + '</div>';
   logEl.scrollTop = logEl.scrollHeight;
 
   btnScan.textContent = '🔍 Re-Scan';
-  btnScan.disabled = false;
+  btnScan.disabled   = false;
   btnDelete.disabled = false;
   btnCancel.disabled = false;
   toDelete = [];

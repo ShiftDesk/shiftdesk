@@ -475,16 +475,19 @@ async function storageGet(key) {
     try { return await window.fbLoadCustomers(); } catch(e) {}
   }
   if (key === ADMIN_PASSWORD_KEY) {
-    var tries = 0;
-    while (!window._fbReady && tries++ < 30) {
-      await new Promise(function(r){ setTimeout(r, 100); });
-    }
+    // Always check localStorage first for admin password — fast and reliable
+    try {
+      var lv = localStorage.getItem(key);
+      if (lv) return JSON.parse(lv);
+    } catch(e) {}
+    // Fallback: try Firebase if localStorage empty
     if (window._fbReady && window.fbGetData) {
       try {
         var fbVal = await window.fbGetData(ADMIN_PASSWORD_KEY);
         if (fbVal) return fbVal;
       } catch(e) {}
     }
+    return null;
   }
   try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; }
 }

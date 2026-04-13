@@ -767,6 +767,7 @@ function closeModal() {
 }
 
 async function saveCustomer() {
+  var isEditing = !!editingId;  // capture before closeModal() can clear it
   var name      = document.getElementById('f_name').value.trim();
   var contact   = document.getElementById('f_contact').value.trim();
   var email     = document.getElementById('f_email').value.trim().toLowerCase();
@@ -781,40 +782,56 @@ async function saveCustomer() {
   var errEl     = document.getElementById('formErr');
   errEl.style.display = 'none';
 
-  if (!name)                    { showErr(errEl, 'Restaurant name is required.');      return; }
-  if (!email || !email.includes('@')) { showErr(errEl, 'A valid email is required.');  return; }
-  if (!editingId && !password)  { showErr(errEl, 'Password is required for new customers.'); return; }
-  if (password && password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
+  if (!name)                         { showErr(errEl, 'Restaurant name is required.');           return; }
+  if (!email || !email.includes('@')) { showErr(errEl, 'A valid email is required.');             return; }
+  if (!isEditing && !password)        { showErr(errEl, 'Password is required for new customers.'); return; }
+  if (password && password.length < 8){ showErr(errEl, 'Password must be at least 8 characters.'); return; }
 
   var btn = document.getElementById('saveBtn');
   btn.disabled    = true;
   btn.textContent = 'Saving…';
 
   try {
-    // Duplicate email check
-    if (!editingId) {
+    if (!isEditing) {
+      // Duplicate email check against fresh Firebase data
       var fresh = [];
       if (window._fbReady && window.fb) { try { fresh = await window.fb.loadCustomers(); } catch(e){} }
       var dupe = fresh.find(function(c){ return c.email && c.email.toLowerCase() === email; });
-      if (dupe) { showErr(errEl, 'A customer with this email already exists.'); btn.disabled = false; btn.textContent = 'Add Customer'; return; }
+      if (dupe) {
+        showErr(errEl, 'A customer with this email already exists.');
+        btn.disabled = false; btn.textContent = 'Add Customer';
+        return;
+      }
       customers = fresh;
     }
 
     var pwHash = password ? (await hashPw(password)) : null;
 
-    if (editingId) {
+    if (isEditing) {
       var idx = customers.findIndex(function(c){ return c.id === editingId; });
       if (idx >= 0) {
         var finalPw = pwHash || customers[idx].password;
-        customers[idx] = Object.assign({}, customers[idx], { name:name, contact:contact, email:email, password:finalPw, plan:plan, duration:duration, startDate:startDate, expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget });
+        customers[idx] = Object.assign({}, customers[idx], {
+          name:name, contact:contact, email:email, password:finalPw,
+          plan:plan, duration:duration, startDate:startDate,
+          expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget
+        });
         if (window._fbReady && window.fb) {
           await window.fb.saveCustomer(customers[idx]);
-          if (password) { try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e){} }
+          if (password) {
+            try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e){}
+          }
         }
       }
       toast('Customer updated ✓');
     } else {
-      var newCust = { id:'cust_'+Date.now(), name:name, contact:contact, email:email, password:pwHash, plan:plan, duration:duration, startDate:startDate, expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, createdAt:new Date().toISOString() };
+      var newCust = {
+        id: 'cust_' + Date.now(),
+        name:name, contact:contact, email:email, password:pwHash,
+        plan:plan, duration:duration, startDate:startDate,
+        expiryDate:expiryDate, status:status, notes:notes,
+        hasBudget:hasBudget, createdAt:new Date().toISOString()
+      };
       customers.push(newCust);
       if (window._fbReady && window.fb) {
         await window.fb.saveCustomer(newCust);
@@ -830,12 +847,12 @@ async function saveCustomer() {
     closeModal();
     renderTable();
     updateStats();
+
   } catch(err) {
     showErr(errEl, 'Save failed: ' + err.message);
+    btn.disabled    = false;
+    btn.textContent = isEditing ? 'Save Changes' : 'Add Customer';
   }
-
-  btn.disabled    = false;
-  btn.textContent = editingId ? 'Save Changes' : 'Add Customer';
 }
 
 async function deleteCustomer() {

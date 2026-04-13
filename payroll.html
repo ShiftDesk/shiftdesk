@@ -173,6 +173,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="logo"><div class="logo-dot"></div>ShiftDesk <span class="pay-badge">LØN</span></div>
   <div class="topbar-r">
     <div class="user-pill"><div class="upd"></div><span id="userDisplay"></span></div>
+    <button class="tbtn" id="settingsBtn">⚙ Indstillinger</button>
     <button class="tbtn" id="logoutBtn">Log ud</button>
   </div>
 </nav>
@@ -217,6 +218,50 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="modal-actions">
       <button class="btn btn-ghost" id="rateCancelBtn">Annuller</button>
       <button class="btn btn-acc" id="rateSaveBtn">Gem sats</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL — company info + employee CPR/address/tel -->
+<div class="overlay" id="settingsModal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-title">⚙ Lønseddel indstillinger</div>
+
+    <!-- Company info -->
+    <div style="background:var(--blue-lt);border:1.5px solid #b0c8f0;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">Virksomhedsoplysninger</div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Firmanavn</label><input class="fc" type="text" id="co_name" placeholder="Restaurant ApS" autocomplete="off"></div>
+        <div class="fg"><label class="fl">CVR-nummer (8 cifre)</label><input class="fc" type="text" id="co_cvr" placeholder="12345678" maxlength="8" autocomplete="off"></div>
+      </div>
+      <div class="fg"><label class="fl">Adresse</label><input class="fc" type="text" id="co_address" placeholder="Vesterbrogade 1, 1620 København V" autocomplete="off"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Telefon</label><input class="fc" type="tel" id="co_tel" placeholder="+45 12 34 56 78" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Email</label><input class="fc" type="email" id="co_email" placeholder="løn@virksomhed.dk" autocomplete="off"></div>
+      </div>
+    </div>
+
+    <!-- Employee info -->
+    <div style="background:var(--green-lt);border:1.5px solid #a8d5bc;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+      <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">Medarbejderoplysninger</div>
+      <div class="fg">
+        <label class="fl">Vælg medarbejder</label>
+        <select class="fc" id="emp_sel"></select>
+      </div>
+      <div class="frow">
+        <div class="fg"><label class="fl">CPR-nummer</label><input class="fc" type="text" id="emp_cpr" placeholder="DDMMÅÅ-XXXX" maxlength="11" autocomplete="off"></div>
+        <div class="fg"><label class="fl">Telefon</label><input class="fc" type="tel" id="emp_tel" placeholder="+45 12 34 56 78" autocomplete="off"></div>
+      </div>
+      <div class="fg"><label class="fl">Adresse</label><input class="fc" type="text" id="emp_address" placeholder="Nørrebrogade 10, 2200 København N" autocomplete="off"></div>
+      <div class="fg"><label class="fl">Kontonummer (reg. + konto)</label><input class="fc" type="text" id="emp_bank" placeholder="1234-12345678" autocomplete="off"></div>
+      <button class="btn btn-green btn-sm" id="empSaveBtn" style="margin-top:4px;">✓ Gem medarbejder</button>
+      <div id="empSaveOk" style="display:none;font-size:.72rem;color:var(--green);margin-top:6px;"></div>
+    </div>
+
+    <div class="form-err" id="settingsErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="settingsCancelBtn">Luk</button>
+      <button class="btn btn-acc" id="settingsSaveBtn">💾 Gem virksomhedsoplysninger</button>
     </div>
   </div>
 </div>
@@ -329,12 +374,13 @@ var _cust       = null;
 var _staff      = [];
 var _clock      = {};
 var _extra      = {};
-var _monthStore = {}; // {staffId: {weekKey: {dayIdx: [{start,end,breakStart,breakEnd}]}}}
-var _shifts     = {}; // current week shifts as fallback
+var _monthStore = {};
+var _shifts     = {};
+var _profile    = {}; // {company:{name,address,tel,cvr}, employees:{id:{address,tel,cpr}}}
 var _selMonth   = new Date().getMonth();
 var _selYear    = new Date().getFullYear();
-var _psStaffId  = null;   // which staff payslip is open for
-var _psOverride = {};     // {rate,askat,pension_e,pension_c,atp,meal} edits
+var _psStaffId  = null;
+var _psOverride = {};
 
 // Default tax constants — Danish 2025/2026 rules
 // Personfradrag 2026: 54.100 DKK/år = 4.508 DKK/måned
@@ -482,18 +528,19 @@ async function loadAllData() {
     var mv=await window.fb.get(monthKey);
     _monthStore=(mv&&typeof mv==='object'&&!Array.isArray(mv))?mv:{};
 
-    // Current week shifts as additional fallback
-    var shiftsKey='cust_'+cid+'_shifts';
-    var shv=await window.fb.get(shiftsKey);
-    _shifts=(shv&&typeof shv==='object'&&!Array.isArray(shv))?shv:{};
+    // monthStore — for break time lookup from shift schedule
+    var mv=await window.fb.get('cust_'+cid+'_monthStore');
+    _monthStore=(mv&&typeof mv==='object'&&!Array.isArray(mv))?mv:{};
 
-    // monthStore — {staffId: {weekKey: {dayIdx: [shifts]}}} — for break lookup
-    var msv=await window.fb.get('cust_'+cid+'_monthStore');
-    _monthStore=(msv&&typeof msv==='object'&&!Array.isArray(msv))?msv:{};
-
-    // shifts (current week) — fallback for break lookup
+    // Current week shifts — fallback for break lookup
     var shv=await window.fb.get('cust_'+cid+'_shifts');
     _shifts=(shv&&typeof shv==='object'&&!Array.isArray(shv))?shv:{};
+
+    // Payroll profile — company info + per-employee CPR/address/tel
+    var pv=await window.fb.get('cust_'+cid+'_payrollProfile');
+    _profile=(pv&&typeof pv==='object'&&!Array.isArray(pv))?pv:{company:{},employees:{}};
+    if(!_profile.company) _profile.company={};
+    if(!_profile.employees) _profile.employees={};
 
   } catch(err) { toast('Fejl: '+err.message); }
 
@@ -923,15 +970,31 @@ function renderPayslip() {
 
   var html='<div class="payslip-doc">';
 
-  // Company header
-  html+='<div class="ps-co">'+esc(_cust.name||'Virksomhed')+'</div>';
+  // Company header — use profile data if available
+  var co  = (_profile&&_profile.company)||{};
+  var coName = co.name || _cust.name || 'Virksomhed';
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">';
+  html+='<div>';
+  html+='<div class="ps-co">'+esc(coName)+'</div>';
+  if(co.address) html+='<div style="font-size:.72rem;color:var(--muted);">'+esc(co.address)+'</div>';
+  if(co.tel||co.email) html+='<div style="font-size:.72rem;color:var(--muted);">'+(co.tel?'Tlf: '+esc(co.tel):'')+(co.tel&&co.email?' &nbsp;·&nbsp; ':'')+(co.email?esc(co.email):'')+'</div>';
+  html+='</div>';
+  if(co.cvr) html+='<div style="font-size:.72rem;color:var(--muted);text-align:right;font-family:\'DM Mono\',monospace;">CVR: '+esc(co.cvr)+'</div>';
+  html+='</div>';
   html+='<div class="ps-period">Lønseddel — '+month+'</div>';
 
   // Info boxes
+  var ep = ((_profile&&_profile.employees)||{})[String(_psStaffId)] || {};
   html+='<div class="ps-info-grid">';
+
+  // Employee box
   html+='<div class="ps-info-box"><div class="ps-info-title">Medarbejder</div>';
   html+='<div class="ps-info-row"><span>Navn</span><span>'+esc(s.name)+'</span></div>';
+  if(ep.cpr) html+='<div class="ps-info-row"><span>CPR-nr.</span><span>'+esc(ep.cpr)+'</span></div>';
   html+='<div class="ps-info-row"><span>Stilling</span><span>'+esc(s.role||'—')+'</span></div>';
+  if(ep.address) html+='<div class="ps-info-row"><span>Adresse</span><span style="font-size:.72rem;text-align:right;max-width:160px;">'+esc(ep.address)+'</span></div>';
+  if(ep.tel) html+='<div class="ps-info-row"><span>Telefon</span><span>'+esc(ep.tel)+'</span></div>';
+  if(ep.bank) html+='<div class="ps-info-row"><span>Konto</span><span>'+esc(ep.bank)+'</span></div>';
   html+='<div class="ps-info-row"><span>Timelønssats</span><span>'+fmt(pay.rate)+' DKK/t</span></div>';
   html+='<div class="ps-info-row"><span>Godkendte dage</span><span>'+pay.approvedCount+'</span></div>';
   html+='<div class="ps-info-row"><span>Total mødetid</span><span>'+(pay.totalHours+(pay.totalBreakMins/60)).toFixed(2)+' t</span></div>';
@@ -941,7 +1004,8 @@ function renderPayslip() {
   html+='<div class="ps-info-box"><div class="ps-info-title">Lønperiode</div>';
   html+='<div class="ps-info-row"><span>Periode</span><span>'+month+'</span></div>';
   html+='<div class="ps-info-row"><span>Betalingsdato</span><span>'+new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'long',year:'numeric'})+'</span></div>';
-  html+='<div class="ps-info-row"><span>Virksomhed</span><span>'+esc(_cust.name||'—')+'</span></div>';
+  html+='<div class="ps-info-row"><span>Virksomhed</span><span>'+esc(coName)+'</span></div>';
+  if(co.cvr) html+='<div class="ps-info-row"><span>CVR-nr.</span><span>'+esc(co.cvr)+'</span></div>';
   html+='<div class="ps-info-row"><span>A-skat %</span><span>'+pay.askatPct+'%</span></div>';
   html+='<div class="ps-info-row"><span>Pension</span><span>'+pay.pensionEPct+'% / '+pay.pensionCPct+'%</span></div>';
   html+='</div></div>';
@@ -1100,6 +1164,82 @@ document.getElementById('psDownloadBtn').addEventListener('click',()=>{
 });
 
 // ── Refresh ──────────────────────────────────────────────────────────────────
+// ── Settings modal ────────────────────────────────────────────────────────────
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('settingsCancelBtn').addEventListener('click', ()=>document.getElementById('settingsModal').classList.remove('open'));
+document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target===document.getElementById('settingsModal')) document.getElementById('settingsModal').classList.remove('open'); });
+document.getElementById('settingsSaveBtn').addEventListener('click', saveCompany);
+document.getElementById('empSaveBtn').addEventListener('click', saveEmployee);
+document.getElementById('emp_sel').addEventListener('change', loadEmployeeFields);
+
+function openSettings() {
+  // Fill company fields
+  var co = _profile.company||{};
+  document.getElementById('co_name').value    = co.name    || _cust.name || '';
+  document.getElementById('co_cvr').value     = co.cvr     || '';
+  document.getElementById('co_address').value = co.address || '';
+  document.getElementById('co_tel').value     = co.tel     || '';
+  document.getElementById('co_email').value   = co.email   || _cust.email || '';
+
+  // Fill employee dropdown
+  var sel = document.getElementById('emp_sel');
+  sel.innerHTML = _staff.map(s=>'<option value="'+s.id+'">'+esc(s.name)+' ('+esc(s.role||'')+')</option>').join('');
+  loadEmployeeFields();
+
+  document.getElementById('settingsErr').style.display='none';
+  document.getElementById('empSaveOk').style.display='none';
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function loadEmployeeFields() {
+  var sid = document.getElementById('emp_sel').value;
+  var ep  = (_profile.employees&&_profile.employees[sid])||{};
+  document.getElementById('emp_cpr').value     = ep.cpr     || '';
+  document.getElementById('emp_tel').value     = ep.tel     || '';
+  document.getElementById('emp_address').value = ep.address || '';
+  document.getElementById('emp_bank').value    = ep.bank    || '';
+  document.getElementById('empSaveOk').style.display='none';
+}
+
+async function saveCompany() {
+  var btn = document.getElementById('settingsSaveBtn');
+  btn.disabled=true; btn.textContent='Gemmer…';
+  try {
+    if(!_profile.company) _profile.company={};
+    _profile.company.name    = document.getElementById('co_name').value.trim();
+    _profile.company.cvr     = document.getElementById('co_cvr').value.trim();
+    _profile.company.address = document.getElementById('co_address').value.trim();
+    _profile.company.tel     = document.getElementById('co_tel').value.trim();
+    _profile.company.email   = document.getElementById('co_email').value.trim();
+    await window.fb.set('cust_'+_cust.id+'_payrollProfile', _profile);
+    toast('✓ Virksomhedsoplysninger gemt');
+    document.getElementById('settingsModal').classList.remove('open');
+    if(_psStaffId) renderPayslip(); // refresh open payslip
+  } catch(err) { showErr(document.getElementById('settingsErr'),'Fejl: '+err.message); }
+  btn.disabled=false; btn.textContent='💾 Gem virksomhedsoplysninger';
+}
+
+async function saveEmployee() {
+  var sid = document.getElementById('emp_sel').value;
+  var btn = document.getElementById('empSaveBtn');
+  btn.disabled=true; btn.textContent='Gemmer…';
+  try {
+    if(!_profile.employees) _profile.employees={};
+    _profile.employees[sid] = {
+      cpr:     document.getElementById('emp_cpr').value.trim(),
+      tel:     document.getElementById('emp_tel').value.trim(),
+      address: document.getElementById('emp_address').value.trim(),
+      bank:    document.getElementById('emp_bank').value.trim()
+    };
+    await window.fb.set('cust_'+_cust.id+'_payrollProfile', _profile);
+    var okEl = document.getElementById('empSaveOk');
+    okEl.textContent = '✓ Gemt';
+    okEl.style.display='block';
+    if(_psStaffId===parseInt(sid)) renderPayslip();
+  } catch(err) { showErr(document.getElementById('settingsErr'),'Fejl: '+err.message); }
+  btn.disabled=false; btn.textContent='✓ Gem medarbejder';
+}
+
 document.getElementById('refreshBtn').addEventListener('click', loadAllData);
 
 // ── Auto-login from ShiftDesk session ────────────────────────────────────────

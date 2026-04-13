@@ -689,6 +689,7 @@ window.handleLogin = async function handleLogin() {
         <div class="drop-item" onclick="openClockPanel()"><span style="width:20px;text-align:center;">&#128336;</span> Clock In/Out</div>
         <div class="drop-item" onclick="openAvailability()"><span style="width:20px;text-align:center;">&#128197;</span> Availability</div>
         <div class="drop-item" id="budgetMenuItem" onclick="openBudgetSystem()" style="background:#e6edf9;border-left:3px solid #1b4896;display:none;"><span style="width:20px;text-align:center;">&#128202;</span> <span style="color:#1b4896;font-weight:700;">Budget</span> <span style="font-size:.6rem;background:#1b4896;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
+        <div class="drop-item" id="payrollMenuItem" style="background:#f5f0ff;border-left:3px solid #6b21a8;display:none;"><span style="width:20px;text-align:center;">&#128176;</span> <span style="color:#6b21a8;font-weight:700;">Løn</span> <span style="font-size:.6rem;background:#6b21a8;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" onclick="sendWhatsApp()"><span style="width:20px;text-align:center;">&#128172;</span> Send WhatsApp</div>
         <div class="drop-item" onclick="openPhoneView()"><span style="width:20px;text-align:center;">&#128241;</span> Phone View</div>
         <div class="drop-sep"></div>
@@ -1054,7 +1055,8 @@ var ppClockTimer=null;
 var personReportId=null;
 
 // Password (stored in localStorage, default alex1900)
-var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||atob('U2hpZnREZXNrMjUh');
+var PI_PASSWORD=localStorage.getItem(atob('c2hpZnRkZXNrX21ncl9wdw=='))||atob('YWxleDE5MDA=');
+
 // ── MANAGER PASSWORD — saved in Firebase customerData per customer ────────
 async function waitForFbFunctions() {
   var tries = 0;
@@ -2315,7 +2317,9 @@ window.bootApp = function bootApp(email, customer){
       updateLicBtn();
     }catch(ex){}
   }
-var _bm=document.getElementById('budgetMenuItem');if(_bm){_bm.style.display=(customer&&customer.hasBudget)?'flex':'none';}  var displayName = customer ? (customer.name || email) : email;
+  var _bm=document.getElementById('budgetMenuItem');if(_bm){_bm.style.display=(customer&&customer.hasBudget)?'flex':'none';}
+  var _pm=document.getElementById('payrollMenuItem');if(_pm){_pm.style.display=(customer&&customer.hasPayroll)?'flex':'none';_pm.addEventListener('click',function(){document.getElementById('toolsWrap').classList.remove('open');window.open('payroll.html','_blank');});}
+  var displayName = customer ? (customer.name || email) : email;
   var tb = document.querySelector('.topbar-r');
   if(tb && email){
     var badge = document.createElement('div');

@@ -432,24 +432,35 @@ async function loadAllData() {
   try {
     var custId = _customer.id;
 
-    // Load staff — key: cust_cust_XXXX_staff
+    // Keys follow the same pattern as shiftdesk.html:
+    // custKey(k) = 'cust_' + customer.id + '_' + k
+    // customer.id is already 'cust_TIMESTAMP' so keys are 'cust_cust_TIMESTAMP_staff' etc.
     var staffKey = 'cust_' + custId + '_staff';
+    var clockKey = 'cust_' + custId + '_clockHistory';
+    var payKey   = 'cust_' + custId + '_payrollEntries';
+
+    // Try Firebase first, fall back to localStorage
     var staffRaw = await window.fb.getCustData(staffKey);
+    if (!staffRaw) {
+      // Fallback: try localStorage (shiftdesk.html base64 keys)
+      try { staffRaw = localStorage.getItem('shiftdesk_staff'); } catch(e) {}
+    }
     _staff = staffRaw ? JSON.parse(staffRaw) : [];
 
-    // Load clock history — key: cust_cust_XXXX_clockHistory
-    var clockKey = 'cust_' + custId + '_clockHistory';
     var clockRaw = await window.fb.getCustData(clockKey);
+    if (!clockRaw) {
+      try { clockRaw = localStorage.getItem('shiftdesk_clockhistory'); } catch(e) {}
+    }
     _clockData = clockRaw ? JSON.parse(clockRaw) : {};
 
-    // Load extra payroll entries added via this page
-    var payKey = 'cust_' + custId + '_payrollEntries';
+    // Payroll entries (admin-added) — Firebase only
     var payRaw = await window.fb.getCustData(payKey);
     _payrollData = payRaw ? JSON.parse(payRaw) : {};
 
+    // If staff still empty show clear message
     renderStaffGrid();
   } catch(err) {
-    toast('Fejl: ' + err.message);
+    toast('Fejl ved indlæsning: ' + err.message);
   }
 
   document.getElementById('loadingState').style.display = 'none';
@@ -529,8 +540,13 @@ function renderStaffGrid() {
   document.getElementById('periodLabel').textContent = 'Periode: ' + month;
 
   if (!_staff.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">Ingen medarbejdere fundet. Opret medarbejdere i ShiftDesk først.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">' +
+      '<div style="font-size:2rem;margin-bottom:12px;">👥</div>' +
+      '<div style="font-family:\'Fraunces\',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">Ingen medarbejdere fundet</div>' +
+      '<div style="font-size:.8rem;">Åbn ShiftDesk og tilføj medarbejdere — de synkroniserer automatisk hertil.</div>' +
+      '</div>';
     grid.style.display = 'grid';
+    document.getElementById('loadingState').style.display = 'none';
     return;
   }
 

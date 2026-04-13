@@ -6,11 +6,16 @@
 <title>ShiftDesk — Admin Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f7f5f1;--white:#fff;--s2:#f0ede7;--border:#e3ddd4;--b2:#c9c3b8;--text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--acc-lt:#fdf0e8;--green:#1b6e40;--green-lt:#e4f2ec;--blue:#1b4896;--blue-lt:#e6edf9;--red:#c0392b;--red-lt:#fdf0f0;--shadow:0 4px 16px rgba(0,0,0,.11);}
+:root{
+  --bg:#f7f5f1;--white:#fff;--s2:#f0ede7;--border:#e3ddd4;--b2:#c9c3b8;
+  --text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--acc-lt:#fdf0e8;
+  --green:#1b6e40;--green-lt:#e4f2ec;--blue:#1b4896;--blue-lt:#e6edf9;
+  --red:#c0392b;--red-lt:#fdf0f0;--shadow:0 4px 16px rgba(0,0,0,.11);
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* LOGIN */
+/* ── LOGIN ─────────────────────────────────────────────────────────────── */
 #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
 .login-box{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:48px 40px;width:400px;max-width:calc(100vw - 32px);box-shadow:0 24px 80px rgba(0,0,0,.11);}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
@@ -23,67 +28,69 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .login-input:focus{border-color:var(--acc);background:#fff;}
 .login-btn{width:100%;background:var(--acc);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .14s;}
 .login-btn:hover{background:#9d3c07;}
-.login-err{font-size:.73rem;color:var(--red);min-height:18px;margin-bottom:8px;display:none;padding:8px 10px;background:var(--red-lt);border-radius:7px;border:1px solid #f5c0c0;}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-err{font-size:.73rem;color:var(--red);margin-bottom:8px;display:none;padding:8px 10px;background:var(--red-lt);border-radius:7px;border:1px solid #f5c0c0;}
 
-/* TOPBAR */
+/* ── TOPBAR ─────────────────────────────────────────────────────────────── */
 .topbar{background:#fff;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.07);}
 .logo{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;display:flex;align-items:center;gap:9px;}
 .logo-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);}
 .admin-badge{background:var(--blue-lt);color:var(--blue);border:1px solid #c0d0ee;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace;letter-spacing:.04em;}
-.topbar-r{display:flex;align-items:center;gap:12px;}
+.topbar-r{display:flex;align-items:center;gap:10px;}
 .user-pill{font-size:.72rem;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:7px;}
 .user-pill-dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
 .logout-btn{background:transparent;border:1.5px solid var(--b2);color:var(--muted);border-radius:7px;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;}
 .logout-btn:hover{background:var(--red-lt);border-color:var(--red);color:var(--red);}
 
-/* MAIN */
-.page{max-width:960px;margin:0 auto;padding:32px 24px;}
+/* ── MAIN PAGE ──────────────────────────────────────────────────────────── */
+.page{max-width:980px;margin:0 auto;padding:32px 24px;}
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .page-title{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700;}
 .page-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
 
-/* STATS */
+/* ── STATS ──────────────────────────────────────────────────────────────── */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
 .stat-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;}
 .stat-val{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;line-height:1;}
 .stat-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-top:4px;}
 
-/* BTN */
+/* ── BUTTONS ────────────────────────────────────────────────────────────── */
 .btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .14s;white-space:nowrap;}
 .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
 .btn-acc{background:var(--acc);color:#fff;}
 .btn-acc:hover{background:#9d3c07;}
 .btn-ghost{background:#fff;border:1.5px solid var(--b2);color:var(--text);}
 .btn-ghost:hover{border-color:var(--text);background:var(--text);color:#fff;}
-.btn-green{background:var(--green);color:#fff;}
-.btn-green:hover{background:#145530;}
 .btn-sm{padding:5px 10px;font-size:.7rem;}
 
-/* CUSTOMER TABLE */
+/* ── CUSTOMER TABLE ─────────────────────────────────────────────────────── */
 .table-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;}
-.table-head{display:grid;grid-template-columns:1fr 180px 140px 150px 110px 120px;background:var(--s2);border-bottom:1.5px solid var(--border);padding:10px 18px;gap:12px;}
+.table-head{display:grid;grid-template-columns:1fr 180px 130px 150px 110px 120px;background:var(--s2);border-bottom:1.5px solid var(--border);padding:10px 18px;gap:12px;}
 .th{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;}
-.cust-row{display:grid;grid-template-columns:1fr 180px 140px 150px 110px 120px;padding:14px 18px;gap:12px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s;}
+.cust-row{display:grid;grid-template-columns:1fr 180px 130px 150px 110px 120px;padding:14px 18px;gap:12px;border-bottom:1px solid var(--border);align-items:center;transition:background .12s;}
 .cust-row:last-child{border-bottom:none;}
 .cust-row:hover{background:var(--s2);}
 .cust-name{font-weight:600;font-size:.85rem;}
-.cust-email{font-size:.74rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.cust-contact{font-size:.74rem;color:var(--muted);margin-top:2px;}
+.cust-email{font-size:.74rem;color:var(--muted);font-family:'DM Mono',monospace;}
 .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:.67rem;font-weight:700;padding:3px 9px;border-radius:20px;}
 .status-active{background:var(--green-lt);color:var(--green);}
 .status-inactive{background:var(--s2);color:var(--muted);}
-.plan-badge{font-size:.68rem;font-family:'DM Mono',monospace;font-weight:600;padding:3px 8px;border-radius:6px;}
+.status-expired{background:#fff3e0;color:#b45309;}
+.plan-badge{font-size:.68rem;font-family:'DM Mono',monospace;font-weight:600;padding:3px 8px;border-radius:6px;display:inline-block;}
 .plan-pro{background:var(--blue-lt);color:var(--blue);}
 .plan-starter{background:var(--acc-lt);color:var(--acc);}
 .plan-lifetime{background:#f0e8ff;color:#6b21a8;}
-.status-expired{background:#fff3e0;color:#b45309;}
 .expiry-date{font-size:.66rem;font-family:'DM Mono',monospace;color:var(--muted);margin-top:2px;}
-.expiry-soon{color:#b45309;font-weight:600;}
-.expiry-expired{color:var(--red);font-weight:600;}
+.expiry-soon{color:#b45309;font-size:.66rem;font-weight:600;margin-top:2px;}
+.expiry-expired{color:var(--red);font-size:.66rem;font-weight:600;margin-top:2px;}
+.budget-tag{display:inline-block;margin-left:5px;background:#e8f0fd;color:#1b4896;border-radius:4px;padding:2px 5px;font-size:.58rem;font-weight:700;border:1px solid #b0c8f0;}
 .empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
 .empty-icon{font-size:2.5rem;margin-bottom:12px;}
 .empty-title{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
 
-/* MODAL */
+/* ── MODALS ─────────────────────────────────────────────────────────────── */
 .overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:center;justify-content:center;}
 .overlay.open{display:flex;}
 .modal{background:#fff;border-radius:16px;padding:28px;width:440px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto;}
@@ -95,164 +102,103 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fc:focus{border-color:var(--acc);background:#fff;}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .modal-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end;}
-.btn-del-sm{margin-right:auto;background:transparent;border:1.5px solid #e5b0b0;color:var(--red);border-radius:8px;padding:7px 14px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.btn-del-sm{margin-right:auto;background:transparent;border:1.5px solid #e5b0b0;color:var(--red);border-radius:8px;padding:7px 14px;font-size:.74rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s;}
 .btn-del-sm:hover{background:var(--red-lt);}
-.form-err{font-size:.73rem;color:var(--red);min-height:16px;margin-bottom:6px;display:none;background:var(--red-lt);border-radius:7px;padding:7px 10px;border:1px solid #f5c0c0;}
-
-/* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;z-index:900;background:var(--text);color:#fff;padding:10px 18px;border-radius:9px;font-size:.77rem;font-weight:500;box-shadow:var(--shadow);animation:fadeIn .18s;}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-
-/* LOADING */
-.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:14px;color:var(--muted);}
-.spinner{width:32px;height:32px;border:3px solid var(--s2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-
+.form-err{font-size:.73rem;color:var(--red);margin-bottom:6px;display:none;background:var(--red-lt);border-radius:7px;padding:7px 10px;border:1px solid #f5c0c0;}
+.form-ok{font-size:.73rem;color:var(--green);margin-bottom:6px;display:none;background:var(--green-lt);border-radius:7px;padding:7px 10px;border:1px solid #a8d5bc;}
 .pw-reveal{position:relative;}
 .pw-reveal .fc{padding-right:36px;}
 .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:0;}
 
-/* RESET REQUESTS */
+/* ── PASSWORD RESET REQUESTS ────────────────────────────────────────────── */
 .reset-card{background:#fff;border:1.5px solid #f5c6a0;border-radius:14px;overflow:hidden;margin-bottom:28px;}
 .reset-card-head{background:#fdf0e8;border-bottom:1.5px solid #f5c6a0;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
 .reset-badge{background:var(--acc);color:#fff;font-size:.65rem;font-weight:700;border-radius:20px;padding:3px 9px;font-family:'DM Mono',monospace;margin-left:8px;}
-.reset-row{display:grid;grid-template-columns:1fr 160px 140px 120px;padding:13px 18px;gap:12px;border-bottom:1px solid var(--border);align-items:center;}
+.reset-head-row{display:grid;grid-template-columns:1fr 170px 130px 120px;background:var(--s2);border-bottom:1.5px solid var(--border);padding:10px 18px;gap:12px;}
+.reset-row{display:grid;grid-template-columns:1fr 170px 130px 120px;padding:13px 18px;gap:12px;border-bottom:1px solid var(--border);align-items:center;}
 .reset-row:last-child{border-bottom:none;}
-.reset-head-row{display:grid;grid-template-columns:1fr 160px 140px 120px;background:var(--s2);border-bottom:1.5px solid var(--border);padding:10px 18px;gap:12px;}
-.notif-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-left:6px;vertical-align:middle;}
+
+/* ── TOAST ──────────────────────────────────────────────────────────────── */
+.toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--text);color:#fff;padding:10px 18px;border-radius:9px;font-size:.77rem;font-weight:500;box-shadow:var(--shadow);animation:fadeIn .18s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LOADING ────────────────────────────────────────────────────────────── */
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;flex-direction:column;gap:14px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--s2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
-
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, getDocs, setDoc, getDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M",
-    authDomain: "shiftdesk-admin.firebaseapp.com",
-    projectId: "shiftdesk-admin",
-    storageBucket: "shiftdesk-admin.firebasestorage.app",
-    messagingSenderId: "942500137972",
-    appId: "1:942500137972:web:c0e0755c97f3590bcb07a1",
-    measurementId: "G-YVZEEZYT63"
-  };
-
-  try {
-    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-
-    window.fbLoadCustomers = async function() {
-      const snap = await getDocs(collection(db, "customers"));
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    };
-    window.fbSaveCustomer = async function(customer) {
-      await setDoc(doc(db, "customers", customer.id), customer);
-    };
-    window.fbDeleteCustomer = async function(id) {
-      await deleteDoc(doc(db, "customers", id));
-    };
-
-    window.fbSetData = async function(key, val) {
-      try { await setDoc(doc(db, "appSettings", key), { value: JSON.stringify(val) }); return true; } catch(e) { return false; }
-    };
-    window.fbGetData = async function(key) {
-      try {
-        const d = await getDoc(doc(db, "appSettings", key));
-        return d.exists() ? JSON.parse(d.data().value) : null;
-      } catch(e) { return null; }
-    };
-
-    window.fbSetCustomerData = async function(key, val) {
-      try { await setDoc(doc(db, "customerData", key), { value: val }); return true; } catch(e) { return false; }
-    };
-
-    window.fbLoadResetRequests = async function() {
-      try {
-        const snap = await getDocs(collection(db, "passwordResets"));
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch(e) { return []; }
-    };
-    window.fbDeleteResetRequest = async function(id) {
-      try { await deleteDoc(doc(db, "passwordResets", id)); } catch(e) {}
-    };
-
-    window._fbReady = true;
-  } catch(err) {
-    console.error("Firebase init failed:", err);
-    window._fbReady = false;
-  }
-</script>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ── LOGIN SCREEN ──────────────────────────────────────────────────────── -->
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo"><div class="login-dot"></div><div class="login-brand">ShiftDesk</div></div>
     <div class="login-tagline">Admin Portal</div>
     <div class="login-title">Sign in as administrator</div>
     <label class="login-lbl">Admin Password</label>
-    <input class="login-input" type="password" id="adminPwInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()">
-    <div class="login-err" id="loginErr">Incorrect password. Try again.</div>
-    <button class="login-btn" onclick="doAdminLogin()">Sign In →</button>
+    <input class="login-input" type="password" id="adminPwInput" placeholder="Enter admin password" autocomplete="current-password">
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" id="loginBtn">Sign In →</button>
   </div>
 </div>
 
-<!-- TOPBAR -->
+<!-- ── TOPBAR ────────────────────────────────────────────────────────────── -->
 <nav class="topbar" id="topbar" style="display:none;">
   <div class="logo"><div class="logo-dot"></div>ShiftDesk <span class="admin-badge">ADMIN</span></div>
   <div class="topbar-r">
-    <div class="user-pill"><div class="user-pill-dot"></div><span id="adminEmailDisplay">admin</span></div>
-    <button class="logout-btn" onclick="openChangePw()" style="border-color:var(--b2);color:var(--muted);">🔑 Change Password</button>
-    <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    <div class="user-pill"><div class="user-pill-dot"></div>Administrator</div>
+    <button class="logout-btn" id="changePwBtn">🔑 Change Password</button>
+    <button class="logout-btn" id="logoutBtn">Sign Out</button>
   </div>
 </nav>
 
-<!-- CHANGE PASSWORD MODAL -->
-<div class="overlay" id="changePwModal" onclick="if(event.target===this)closeChangePw()">
+<!-- ── CHANGE PASSWORD MODAL ─────────────────────────────────────────────── -->
+<div class="overlay" id="changePwModal">
   <div class="modal" style="max-width:380px;">
     <div class="modal-title">Change Admin Password</div>
     <div class="fg">
       <label class="fl">Current Password</label>
       <div class="pw-reveal">
-        <input class="fc" type="password" id="cp_current" placeholder="Your current password">
-        <button class="pw-eye" onclick="togglePw('cp_current',this)" title="Show/hide">👁</button>
+        <input class="fc" type="password" id="cp_current" placeholder="Your current password" autocomplete="current-password">
+        <button class="pw-eye" type="button" data-target="cp_current">👁</button>
       </div>
     </div>
     <div class="fg">
       <label class="fl">New Password</label>
       <div class="pw-reveal">
-        <input class="fc" type="password" id="cp_new" placeholder="At least 6 characters">
-        <button class="pw-eye" onclick="togglePw('cp_new',this)" title="Show/hide">👁</button>
+        <input class="fc" type="password" id="cp_new" placeholder="At least 6 characters" autocomplete="new-password">
+        <button class="pw-eye" type="button" data-target="cp_new">👁</button>
       </div>
     </div>
     <div class="fg">
       <label class="fl">Confirm New Password</label>
       <div class="pw-reveal">
-        <input class="fc" type="password" id="cp_confirm" placeholder="Repeat new password">
-        <button class="pw-eye" onclick="togglePw('cp_confirm',this)" title="Show/hide">👁</button>
+        <input class="fc" type="password" id="cp_confirm" placeholder="Repeat new password" autocomplete="new-password">
+        <button class="pw-eye" type="button" data-target="cp_confirm">👁</button>
       </div>
     </div>
     <div class="form-err" id="cpErr"></div>
-    <div id="cpSuccess" style="display:none;font-size:.73rem;color:var(--green);background:var(--green-lt);border-radius:7px;padding:8px 10px;border:1px solid #a8d5be;margin-bottom:6px;">✓ Password changed successfully!</div>
+    <div class="form-ok" id="cpSuccess">✓ Password changed successfully!</div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeChangePw()">Cancel</button>
-      <button class="btn btn-acc" onclick="doChangePw()">Update Password</button>
+      <button class="btn btn-ghost" id="changePwCancelBtn">Cancel</button>
+      <button class="btn btn-acc" id="changePwSaveBtn">Update Password</button>
     </div>
   </div>
 </div>
 
-<!-- MAIN PAGE -->
+<!-- ── MAIN PAGE ─────────────────────────────────────────────────────────── -->
 <div class="page" id="mainPage" style="display:none;">
   <div class="page-header">
     <div>
       <div class="page-title">Customer Accounts</div>
       <div class="page-sub">Manage restaurant clients — each gets their own private ShiftDesk workspace</div>
     </div>
-    <button class="btn btn-acc" onclick="openAddCustomer()">＋ Add Customer</button>
+    <button class="btn btn-acc" id="addCustomerBtn">＋ Add Customer</button>
   </div>
 
   <div id="fbBanner" style="display:none;background:#fff3e0;border:1.5px solid #f6c470;border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:.78rem;color:#92400e;">
-    <strong>⚠ Firebase not connected</strong> — Data is stored locally in this browser only.
+    ⚠ <strong>Firebase not connected</strong> — check your internet connection and try refreshing.
   </div>
 
   <!-- Stats -->
@@ -267,7 +213,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="stat-card">
       <div class="stat-val" style="color:var(--muted)" id="statInactive">—</div>
-      <div class="stat-lbl">Inactive</div>
+      <div class="stat-lbl">Inactive / Expired</div>
     </div>
   </div>
 
@@ -276,50 +222,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="reset-card">
       <div class="reset-card-head">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:1.1rem;">&#128274;</span>
+          <span style="font-size:1.1rem;">🔒</span>
           <span style="font-family:'Fraunces',serif;font-weight:700;font-size:1rem;">Password Reset Requests</span>
           <span class="reset-badge" id="resetCount">0</span>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="loadResetRequests()">&#8635; Refresh</button>
+        <button class="btn btn-ghost btn-sm" id="refreshResetsBtn">↻ Refresh</button>
       </div>
-      <div id="resetRequestsTable">
+      <div>
         <div class="reset-head-row">
           <div class="th">Customer</div>
-          <div class="th">Requested</div>
-          <div class="th">New Password</div>
+          <div class="th">Requested At</div>
+          <div class="th">Note</div>
           <div class="th">Actions</div>
         </div>
-        <div id="resetRequestsBody">
-          <div class="empty-state" style="padding:28px;"><div class="empty-icon">&#10003;</div><div class="empty-title">No pending requests</div></div>
-        </div>
+        <div id="resetRequestsBody"></div>
       </div>
     </div>
   </div>
 
   <!-- Reset Password Modal -->
-  <div class="overlay" id="resetPwModal" onclick="if(event.target===this)closeResetModal()">
+  <div class="overlay" id="resetPwModal">
     <div class="modal" style="max-width:400px;">
-      <div class="modal-title">&#128274; Reset Customer Password</div>
+      <div class="modal-title">🔒 Reset Customer Password</div>
       <div id="resetCustomerInfo" style="background:var(--s2);border-radius:9px;padding:11px 14px;margin-bottom:16px;font-size:.8rem;"></div>
       <div class="fg">
         <label class="fl">New Password for Customer</label>
         <div class="pw-reveal">
-          <input class="fc" type="password" id="reset_newpw" placeholder="At least 4 characters">
-          <button class="pw-eye" onclick="togglePw('reset_newpw',this)" title="Show/hide">&#128065;</button>
+          <input class="fc" type="password" id="reset_newpw" placeholder="At least 8 characters" autocomplete="new-password">
+          <button class="pw-eye" type="button" data-target="reset_newpw">👁</button>
         </div>
       </div>
       <div class="fg">
         <label class="fl">Confirm Password</label>
         <div class="pw-reveal">
-          <input class="fc" type="password" id="reset_confirmpw" placeholder="Repeat password">
-          <button class="pw-eye" onclick="togglePw('reset_confirmpw',this)" title="Show/hide">&#128065;</button>
+          <input class="fc" type="password" id="reset_confirmpw" placeholder="Repeat password" autocomplete="new-password">
+          <button class="pw-eye" type="button" data-target="reset_confirmpw">👁</button>
         </div>
       </div>
       <div class="form-err" id="resetPwErr"></div>
-      <div id="resetPwOk" style="display:none;font-size:.73rem;color:var(--green);background:var(--green-lt);border-radius:7px;padding:8px 10px;border:1px solid #a8d5bc;margin-bottom:6px;">&#10003; Password reset successfully!</div>
+      <div class="form-ok" id="resetPwOk">✓ Password reset successfully!</div>
       <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeResetModal()">Cancel</button>
-        <button class="btn btn-acc" onclick="doResetCustomerPw()">Reset Password</button>
+        <button class="btn btn-ghost" id="resetCancelBtn">Cancel</button>
+        <button class="btn btn-acc" id="resetSaveBtn">Reset Password</button>
       </div>
     </div>
   </div>
@@ -334,8 +278,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ADD/EDIT CUSTOMER MODAL -->
-<div class="overlay" id="customerModal" onclick="if(event.target===this)closeModal()">
+<!-- ── ADD / EDIT CUSTOMER MODAL ─────────────────────────────────────────── -->
+<div class="overlay" id="customerModal">
   <div class="modal">
     <div class="modal-title" id="modalTitle">Add New Customer</div>
     <div class="fg">
@@ -353,10 +297,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
     <div class="fg">
-      <label class="fl">Login Password</label>
+      <label class="fl">Login Password <span id="pwHint" style="text-transform:none;font-weight:400;color:var(--muted);">(required for new customer)</span></label>
       <div class="pw-reveal">
-        <input class="fc" type="password" id="f_password" placeholder="Set password (min 8 chars, blank = keep current)">
-        <button class="pw-eye" onclick="togglePw('f_password',this)" title="Show/hide">👁</button>
+        <input class="fc" type="password" id="f_password" placeholder="Min 8 characters" autocomplete="new-password">
+        <button class="pw-eye" type="button" data-target="f_password">👁</button>
       </div>
     </div>
     <div class="frow">
@@ -393,13 +337,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <label class="fl">Notes (optional)</label>
       <input class="fc" type="text" id="f_notes" placeholder="e.g. Trial period, referred by…" autocomplete="off">
     </div>
-
-
-    <!-- BUDGET ADDON -->
-    <div class="fg" style="background:#e8f0fd;border:1.5px solid #1b4896;border-radius:10px;padding:12px 14px;margin-top:4px;">
+    <div class="fg" style="background:#e8f0fd;border:1.5px solid #1b4896;border-radius:10px;padding:12px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <div>
-          <label style="font-size:.78rem;font-weight:700;color:#1b4896;display:block;margin-bottom:2px;">&#128200; Budget &amp; Finance Add-on</label>
+          <div style="font-size:.78rem;font-weight:700;color:#1b4896;margin-bottom:2px;">📊 Budget &amp; Finance Add-on</div>
           <div style="font-size:.68rem;color:#3a5a96;">Grants access to the Restaurant Budget finance module</div>
         </div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
@@ -410,376 +351,413 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="form-err" id="formErr"></div>
     <div class="modal-actions">
-      <button class="btn-del-sm" id="deleteBtn" onclick="deleteCustomer()" style="display:none;">🗑 Delete</button>
-      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-acc" onclick="saveCustomer()" id="saveBtn">Add Customer</button>
+      <button class="btn-del-sm" id="deleteBtn" style="display:none;">🗑 Delete</button>
+      <button class="btn btn-ghost" id="modalCancelBtn">Cancel</button>
+      <button class="btn btn-acc" id="saveBtn">Add Customer</button>
     </div>
   </div>
 </div>
 
-<script>
-var ADMIN_PASSWORD_KEY = 'shiftdesk_admin_pw';
-var CUSTOMERS_KEY = 'shiftdesk_customers';
-var DEFAULT_ADMIN_PW = 'Admin2025';
+<!-- ── FIREBASE (module) ──────────────────────────────────────────────────── -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, getDocs, setDoc, getDoc, deleteDoc, doc }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-var customers = [];
-var editingId = null;
-var isLoggedIn = false;
+const FB_CFG = {
+  apiKey:            'AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M',
+  authDomain:        'shiftdesk-admin.firebaseapp.com',
+  projectId:         'shiftdesk-admin',
+  storageBucket:     'shiftdesk-admin.firebasestorage.app',
+  messagingSenderId: '942500137972',
+  appId:             '1:942500137972:web:c0e0755c97f3590bcb07a1'
+};
 
-// ── LOGIN LOCKOUT ──────────────────────────────────────────────────────────
-var LOGIN_ATTEMPTS_KEY = 'shiftdesk_admin_attempts';
-var LOGIN_LOCKOUT_KEY  = 'shiftdesk_admin_lockout';
-var MAX_ATTEMPTS = 5;
-var LOCKOUT_MS   = 30000;
+try {
+  const app = getApps().length ? getApps()[0] : initializeApp(FB_CFG);
+  const db  = getFirestore(app);
 
-function isLockedOut() {
-  try {
-    var lockUntil = parseInt(localStorage.getItem(LOGIN_LOCKOUT_KEY) || '0');
-    if (Date.now() < lockUntil) return Math.ceil((lockUntil - Date.now()) / 1000);
-    return false;
-  } catch(e) { return false; }
+  window.fb = {
+    loadCustomers:     async () => { const s = await getDocs(collection(db,'customers')); return s.docs.map(d=>({id:d.id,...d.data()})); },
+    saveCustomer:      async (c) => { await setDoc(doc(db,'customers',c.id), c); },
+    deleteCustomer:    async (id) => { await deleteDoc(doc(db,'customers',id)); },
+    getAdminPw:        async () => { try { const d = await getDoc(doc(db,'appSettings','shiftdesk_admin_pw')); return d.exists() ? JSON.parse(d.data().value) : null; } catch(e) { return null; } },
+    setAdminPw:        async (val) => { await setDoc(doc(db,'appSettings','shiftdesk_admin_pw'), { value: JSON.stringify(val) }); },
+    setCustomerData:   async (key,val) => { await setDoc(doc(db,'customerData',key), { value: val }); },
+    loadResetRequests: async () => { try { const s = await getDocs(collection(db,'passwordResets')); return s.docs.map(d=>({id:d.id,...d.data()})); } catch(e) { return []; } },
+    deleteResetRequest:async (id) => { try { await deleteDoc(doc(db,'passwordResets',id)); } catch(e) {} }
+  };
+  window._fbReady = true;
+} catch(err) {
+  console.error('Firebase init error:', err);
+  window._fbReady = false;
 }
-function recordFailedAttempt() {
+</script>
+
+<!-- ── APP LOGIC ──────────────────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+// ── Constants ────────────────────────────────────────────────────────────────
+var ADMIN_PW_LS_KEY  = 'shiftdesk_admin_pw';
+var DEFAULT_ADMIN_PW = 'Admin2025';
+var MAX_ATTEMPTS     = 5;
+var LOCKOUT_MS       = 30000;
+
+// ── State ────────────────────────────────────────────────────────────────────
+var customers        = [];
+var editingId        = null;
+var resetRequestId   = null;
+var resetRequestEmail= null;
+var resetRequests    = [];
+
+// ── Wait for Firebase module to initialise ───────────────────────────────────
+function waitFb() {
+  return new Promise(function(resolve) {
+    if (window._fbReady !== undefined) { resolve(window._fbReady); return; }
+    var t = 0;
+    var iv = setInterval(function() {
+      if (window._fbReady !== undefined || ++t > 50) {
+        clearInterval(iv);
+        resolve(!!window._fbReady);
+      }
+    }, 100);
+  });
+}
+
+// ── Password helpers ─────────────────────────────────────────────────────────
+async function hashPw(pw) {
   try {
-    var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0') + 1;
-    localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts);
-    if (attempts >= MAX_ATTEMPTS) {
-      localStorage.setItem(LOGIN_LOCKOUT_KEY, Date.now() + LOCKOUT_MS);
-      localStorage.setItem(LOGIN_ATTEMPTS_KEY, '0');
+    var buf  = new TextEncoder().encode(pw);
+    var hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+  } catch(e) { return pw; }
+}
+
+async function verifyPw(pw, hash) {
+  try { return (await hashPw(pw)) === hash; } catch(e) { return false; }
+}
+
+// ── Lockout helpers ──────────────────────────────────────────────────────────
+function getLockout() {
+  try {
+    var until = parseInt(localStorage.getItem('sd_adm_lockout') || '0');
+    if (Date.now() < until) return Math.ceil((until - Date.now()) / 1000);
+  } catch(e) {}
+  return 0;
+}
+function recordFail() {
+  try {
+    var n = parseInt(localStorage.getItem('sd_adm_attempts') || '0') + 1;
+    localStorage.setItem('sd_adm_attempts', n);
+    if (n >= MAX_ATTEMPTS) {
+      localStorage.setItem('sd_adm_lockout', Date.now() + LOCKOUT_MS);
+      localStorage.setItem('sd_adm_attempts', '0');
     }
   } catch(e) {}
 }
-function clearAttempts() {
-  try { localStorage.removeItem(LOGIN_ATTEMPTS_KEY); localStorage.removeItem(LOGIN_LOCKOUT_KEY); } catch(e) {}
+function clearLockout() {
+  try { localStorage.removeItem('sd_adm_attempts'); localStorage.removeItem('sd_adm_lockout'); } catch(e) {}
 }
 
-// ── PASSWORD HASHING (SHA-256) ──
-async function hashPassword(password) {
+// ── Load / save admin password ───────────────────────────────────────────────
+async function getStoredAdminPw() {
+  // 1. localStorage (fastest)
   try {
-    var buf = new TextEncoder().encode(password);
-    var hash = await crypto.subtle.digest('SHA-256', buf);
-    return Array.from(new Uint8Array(hash)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
-  } catch(e) { return password; }
-}
-
-async function verifyPassword(password, hash) {
+    var lv = localStorage.getItem(ADMIN_PW_LS_KEY);
+    if (lv) return JSON.parse(lv);
+  } catch(e) {}
+  // 2. Firebase fallback
   try {
-    var h = await hashPassword(password);
-    return h === hash;
-  } catch(e) { return false; }
-}
-
-// ── STORAGE HELPERS ────────────────────────────────────────────────────────
-async function storageGet(key) {
-  if (window._fbReady && key === CUSTOMERS_KEY) {
-    try { return await window.fbLoadCustomers(); } catch(e) {}
-  }
-  if (key === ADMIN_PASSWORD_KEY) {
-    // Always check localStorage first for admin password — fast and reliable
-    try {
-      var lv = localStorage.getItem(key);
-      if (lv) return JSON.parse(lv);
-    } catch(e) {}
-    // Fallback: try Firebase if localStorage empty
-    if (window._fbReady && window.fbGetData) {
-      try {
-        var fbVal = await window.fbGetData(ADMIN_PASSWORD_KEY);
-        if (fbVal) return fbVal;
-      } catch(e) {}
+    var ok = await waitFb();
+    if (ok && window.fb) {
+      var fbv = await window.fb.getAdminPw();
+      if (fbv) return fbv;
     }
-    return null;
-  }
-  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+  } catch(e) {}
+  return null;
 }
 
-async function storageSet(key, val) {
-  if (window._fbReady && key === CUSTOMERS_KEY) {
-    return true;
-  }
-  if (key === ADMIN_PASSWORD_KEY) {
-    if (window._fbReady && window.fbSetData) {
-      try { await window.fbSetData(ADMIN_PASSWORD_KEY, val); } catch(e) {}
-    }
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-    return true;
-  }
-  try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e) { return false; }
+async function saveAdminPw(obj) {
+  try { localStorage.setItem(ADMIN_PW_LS_KEY, JSON.stringify(obj)); } catch(e) {}
+  try {
+    var ok = await waitFb();
+    if (ok && window.fb) await window.fb.setAdminPw(obj);
+  } catch(e) {}
 }
 
-// ── SUBSCRIPTION HELPERS ───────────────────────────────────────────────────
-function calcExpiryDate(startDate, duration) {
-  if (duration === 'lifetime') return null;
-  var d = new Date(startDate);
-  d.setFullYear(d.getFullYear() + parseInt(duration));
-  return d.toISOString().split('T')[0];
-}
+// ── LOGIN ────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  var inp    = document.getElementById('adminPwInput');
+  var errEl  = document.getElementById('loginErr');
+  var btn    = document.getElementById('loginBtn');
+  var pw     = inp.value;
 
-function expiryStatus(expiryDate) {
-  if (!expiryDate) return 'lifetime';
-  var now = new Date();
-  var exp = new Date(expiryDate);
-  var diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-  if (diffDays < 0) return 'expired';
-  if (diffDays <= 30) return 'soon';
-  return 'ok';
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '—';
-  var d = new Date(dateStr);
-  return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-}
-
-// ── AUTH ───────────────────────────────────────────────────────────────────
-async function doAdminLogin() {
-  var inp = document.getElementById('adminPwInput');
-  var pw = inp.value;
-  var err = document.getElementById('loginErr');
+  errEl.style.display = 'none';
   if (!pw) { inp.focus(); return; }
 
-  var locked = isLockedOut();
+  var locked = getLockout();
   if (locked) {
-    err.textContent = 'Too many failed attempts. Try again in ' + locked + ' seconds.';
-    err.style.display = 'block';
+    showErr(errEl, 'Too many attempts. Wait ' + locked + ' seconds.');
     inp.value = '';
     return;
   }
 
-  var stored = await storageGet(ADMIN_PASSWORD_KEY);
-  var adminPw = stored ? stored.password : null;
+  btn.disabled   = true;
+  btn.textContent = 'Checking…';
 
-  var match = false;
-  if (adminPw) {
-    match = await verifyPassword(pw, adminPw);
-  } else {
-    match = (pw === DEFAULT_ADMIN_PW);
-    if (match) {
-      var hashed = await hashPassword(pw);
-      await storageSet(ADMIN_PASSWORD_KEY, { password: hashed });
-    }
-  }
+  try {
+    var stored = await getStoredAdminPw();
+    var match  = false;
 
-  if (match) {
-    clearAttempts();
-    err.style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('topbar').style.display = 'flex';
-    document.getElementById('mainPage').style.display = 'block';
-    isLoggedIn = true;
-    loadCustomers();
-  } else {
-    recordFailedAttempt();
-    var remaining = isLockedOut();
-    if (remaining) {
-      err.textContent = 'Too many failed attempts. Locked for ' + remaining + ' seconds.';
+    if (stored && stored.password) {
+      match = await verifyPw(pw, stored.password);
     } else {
-      err.textContent = 'Incorrect password. Try again.';
+      // First time — compare to default plaintext password
+      match = (pw === DEFAULT_ADMIN_PW);
+      if (match) {
+        var hashed = await hashPw(pw);
+        await saveAdminPw({ password: hashed });
+      }
     }
-    err.style.display = 'block';
-    inp.value = '';
-    inp.style.borderColor = '#c0392b';
-    setTimeout(function(){ inp.style.borderColor = ''; }, 600);
+
+    if (match) {
+      clearLockout();
+      enterApp();
+    } else {
+      recordFail();
+      var remaining = getLockout();
+      if (remaining) {
+        showErr(errEl, 'Too many failed attempts. Locked for ' + remaining + ' seconds.');
+      } else {
+        showErr(errEl, 'Incorrect password. Try again.');
+      }
+      inp.value = '';
+      inp.style.borderColor = 'var(--red)';
+      setTimeout(function(){ inp.style.borderColor = ''; }, 700);
+    }
+  } catch(err) {
+    showErr(errEl, 'Login error: ' + err.message);
   }
+
+  btn.disabled    = false;
+  btn.textContent = 'Sign In →';
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('topbar').style.display      = 'flex';
+  document.getElementById('mainPage').style.display    = 'block';
+  loadCustomers();
 }
 
 function doLogout() {
+  customers = [];
   document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('topbar').style.display = 'none';
-  document.getElementById('mainPage').style.display = 'none';
-  document.getElementById('adminPwInput').value = '';
-  isLoggedIn = false;
+  document.getElementById('topbar').style.display      = 'none';
+  document.getElementById('mainPage').style.display    = 'none';
+  document.getElementById('adminPwInput').value        = '';
+  document.getElementById('loginErr').style.display    = 'none';
 }
 
-// ── CHANGE PASSWORD ────────────────────────────────────────────────────────
-function openChangePw() {
-  document.getElementById('cp_current').value = '';
-  document.getElementById('cp_new').value = '';
-  document.getElementById('cp_confirm').value = '';
-  document.getElementById('cpErr').style.display = 'none';
-  document.getElementById('cpSuccess').style.display = 'none';
-  document.getElementById('changePwModal').classList.add('open');
-  setTimeout(function(){ document.getElementById('cp_current').focus(); }, 100);
-}
-
-function closeChangePw() {
-  document.getElementById('changePwModal').classList.remove('open');
-}
-
+// ── CHANGE ADMIN PASSWORD ────────────────────────────────────────────────────
 async function doChangePw() {
   var current = document.getElementById('cp_current').value;
   var newPw   = document.getElementById('cp_new').value;
-  var confirm = document.getElementById('cp_confirm').value;
+  var conf    = document.getElementById('cp_confirm').value;
   var errEl   = document.getElementById('cpErr');
   var okEl    = document.getElementById('cpSuccess');
   errEl.style.display = 'none';
-  okEl.style.display = 'none';
+  okEl.style.display  = 'none';
 
-  var stored = await storageGet(ADMIN_PASSWORD_KEY);
-  var adminPw = stored ? stored.password : null;
-  var match = adminPw ? await verifyPassword(current, adminPw) : (current === DEFAULT_ADMIN_PW);
-  if (!match) {
-    errEl.textContent = 'Current password is incorrect.';
-    errEl.style.display = 'block';
-    document.getElementById('cp_current').value = '';
-    document.getElementById('cp_current').focus();
-    return;
-  }
-  if (!newPw || newPw.length < 8) {
-    errEl.textContent = 'New password must be at least 8 characters.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (newPw !== confirm) {
-    errEl.textContent = 'Passwords do not match.';
-    errEl.style.display = 'block';
-    document.getElementById('cp_confirm').value = '';
-    document.getElementById('cp_confirm').focus();
-    return;
+  if (!current || !newPw || !conf) { showErr(errEl, 'All fields are required.'); return; }
+  if (newPw.length < 6) { showErr(errEl, 'New password must be at least 6 characters.'); return; }
+  if (newPw !== conf)   { showErr(errEl, 'New passwords do not match.'); return; }
+
+  var stored = await getStoredAdminPw();
+  var valid  = false;
+  if (stored && stored.password) {
+    valid = await verifyPw(current, stored.password);
+  } else {
+    valid = (current === DEFAULT_ADMIN_PW);
   }
 
-  var newHashed = await hashPassword(newPw);
-  await storageSet(ADMIN_PASSWORD_KEY, { password: newHashed });
+  if (!valid) { showErr(errEl, 'Current password is incorrect.'); return; }
+
+  var hashed = await hashPw(newPw);
+  await saveAdminPw({ password: hashed });
   okEl.style.display = 'block';
   document.getElementById('cp_current').value = '';
-  document.getElementById('cp_new').value = '';
+  document.getElementById('cp_new').value     = '';
   document.getElementById('cp_confirm').value = '';
   setTimeout(closeChangePw, 1800);
   toast('Admin password updated ✓');
 }
 
-// ── FIREBASE READY HELPER ──────────────────────────────────────────────────
-async function waitFbReady() {
-  var tries = 0;
-  while (window._fbReady === undefined && tries++ < 40) {
-    await new Promise(r => setTimeout(r, 100));
-  }
+function openChangePw() {
+  document.getElementById('cp_current').value = '';
+  document.getElementById('cp_new').value     = '';
+  document.getElementById('cp_confirm').value = '';
+  document.getElementById('cpErr').style.display     = 'none';
+  document.getElementById('cpSuccess').style.display = 'none';
+  document.getElementById('changePwModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('cp_current').focus(); }, 100);
+}
+function closeChangePw() {
+  document.getElementById('changePwModal').classList.remove('open');
 }
 
-// ── LOAD CUSTOMERS ─────────────────────────────────────────────────────────
+// ── LOAD CUSTOMERS ───────────────────────────────────────────────────────────
 async function loadCustomers() {
-  document.getElementById('loadingState').style.display = 'flex';
+  document.getElementById('loadingState').style.display  = 'flex';
   document.getElementById('customerTable').style.display = 'none';
 
-  await waitFbReady();
-
-  // ✅ FIX: Always load from Firebase only — never fall back to localStorage for customers
-  if (window._fbReady) {
+  var ok = await waitFb();
+  if (ok && window.fb) {
     try {
-      customers = await window.fbLoadCustomers();
+      customers = await window.fb.loadCustomers();
+      document.getElementById('fbBanner').style.display = 'none';
     } catch(e) {
       customers = [];
-      toast('Firebase error — check Firestore is enabled in console.firebase.google.com');
+      document.getElementById('fbBanner').style.display = 'block';
     }
   } else {
     customers = [];
-    var banner = document.getElementById('fbBanner');
-    if (banner) banner.style.display = 'block';
+    document.getElementById('fbBanner').style.display = 'block';
   }
 
-  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('loadingState').style.display  = 'none';
   document.getElementById('customerTable').style.display = 'block';
   renderTable();
   updateStats();
   loadResetRequests();
 }
 
-// ── RENDER TABLE ───────────────────────────────────────────────────────────
+// ── RENDER CUSTOMER TABLE ────────────────────────────────────────────────────
 function renderTable() {
   var el = document.getElementById('customerTable');
-
   if (!customers.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-title">No customers yet</div><div style="font-size:.78rem;margin-top:4px;">Add your first restaurant client to get started.</div></div>';
+    el.innerHTML =
+      '<div class="empty-state">' +
+      '<div class="empty-icon">🏪</div>' +
+      '<div class="empty-title">No customers yet</div>' +
+      '<div style="font-size:.78rem;margin-top:4px;">Add your first restaurant client to get started.</div>' +
+      '</div>';
     return;
   }
 
-  var html = '<div class="table-head">';
-  html += '<div class="th">Restaurant</div>';
-  html += '<div class="th">Email / Login</div>';
-  html += '<div class="th">Plan</div>';
-  html += '<div class="th">Subscription</div>';
-  html += '<div class="th">Status</div>';
-  html += '<div class="th">Actions</div>';
-  html += ' + (c.hasBudget ? '<span style="margin-left:4px;background:#e8f0fd;color:#1b4896;border-radius:4px;padding:2px 5px;font-size:.58rem;font-weight:700;border:1px solid #b0c8f0;">&#128200; Budget</span>' : '') + '</div>';
+  var html = '<div class="table-head">' +
+    '<div class="th">Restaurant</div>' +
+    '<div class="th">Email</div>' +
+    '<div class="th">Plan</div>' +
+    '<div class="th">Subscription</div>' +
+    '<div class="th">Status</div>' +
+    '<div class="th">Actions</div>' +
+    '</div>';
 
   customers.forEach(function(c) {
-    var expStatus = expiryStatus(c.expiryDate);
-    var effectiveStatus = expStatus === 'expired' ? 'expired' : c.status;
+    var expStatus     = getExpiryStatus(c.expiryDate);
+    var effectiveSt   = (expStatus === 'expired') ? 'expired' : c.status;
 
+    // Plan cell
+    var planLabel  = c.plan === 'pro' ? 'Pro' : 'Starter';
+    var planClass  = c.plan === 'pro' ? 'plan-pro' : 'plan-starter';
+    var budgetTag  = c.hasBudget ? '<span class="budget-tag">📊 Budget</span>' : '';
+    var planCell   = '<span class="plan-badge ' + planClass + '">' + planLabel + '</span>' + budgetTag;
+
+    // Subscription cell
     var subCell = '';
     if (c.duration === 'lifetime') {
       subCell = '<span class="plan-badge plan-lifetime">♾ Lifetime</span>';
     } else {
-      var dLabel = c.duration ? c.duration + (c.duration === '1' ? ' Year' : ' Years') : '—';
-      var expClass = expStatus === 'expired' ? 'expiry-expired' : expStatus === 'soon' ? 'expiry-soon' : 'expiry-date';
+      var dLabel   = c.duration ? c.duration + (c.duration === '1' ? ' Year' : ' Years') : '—';
       var expLabel = c.expiryDate ? formatDate(c.expiryDate) : '—';
-      if (expStatus === 'expired') expLabel = '✕ ' + expLabel;
-      else if (expStatus === 'soon') expLabel = '⚠ ' + expLabel;
-      subCell = '<div style="font-size:.74rem;font-weight:600;">' + esc(dLabel) + '</div>';
-      subCell += '<div class="' + expClass + '">' + esc(expLabel) + '</div>';
+      var expClass = 'expiry-date';
+      if (expStatus === 'expired') { expLabel = '✕ ' + expLabel; expClass = 'expiry-expired'; }
+      else if (expStatus === 'soon') { expLabel = '⚠ ' + expLabel; expClass = 'expiry-soon'; }
+      subCell = '<div style="font-size:.74rem;font-weight:600;">' + esc(dLabel) + '</div>' +
+                '<div class="' + expClass + '">' + esc(expLabel) + '</div>';
     }
 
-    html += '<div class="cust-row">';
-    html += '<div><div class="cust-name">' + esc(c.name) + '</div><div class="cust-email">' + esc(c.contact || '') + '</div></div>';
-    html += '<div style="font-size:.75rem;font-family:\'DM Mono\',monospace;">' + esc(c.email) + '</div>';
-    html += '<div><span class="plan-badge ' + (c.plan === 'pro' ? 'plan-pro' : 'plan-starter') + '">' + (c.plan === 'pro' ? 'Pro' : 'Starter') + '</span>' + '</div>';
-    html += '<div>' + subCell + '</div>';
-    html += '<div><span class="status-badge ' + (effectiveStatus === 'active' ? 'status-active' : effectiveStatus === 'expired' ? 'status-expired' : 'status-inactive') + '">';
-    html += '<span style="width:6px;height:6px;border-radius:50%;background:' + (effectiveStatus === 'active' ? 'var(--green)' : effectiveStatus === 'expired' ? '#b45309' : 'var(--b2)') + ';display:inline-block;"></span>';
-    html += (effectiveStatus === 'active' ? 'Active' : effectiveStatus === 'expired' ? 'Expired' : 'Inactive') + '</span></div>';
-    html += '<div style="display:flex;gap:6px;">';
-    html += '<button class="btn btn-ghost btn-sm" onclick="openEditCustomer(\'' + c.id + '\')">✏ Edit</button>';
-    html += '</div>';
-    html += '</div>';
+    // Status cell
+    var stClass = effectiveSt === 'active' ? 'status-active' : effectiveSt === 'expired' ? 'status-expired' : 'status-inactive';
+    var stDot   = effectiveSt === 'active' ? 'var(--green)' : effectiveSt === 'expired' ? '#b45309' : 'var(--b2)';
+    var stLabel = effectiveSt === 'active' ? 'Active' : effectiveSt === 'expired' ? 'Expired' : 'Inactive';
+    var statusCell = '<span class="status-badge ' + stClass + '">' +
+      '<span style="width:6px;height:6px;border-radius:50%;background:' + stDot + ';display:inline-block;"></span>' +
+      stLabel + '</span>';
+
+    html +=
+      '<div class="cust-row">' +
+      '<div><div class="cust-name">' + esc(c.name) + '</div>' +
+      (c.contact ? '<div class="cust-contact">' + esc(c.contact) + '</div>' : '') +
+      '</div>' +
+      '<div class="cust-email">' + esc(c.email || '') + '</div>' +
+      '<div>' + planCell + '</div>' +
+      '<div>' + subCell + '</div>' +
+      '<div>' + statusCell + '</div>' +
+      '<div>' +
+      '<button class="btn btn-ghost btn-sm" data-edit="' + esc(c.id) + '">✏ Edit</button>' +
+      '</div>' +
+      '</div>';
   });
 
   el.innerHTML = html;
+
+  // Attach edit button listeners
+  el.querySelectorAll('[data-edit]').forEach(function(btn) {
+    btn.addEventListener('click', function() { openEdit(btn.getAttribute('data-edit')); });
+  });
 }
 
 function updateStats() {
-  var active = customers.filter(function(c){ return c.status === 'active'; }).length;
-  document.getElementById('statTotal').textContent = customers.length;
-  document.getElementById('statActive').textContent = active;
+  var active   = customers.filter(function(c){ return c.status === 'active' && getExpiryStatus(c.expiryDate) !== 'expired'; }).length;
+  document.getElementById('statTotal').textContent    = customers.length;
+  document.getElementById('statActive').textContent   = active;
   document.getElementById('statInactive').textContent = customers.length - active;
 }
 
-// ── ADD / EDIT MODAL ───────────────────────────────────────────────────────
-function openAddCustomer() {
+// ── ADD / EDIT MODAL ─────────────────────────────────────────────────────────
+function openAdd() {
   editingId = null;
-  document.getElementById('modalTitle').textContent = 'Add New Customer';
-  document.getElementById('saveBtn').textContent = 'Add Customer';
-  document.getElementById('deleteBtn').style.display = 'none';
-  document.getElementById('formErr').style.display = 'none';
-  document.getElementById('f_name').value = '';
-  document.getElementById('f_contact').value = '';
-  document.getElementById('f_email').value = '';
-  document.getElementById('f_password').value = '';
-  document.getElementById('f_plan').value = 'starter';
-  document.getElementById('f_duration').value = '1';
-  document.getElementById('f_startdate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('f_status').value = 'active';
-  document.getElementById('f_notes').value = '';
-    document.getElementById('customerModal').classList.add('open');
+  document.getElementById('modalTitle').textContent     = 'Add New Customer';
+  document.getElementById('saveBtn').textContent        = 'Add Customer';
+  document.getElementById('deleteBtn').style.display    = 'none';
+  document.getElementById('pwHint').textContent         = '(required for new customer)';
+  document.getElementById('formErr').style.display      = 'none';
+  document.getElementById('f_name').value               = '';
+  document.getElementById('f_contact').value            = '';
+  document.getElementById('f_email').value              = '';
+  document.getElementById('f_password').value           = '';
+  document.getElementById('f_plan').value               = 'starter';
+  document.getElementById('f_duration').value           = '1';
+  document.getElementById('f_startdate').value          = today();
+  document.getElementById('f_status').value             = 'active';
+  document.getElementById('f_notes').value              = '';
+  document.getElementById('f_hasBudget').checked        = false;
+  document.getElementById('customerModal').classList.add('open');
   setTimeout(function(){ document.getElementById('f_name').focus(); }, 100);
 }
 
-function openEditCustomer(id) {
+function openEdit(id) {
   var c = customers.find(function(x){ return x.id === id; });
   if (!c) return;
   editingId = id;
-  document.getElementById('modalTitle').textContent = 'Edit Customer';
-  document.getElementById('saveBtn').textContent = 'Save Changes';
-  document.getElementById('deleteBtn').style.display = 'inline-flex';
-  document.getElementById('formErr').style.display = 'none';
-  document.getElementById('f_name').value = c.name || '';
-  document.getElementById('f_contact').value = c.contact || '';
-  document.getElementById('f_email').value = c.email || '';
-  document.getElementById('f_password').value = '';
-  document.getElementById('f_plan').value = c.plan || 'starter';
-  document.getElementById('f_duration').value = c.duration || '1';
-  document.getElementById('f_startdate').value = c.startDate || new Date().toISOString().split('T')[0];
-  document.getElementById('f_status').value = c.status || 'active';
-  document.getElementById('f_notes').value = c.notes || '';
-  document.getElementById('f_hasBudget').checked = c.hasBudget === true;
+  document.getElementById('modalTitle').textContent     = 'Edit Customer';
+  document.getElementById('saveBtn').textContent        = 'Save Changes';
+  document.getElementById('deleteBtn').style.display    = 'inline-flex';
+  document.getElementById('pwHint').textContent         = '(leave blank to keep current)';
+  document.getElementById('formErr').style.display      = 'none';
+  document.getElementById('f_name').value               = c.name     || '';
+  document.getElementById('f_contact').value            = c.contact  || '';
+  document.getElementById('f_email').value              = c.email    || '';
+  document.getElementById('f_password').value           = '';
+  document.getElementById('f_plan').value               = c.plan     || 'starter';
+  document.getElementById('f_duration').value           = c.duration || '1';
+  document.getElementById('f_startdate').value          = c.startDate || today();
+  document.getElementById('f_status').value             = c.status   || 'active';
+  document.getElementById('f_notes').value              = c.notes    || '';
+  document.getElementById('f_hasBudget').checked        = c.hasBudget === true;
   document.getElementById('customerModal').classList.add('open');
 }
 
@@ -789,244 +767,265 @@ function closeModal() {
 }
 
 async function saveCustomer() {
-  var name = document.getElementById('f_name').value.trim();
-  var contact = document.getElementById('f_contact').value.trim();
-  var email = document.getElementById('f_email').value.trim();
-  var password = document.getElementById('f_password').value;
-  var plan = document.getElementById('f_plan').value;
-  var duration = document.getElementById('f_duration').value;
-  var startDate = document.getElementById('f_startdate').value || new Date().toISOString().split('T')[0];
-  var status = document.getElementById('f_status').value;
-  var notes = document.getElementById('f_notes').value.trim();
-  var expiryDate = calcExpiryDate(startDate, duration);
+  var name      = document.getElementById('f_name').value.trim();
+  var contact   = document.getElementById('f_contact').value.trim();
+  var email     = document.getElementById('f_email').value.trim().toLowerCase();
+  var password  = document.getElementById('f_password').value;
+  var plan      = document.getElementById('f_plan').value;
+  var duration  = document.getElementById('f_duration').value;
+  var startDate = document.getElementById('f_startdate').value || today();
+  var status    = document.getElementById('f_status').value;
+  var notes     = document.getElementById('f_notes').value.trim();
+  var hasBudget = document.getElementById('f_hasBudget').checked;
+  var expiryDate= calcExpiry(startDate, duration);
+  var errEl     = document.getElementById('formErr');
+  errEl.style.display = 'none';
 
-  if (!name) { showFormErr('Restaurant name is required.'); return; }
-  if (!email || !email.includes('@')) { showFormErr('A valid email is required.'); return; }
-  if (!editingId && !password) { showFormErr('Password is required for new customers.'); return; }
-  if (password && password.length < 8) { showFormErr('Password must be at least 8 characters.'); return; }
+  if (!name)                    { showErr(errEl, 'Restaurant name is required.');      return; }
+  if (!email || !email.includes('@')) { showErr(errEl, 'A valid email is required.');  return; }
+  if (!editingId && !password)  { showErr(errEl, 'Password is required for new customers.'); return; }
+  if (password && password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
 
-  // ✅ FIX: Only check for duplicates against Firebase data — never localStorage
-  if (!editingId) {
-    var freshList = [];
-    if (window._fbReady) {
-      try { freshList = await window.fbLoadCustomers(); } catch(e) { freshList = []; }
+  var btn = document.getElementById('saveBtn');
+  btn.disabled    = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    // Duplicate email check
+    if (!editingId) {
+      var fresh = [];
+      if (window._fbReady && window.fb) { try { fresh = await window.fb.loadCustomers(); } catch(e){} }
+      var dupe = fresh.find(function(c){ return c.email && c.email.toLowerCase() === email; });
+      if (dupe) { showErr(errEl, 'A customer with this email already exists.'); btn.disabled = false; btn.textContent = 'Add Customer'; return; }
+      customers = fresh;
     }
-    var dupe = freshList.find(function(c){
-      return c.email && c.email.toLowerCase() === email.toLowerCase();
-    });
-    if (dupe) { showFormErr('A customer with this email already exists.'); return; }
-    // Update local cache with fresh data
-    customers = freshList;
-  }
 
-  var passwordHashed = password ? await hashPassword(password) : null;
+    var pwHash = password ? (await hashPw(password)) : null;
 
-  if (editingId) {
-    var idx = customers.findIndex(function(c){ return c.id === editingId; });
-    if (idx >= 0) {
-      var updatedPassword = password ? passwordHashed : customers[idx].password;
-      var hasBudget = document.getElementById('f_hasBudget').checked;
-      customers[idx] = Object.assign(customers[idx], { name, contact, email, password: updatedPassword, plan, duration, startDate, expiryDate, status, notes, hasBudget });
-      if (window._fbReady) {
-        await window.fbSaveCustomer(customers[idx]);
-        if (password && window.fbSetCustomerData) {
-          try { await window.fbSetCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e) { console.warn('mgr_pw update failed:', e); }
+    if (editingId) {
+      var idx = customers.findIndex(function(c){ return c.id === editingId; });
+      if (idx >= 0) {
+        var finalPw = pwHash || customers[idx].password;
+        customers[idx] = Object.assign({}, customers[idx], { name:name, contact:contact, email:email, password:finalPw, plan:plan, duration:duration, startDate:startDate, expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget });
+        if (window._fbReady && window.fb) {
+          await window.fb.saveCustomer(customers[idx]);
+          if (password) { try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e){} }
         }
       }
-    }
-    toast('Customer updated ✓');
-  } else {
-    var newCust = {
-      id: 'cust_' + Date.now(),
-      name, contact, email, password: passwordHashed, plan, duration, startDate, expiryDate, status, notes,
-      hasBudget: document.getElementById('f_hasBudget').checked,
-      createdAt: new Date().toISOString()
-    };
-    customers.push(newCust);
-    if (window._fbReady) {
-      await window.fbSaveCustomer(newCust);
-      if (window.fbSetCustomerData) {
-        var mgrPwSaved = false;
-        for (var _a = 0; _a < 3; _a++) {
-          try {
-            await window.fbSetCustomerData('mgr_pw_' + newCust.id, password);
-            mgrPwSaved = true;
-            break;
-          } catch(e) {
-            await new Promise(function(r){ setTimeout(r, 600); });
-          }
+      toast('Customer updated ✓');
+    } else {
+      var newCust = { id:'cust_'+Date.now(), name:name, contact:contact, email:email, password:pwHash, plan:plan, duration:duration, startDate:startDate, expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, createdAt:new Date().toISOString() };
+      customers.push(newCust);
+      if (window._fbReady && window.fb) {
+        await window.fb.saveCustomer(newCust);
+        // Retry mgr_pw up to 3 times
+        for (var i = 0; i < 3; i++) {
+          try { await window.fb.setCustomerData('mgr_pw_' + newCust.id, password); break; }
+          catch(e) { await new Promise(function(r){ setTimeout(r, 600); }); }
         }
-        if (!mgrPwSaved) console.warn('mgr_pw seed failed after 3 attempts for', newCust.id);
       }
+      toast('Customer added ✓');
     }
-    toast('Customer added ✓');
+
+    closeModal();
+    renderTable();
+    updateStats();
+  } catch(err) {
+    showErr(errEl, 'Save failed: ' + err.message);
   }
 
-  closeModal();
-  renderTable();
-  updateStats();
+  btn.disabled    = false;
+  btn.textContent = editingId ? 'Save Changes' : 'Add Customer';
 }
 
 async function deleteCustomer() {
   if (!editingId) return;
   var c = customers.find(function(x){ return x.id === editingId; });
   if (!confirm('Delete "' + (c ? c.name : 'this customer') + '"? This cannot be undone.')) return;
+  if (window._fbReady && window.fb) {
+    try { await window.fb.deleteCustomer(editingId); } catch(e) { toast('Delete failed: ' + e.message); return; }
+  }
   customers = customers.filter(function(x){ return x.id !== editingId; });
-  if (window._fbReady) await window.fbDeleteCustomer(editingId);
   closeModal();
   renderTable();
   updateStats();
   toast('Customer deleted');
 }
 
-function showFormErr(msg) {
-  var el = document.getElementById('formErr');
-  el.textContent = msg;
-  el.style.display = 'block';
-}
-
-// ── UTILS ──────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function toast(msg) {
-  var t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function(){ t.remove(); }, 2400);
-}
-
-function togglePw(inputId, btn) {
-  var inp = document.getElementById(inputId);
-  if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '&#128584;'; }
-  else { inp.type = 'password'; btn.innerHTML = '&#128065;'; }
-}
-
-// ── PASSWORD RESET REQUESTS ────────────────────────────────────────────────
-var resetRequests = [];
-var resetingRequestId = null;
-var resetingCustomerEmail = null;
-
+// ── PASSWORD RESET REQUESTS ──────────────────────────────────────────────────
 async function loadResetRequests() {
-  if (!window._fbReady) return;
-  try {
-    resetRequests = await window.fbLoadResetRequests();
-  } catch(e) {
-    resetRequests = [];
-  }
+  if (!window._fbReady || !window.fb) return;
+  try { resetRequests = await window.fb.loadResetRequests(); }
+  catch(e) { resetRequests = []; }
   renderResetRequests();
 }
 
 function renderResetRequests() {
   var section = document.getElementById('resetRequestsSection');
   var countEl = document.getElementById('resetCount');
-  var body = document.getElementById('resetRequestsBody');
-
-  if (!resetRequests.length) {
-    section.style.display = 'none';
-    return;
-  }
-
+  var body    = document.getElementById('resetRequestsBody');
+  if (!resetRequests.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  countEl.textContent = resetRequests.length;
+  countEl.textContent   = resetRequests.length;
 
   var html = '';
   resetRequests.forEach(function(req) {
-    var cust = customers.find(function(c){ return c.email && c.email.toLowerCase() === (req.email || '').toLowerCase(); });
+    var cust     = customers.find(function(c){ return c.email && c.email.toLowerCase() === (req.email||'').toLowerCase(); });
     var custName = cust ? esc(cust.name) : '<span style="color:var(--muted);font-style:italic;">Unknown</span>';
-    var ts = req.requestedAt ? new Date(req.requestedAt).toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
-    html += '<div class="reset-row">';
-    html += '<div><div style="font-weight:600;font-size:.84rem;">' + custName + '</div><div style="font-size:.72rem;color:var(--muted);font-family:\'DM Mono\',monospace;margin-top:2px;">' + esc(req.email || '') + '</div></div>';
-    html += '<div style="font-size:.73rem;color:var(--muted);font-family:\'DM Mono\',monospace;">' + esc(ts) + '</div>';
-    html += '<div style="font-size:.73rem;color:var(--muted);">';
-    if (req.note) html += '<span style="background:var(--acc-lt);color:var(--acc);border-radius:6px;padding:3px 8px;font-size:.67rem;font-weight:600;">' + esc(req.note) + '</span>';
-    else html += '—';
-    html += '</div>';
-    html += '<div style="display:flex;gap:6px;">';
-    html += '<button class="btn btn-acc btn-sm" onclick="openResetModal(\'' + esc(req.id) + '\',\'' + esc(req.email || '') + '\')">&#128274; Reset</button>';
-    html += '<button class="btn btn-ghost btn-sm" onclick="dismissResetRequest(\'' + esc(req.id) + '\')" title="Dismiss without resetting" style="color:var(--muted);">&#10005;</button>';
-    html += '</div>';
-    html += '</div>';
+    var ts       = req.requestedAt ? new Date(req.requestedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    html +=
+      '<div class="reset-row">' +
+      '<div><div style="font-weight:600;font-size:.84rem;">' + custName + '</div>' +
+      '<div style="font-size:.72rem;color:var(--muted);font-family:\'DM Mono\',monospace;margin-top:2px;">' + esc(req.email||'') + '</div></div>' +
+      '<div style="font-size:.73rem;color:var(--muted);font-family:\'DM Mono\',monospace;">' + esc(ts) + '</div>' +
+      '<div>' + (req.note ? '<span style="background:var(--acc-lt);color:var(--acc);border-radius:6px;padding:3px 8px;font-size:.67rem;font-weight:600;">' + esc(req.note) + '</span>' : '<span style="color:var(--muted);">—</span>') + '</div>' +
+      '<div style="display:flex;gap:6px;">' +
+      '<button class="btn btn-acc btn-sm" data-reset-id="' + esc(req.id) + '" data-reset-email="' + esc(req.email||'') + '">🔒 Reset</button>' +
+      '<button class="btn btn-ghost btn-sm" data-dismiss-id="' + esc(req.id) + '" title="Dismiss" style="color:var(--muted);">✕</button>' +
+      '</div>' +
+      '</div>';
   });
   body.innerHTML = html;
+
+  body.querySelectorAll('[data-reset-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() { openResetModal(btn.getAttribute('data-reset-id'), btn.getAttribute('data-reset-email')); });
+  });
+  body.querySelectorAll('[data-dismiss-id]').forEach(function(btn) {
+    btn.addEventListener('click', function() { dismissRequest(btn.getAttribute('data-dismiss-id')); });
+  });
 }
 
-function openResetModal(requestId, email) {
-  resetingRequestId = requestId;
-  resetingCustomerEmail = email;
-  var cust = customers.find(function(c){ return c.email && c.email.toLowerCase() === email.toLowerCase(); });
-  var infoEl = document.getElementById('resetCustomerInfo');
-  if (cust) {
-    infoEl.innerHTML = '<strong>' + esc(cust.name) + '</strong><br><span style="color:var(--muted);font-family:\'DM Mono\',monospace;font-size:.76rem;">' + esc(email) + '</span>';
-  } else {
-    infoEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;">' + esc(email) + '</span>';
-  }
-  document.getElementById('reset_newpw').value = '';
-  document.getElementById('reset_confirmpw').value = '';
-  document.getElementById('resetPwErr').style.display = 'none';
-  document.getElementById('resetPwOk').style.display = 'none';
+function openResetModal(reqId, email) {
+  resetRequestId    = reqId;
+  resetRequestEmail = email;
+  var cust  = customers.find(function(c){ return c.email && c.email.toLowerCase() === email.toLowerCase(); });
+  var infoEl= document.getElementById('resetCustomerInfo');
+  infoEl.innerHTML  = cust
+    ? '<strong>' + esc(cust.name) + '</strong><br><span style="color:var(--muted);font-family:\'DM Mono\',monospace;font-size:.76rem;">' + esc(email) + '</span>'
+    : '<span style="font-family:\'DM Mono\',monospace;">' + esc(email) + '</span>';
+  document.getElementById('reset_newpw').value          = '';
+  document.getElementById('reset_confirmpw').value      = '';
+  document.getElementById('resetPwErr').style.display   = 'none';
+  document.getElementById('resetPwOk').style.display    = 'none';
   document.getElementById('resetPwModal').classList.add('open');
   setTimeout(function(){ document.getElementById('reset_newpw').focus(); }, 100);
 }
 
 function closeResetModal() {
   document.getElementById('resetPwModal').classList.remove('open');
-  resetingRequestId = null;
-  resetingCustomerEmail = null;
+  resetRequestId = null; resetRequestEmail = null;
 }
 
 async function doResetCustomerPw() {
-  var newPw = document.getElementById('reset_newpw').value;
-  var conf  = document.getElementById('reset_confirmpw').value;
-  var errEl = document.getElementById('resetPwErr');
-  var okEl  = document.getElementById('resetPwOk');
+  var newPw  = document.getElementById('reset_newpw').value;
+  var conf   = document.getElementById('reset_confirmpw').value;
+  var errEl  = document.getElementById('resetPwErr');
+  var okEl   = document.getElementById('resetPwOk');
   errEl.style.display = 'none'; okEl.style.display = 'none';
 
-  if (!newPw || newPw.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; errEl.style.display = 'block'; return; }
-  if (newPw !== conf) { errEl.textContent = 'Passwords do not match.'; errEl.style.display = 'block'; document.getElementById('reset_confirmpw').value = ''; return; }
+  if (!newPw || newPw.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
+  if (newPw !== conf)              { showErr(errEl, 'Passwords do not match.'); document.getElementById('reset_confirmpw').value=''; return; }
 
-  var email = resetingCustomerEmail;
-  var custIdx = customers.findIndex(function(c){ return c.email && c.email.toLowerCase() === email.toLowerCase(); });
-  if (custIdx < 0) { errEl.textContent = 'Customer account not found.'; errEl.style.display = 'block'; return; }
+  var idx = customers.findIndex(function(c){ return c.email && c.email.toLowerCase() === (resetRequestEmail||'').toLowerCase(); });
+  if (idx < 0) { showErr(errEl, 'Customer account not found.'); return; }
 
-  var newPwHashed = await hashPassword(newPw);
-  customers[custIdx] = Object.assign({}, customers[custIdx], { password: newPwHashed });
-  if (window._fbReady) {
-    try { await window.fbSaveCustomer(customers[custIdx]); } catch(e) { errEl.textContent = 'Failed to save. Try again.'; errEl.style.display = 'block'; return; }
-    try {
-      var mgrPwKey = 'mgr_pw_' + customers[custIdx].id;
-      await window.fbSetCustomerData(mgrPwKey, newPw);
-    } catch(e) { console.warn('mgr_pw update failed:', e); }
+  var btn = document.getElementById('resetSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    var hashed = await hashPw(newPw);
+    customers[idx] = Object.assign({}, customers[idx], { password: hashed });
+    if (window._fbReady && window.fb) {
+      await window.fb.saveCustomer(customers[idx]);
+      try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, newPw); } catch(e){}
+      if (resetRequestId) await window.fb.deleteResetRequest(resetRequestId);
+    }
+    resetRequests = resetRequests.filter(function(r){ return r.id !== resetRequestId; });
+    okEl.style.display = 'block';
+    toast('Password reset for ' + customers[idx].name + ' ✓');
+    renderTable();
+    setTimeout(function(){ closeResetModal(); renderResetRequests(); }, 1600);
+  } catch(err) {
+    showErr(errEl, 'Failed to save: ' + err.message);
   }
 
-  if (resetingRequestId && window._fbReady) {
-    await window.fbDeleteResetRequest(resetingRequestId);
-  }
-
-  resetRequests = resetRequests.filter(function(r){ return r.id !== resetingRequestId; });
-
-  okEl.style.display = 'block';
-  toast('Password reset for ' + customers[custIdx].name + ' ✓');
-  renderTable();
-  setTimeout(function(){
-    closeResetModal();
-    renderResetRequests();
-  }, 1800);
+  btn.disabled = false; btn.textContent = 'Reset Password';
 }
 
-async function dismissResetRequest(requestId) {
-  if (!confirm('Dismiss this reset request without changing the password?')) return;
-  if (window._fbReady) await window.fbDeleteResetRequest(requestId);
-  resetRequests = resetRequests.filter(function(r){ return r.id !== requestId; });
+async function dismissRequest(reqId) {
+  if (!confirm('Dismiss this request without resetting the password?')) return;
+  if (window._fbReady && window.fb) await window.fb.deleteResetRequest(reqId);
+  resetRequests = resetRequests.filter(function(r){ return r.id !== reqId; });
   renderResetRequests();
   toast('Request dismissed');
 }
 
-document.getElementById('adminPwInput').addEventListener('keydown', function(e){
-  if (e.key === 'Enter') doAdminLogin();
+// ── UTILITIES ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className   = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.remove(); }, 2600);
+}
+function calcExpiry(startDate, duration) {
+  if (duration === 'lifetime' || !startDate) return null;
+  var d = new Date(startDate);
+  d.setFullYear(d.getFullYear() + parseInt(duration));
+  return d.toISOString().split('T')[0];
+}
+function getExpiryStatus(expiryDate) {
+  if (!expiryDate) return 'lifetime';
+  var diff = Math.ceil((new Date(expiryDate) - new Date()) / 86400000);
+  if (diff < 0) return 'expired';
+  if (diff <= 30) return 'soon';
+  return 'ok';
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ── EYE / SHOW-PASSWORD BUTTONS ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.pw-eye');
+  if (!btn) return;
+  var target = btn.getAttribute('data-target');
+  if (!target) return;
+  var inp = document.getElementById(target);
+  if (!inp) return;
+  inp.type    = inp.type === 'password' ? 'text' : 'password';
+  btn.innerHTML = inp.type === 'password' ? '👁' : '🙈';
 });
+
+// ── OVERLAY CLOSE ON BACKDROP CLICK ─────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('overlay') && e.target.classList.contains('open')) {
+    e.target.classList.remove('open');
+    if (e.target.id === 'customerModal') { editingId = null; }
+    if (e.target.id === 'resetPwModal')  { resetRequestId = null; resetRequestEmail = null; }
+  }
+});
+
+// ── BUTTON WIRING ────────────────────────────────────────────────────────────
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('adminPwInput').addEventListener('keydown', function(e){ if (e.key === 'Enter') doLogin(); });
+document.getElementById('logoutBtn').addEventListener('click', doLogout);
+document.getElementById('changePwBtn').addEventListener('click', openChangePw);
+document.getElementById('changePwCancelBtn').addEventListener('click', closeChangePw);
+document.getElementById('changePwSaveBtn').addEventListener('click', doChangePw);
+document.getElementById('addCustomerBtn').addEventListener('click', openAdd);
+document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+document.getElementById('saveBtn').addEventListener('click', saveCustomer);
+document.getElementById('deleteBtn').addEventListener('click', deleteCustomer);
+document.getElementById('refreshResetsBtn').addEventListener('click', loadResetRequests);
+document.getElementById('resetCancelBtn').addEventListener('click', closeResetModal);
+document.getElementById('resetSaveBtn').addEventListener('click', doResetCustomerPw);
 </script>
 </body>
 </html>

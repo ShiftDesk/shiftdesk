@@ -393,20 +393,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <label class="fl">Notes (optional)</label>
       <input class="fc" type="text" id="f_notes" placeholder="e.g. Trial period, referred by…" autocomplete="off">
     </div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          
-          <span style="font-size:.75rem;font-weight:600;color:var(--green,#1b6e40);">Enabled</span>
-        </label>
-      </div>
-    </div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          
-          <span style="font-size:.75rem;font-weight:600;color:#1b4896;">Enabled</span>
-        </label>
-      </div>
-    </div>
+
+
     <div class="form-err" id="formErr"></div>
     <div class="modal-actions">
       <button class="btn-del-sm" id="deleteBtn" onclick="deleteCustomer()" style="display:none;">🗑 Delete</button>
@@ -754,7 +742,7 @@ function openAddCustomer() {
   document.getElementById('f_startdate').value = new Date().toISOString().split('T')[0];
   document.getElementById('f_status').value = 'active';
   document.getElementById('f_notes').value = '';
-  document.getElementById('customerModal').classList.add('open');
+    document.getElementById('customerModal').classList.add('open');
   setTimeout(function(){ document.getElementById('f_name').focus(); }, 100);
 }
 

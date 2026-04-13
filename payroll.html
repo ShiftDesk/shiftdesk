@@ -191,6 +191,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="fg">
       <label class="fl">Pause (minutter) — trækkes fra betalt tid</label>
       <input class="fc" type="number" id="hm_break" min="0" step="5" value="0" placeholder="0">
+      <div id="hm_break_hint" style="font-size:.68rem;color:var(--muted);margin-top:4px;"></div>
     </div>
     <div class="fg" style="background:var(--green-lt);border:1.5px solid var(--green);border-radius:9px;padding:10px 13px;">
       <label style="display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--green);">
@@ -736,14 +737,14 @@ function renderAll() {
     // Footer
     html+='<div class="emp-foot">';
     html+='<button class="btn btn-blue btn-sm" data-payslip="'+s.id+'">📄 Lønseddel</button>';
-    html+='<button class="btn btn-ghost btn-sm" data-hours="'+s.id+'">✏ Ret timer</button>';
+    html+='<button class="btn btn-ghost btn-sm" data-hours="'+s.id+'" data-date="'+(entries.length?entries[entries.length-1].dateStr:'')+'">✏ Ret timer</button>';
     html+='</div>';
     html+='</div>';
   });
 
   grid.innerHTML=html; grid.style.display='grid';
   grid.querySelectorAll('[data-payslip]').forEach(b=>b.addEventListener('click',()=>openPayslip(parseInt(b.getAttribute('data-payslip')))));
-  grid.querySelectorAll('[data-hours]').forEach(b=>b.addEventListener('click',()=>openAddHours(parseInt(b.getAttribute('data-hours')))));
+  grid.querySelectorAll('[data-hours]').forEach(b=>b.addEventListener('click',()=>openAddHours(parseInt(b.getAttribute('data-hours')),b.getAttribute('data-date')||null)));
   grid.querySelectorAll('[data-rate]').forEach(b=>b.addEventListener('click',()=>openRateModal(parseInt(b.getAttribute('data-rate')))));
 
   document.getElementById('sumHours').textContent=totHours.toFixed(1)+'t';
@@ -797,18 +798,62 @@ document.getElementById('hmCancelBtn').addEventListener('click',()=>document.get
 document.getElementById('hoursModal').addEventListener('click',e=>{if(e.target===document.getElementById('hoursModal'))document.getElementById('hoursModal').classList.remove('open');});
 document.getElementById('hmSaveBtn').addEventListener('click', saveHours);
 
-function openAddHours(preId) {
+function openAddHours(preId, preDate) {
   var sel=document.getElementById('hm_staff');
   sel.innerHTML=_staff.map(s=>'<option value="'+s.id+'"'+(s.id===preId?' selected':'')+'>'+esc(s.name)+' ('+esc(s.role||'')+')</option>').join('');
-  document.getElementById('hm_date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('hm_in').value='';
-  document.getElementById('hm_out').value='';
-  document.getElementById('hm_note').value='';
-  document.getElementById('hm_break').value='0';
-  document.getElementById('hm_approved').checked=true;
+
+  // Set date — use preDate if given, else today
+  var dateToUse = preDate || new Date().toISOString().split('T')[0];
+  document.getElementById('hm_date').value = dateToUse;
+
+  // Try to pre-fill from existing entry for this staff + date
+  var prefilled = false;
+  if (preId && dateToUse) {
+    var sidStr = String(preId);
+    // Check extra (admin) entries first, then clock history
+    var existing = (_extra[sidStr]&&_extra[sidStr][dateToUse])
+                || (_clock[preId]&&_clock[preId][dateToUse])
+                || (_clock[sidStr]&&_clock[sidStr][dateToUse]);
+    if (existing && existing.inTime) {
+      document.getElementById('hm_in').value       = existing.inTime;
+      document.getElementById('hm_out').value      = existing.outTime || '';
+      document.getElementById('hm_note').value     = existing.note || '';
+      document.getElementById('hm_break').value    = existing.breakMins !== undefined ? existing.breakMins : (getBreakMins(preId, dateToUse, existing.inTime)||0);
+      document.getElementById('hm_approved').checked = !!existing.approved;
+      prefilled = true;
+    }
+  }
+
+  if (!prefilled) {
+    document.getElementById('hm_in').value       = '';
+    document.getElementById('hm_out').value      = '';
+    document.getElementById('hm_note').value     = '';
+    // Auto-detect break from schedule
+    var autoBreak = preId ? (getBreakMins(preId, dateToUse, '')||0) : 0;
+    document.getElementById('hm_break').value    = autoBreak;
+    document.getElementById('hm_approved').checked = true;
+  }
+
   document.getElementById('hmErr').style.display='none';
   document.getElementById('hoursModal').classList.add('open');
-  setTimeout(()=>document.getElementById('hm_date').focus(),100);
+
+  // When date changes, auto-update break from schedule
+  document.getElementById('hm_date').onchange = function() {
+    var sid = parseInt(document.getElementById('hm_staff').value);
+    var dt  = document.getElementById('hm_date').value;
+    if (!sid || !dt) return;
+    var inT = document.getElementById('hm_in').value;
+    var schedBreak = getBreakMins(sid, dt, inT)||0;
+    var currentBreak = parseInt(document.getElementById('hm_break').value)||0;
+    // Only auto-fill if user hasn't entered a value yet
+    if (currentBreak === 0 && schedBreak > 0) {
+      document.getElementById('hm_break').value = schedBreak;
+    }
+    var hint = document.getElementById('hm_break_hint');
+    if (hint) hint.textContent = schedBreak > 0 ? '📅 Fra vagtplan: '+schedBreak+' min pause' : 'Ingen pause fundet i vagtplan — angiv manuelt';
+  };
+
+  setTimeout(()=>{ if(!prefilled) document.getElementById('hm_in').focus(); else document.getElementById('hm_break').focus(); }, 100);
 }
 
 async function saveHours() {

@@ -43,12 +43,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .tbtn:hover{background:var(--red-lt);border-color:var(--red);color:var(--red);}
 
 /* LAYOUT */
-.page{max-width:1100px;margin:0 auto;padding:28px 20px;}
-.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:gap;}
+.page{max-width:1200px;margin:0 auto;padding:28px 20px;}
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
 .page-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;}
 .page-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
 
-/* BTN */
+/* BUTTONS */
 .btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .14s;white-space:nowrap;}
 .btn:hover{transform:translateY(-1px);}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
@@ -62,44 +62,63 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-blue:hover{background:#133870;}
 .btn-sm{padding:5px 10px;font-size:.7rem;}
 
-/* PERIOD PICKER */
+/* PERIOD BAR */
 .period-bar{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .period-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;}
 .period-sel{background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:8px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;cursor:pointer;}
 .period-sel:focus{border-color:var(--acc);}
 
-/* STAFF CARDS */
-.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:24px;}
-.staff-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;transition:box-shadow .15s;}
-.staff-card:hover{box-shadow:var(--shadow);}
-.sc-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--s2);}
-.sc-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;border:2px solid rgba(0,0,0,.06);}
-.sc-name{font-weight:700;font-size:.88rem;}
-.sc-role{font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
-.sc-rate{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--green);font-weight:700;margin-left:auto;}
-.sc-body{padding:12px 16px;}
-.sc-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.79rem;}
-.sc-row:last-child{border-bottom:none;}
-.sc-key{color:var(--muted);}
-.sc-val{font-family:'DM Mono',monospace;font-weight:600;}
-.sc-val.approved{color:var(--green);}
-.sc-val.pending{color:#b45309;}
-.sc-foot{padding:12px 16px;border-top:1.5px solid var(--border);background:var(--s2);display:flex;gap:8px;align-items:center;}
-.no-hours{text-align:center;padding:16px;color:var(--muted);font-size:.78rem;font-style:italic;}
+/* STAFF GRID */
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;margin-bottom:24px;}
+
+/* EMPLOYEE CARD */
+.emp-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;}
+.emp-head{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--s2);border-bottom:1.5px solid var(--border);}
+.emp-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.88rem;flex-shrink:0;color:#fff;}
+.emp-name{font-weight:700;font-size:.9rem;}
+.emp-role{font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.emp-rate{margin-left:auto;text-align:right;}
+.rate-val{font-family:'DM Mono',monospace;font-size:.82rem;font-weight:700;color:var(--green);}
+.rate-edit{font-size:.62rem;color:var(--acc);cursor:pointer;text-decoration:underline;display:block;margin-top:1px;}
 
 /* HOURS TABLE */
-.hours-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:10px;}
-.hours-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;border-bottom:1.5px solid var(--border);}
-.hours-table td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.hours-section{padding:12px 16px;border-bottom:1px solid var(--border);}
+.section-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:8px;}
+.hours-table{width:100%;border-collapse:collapse;font-size:.76rem;}
+.hours-table th{background:var(--s2);padding:5px 8px;text-align:left;font-size:.62rem;text-transform:uppercase;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border);}
+.hours-table td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
 .hours-table tr:last-child td{border-bottom:none;}
-.ap-badge{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;}
-.ap-ok{background:var(--green-lt);color:var(--green);}
-.ap-pending{background:#fff3e0;color:#b45309;}
+.ap-ok{background:var(--green-lt);color:var(--green);font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:20px;display:inline-block;}
+.ap-no{background:#fff3e0;color:#b45309;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:20px;display:inline-block;}
+.no-hours{text-align:center;padding:14px;color:var(--muted);font-size:.76rem;font-style:italic;}
 
-/* ADD HOURS MODAL */
-.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:center;justify-content:center;}
+/* PAYROLL BREAKDOWN */
+.breakdown{padding:0 16px 12px;}
+.br-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.78rem;}
+.br-row:last-child{border-bottom:none;}
+.br-lbl{color:var(--muted);}
+.br-val{font-family:'DM Mono',monospace;font-weight:600;}
+.br-row.deduct .br-val{color:var(--red);}
+.br-row.total{background:var(--green-lt);margin:8px -16px 0;padding:10px 16px;border-radius:0 0 0 0;}
+.br-row.total .br-lbl{font-weight:700;color:var(--green);}
+.br-row.total .br-val{color:var(--green);font-size:.95rem;}
+.br-divider{height:1px;background:var(--border);margin:4px 0;}
+.br-sub{font-size:.68rem;color:var(--muted);margin-left:8px;}
+
+/* CARD FOOTER */
+.emp-foot{padding:12px 16px;border-top:1.5px solid var(--border);background:var(--s2);display:flex;gap:8px;}
+
+/* SUMMARY */
+.summary-bar{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px;}
+.sum-item{}
+.sum-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px;}
+.sum-val{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;line-height:1;}
+.sum-val.green{color:var(--green);}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 12px 48px;}
 .overlay.open{display:flex;}
-.modal{background:#fff;border-radius:16px;padding:26px;width:440px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;max-height:90vh;overflow-y:auto;}
+.modal{background:#fff;border-radius:16px;padding:24px;width:460px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;flex-shrink:0;}
 @keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;margin-bottom:18px;}
 .fg{margin-bottom:13px;}
@@ -111,46 +130,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .form-err{font-size:.73rem;color:var(--red);margin-bottom:6px;display:none;background:var(--red-lt);border-radius:7px;padding:7px 10px;border:1px solid #f5c0c0;}
 
 /* PAYSLIP */
-#payslipArea{display:none;}
-.payslip-wrap{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:32px;max-width:700px;margin:0 auto;font-size:.82rem;}
-.ps-header{display:flex;justify-content:space-between;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--border);}
-.ps-company{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;}
-.ps-sub{font-size:.72rem;color:var(--muted);margin-top:3px;}
-.ps-meta table{width:100%;border-collapse:collapse;}
-.ps-meta td{padding:2px 4px;font-size:.76rem;vertical-align:top;}
-.ps-meta td:first-child{color:var(--muted);min-width:110px;}
-.ps-meta td:last-child{font-family:'DM Mono',monospace;font-weight:600;}
-.ps-section{margin-bottom:20px;}
-.ps-sec-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border);}
-.ps-table{width:100%;border-collapse:collapse;}
-.ps-table th{background:var(--s2);padding:6px 10px;text-align:left;font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;}
+.payslip-wrap{background:#fff;border-radius:12px;padding:28px;font-size:.82rem;line-height:1.6;}
+.ps-co{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;margin-bottom:2px;}
+.ps-sub-title{font-size:.72rem;color:var(--muted);margin-bottom:20px;}
+.ps-two{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.ps-box{background:var(--s2);border-radius:9px;padding:12px 14px;}
+.ps-box-title{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.ps-box-row{display:flex;justify-content:space-between;font-size:.75rem;padding:3px 0;}
+.ps-box-row span:last-child{font-family:'DM Mono',monospace;font-weight:600;}
+.ps-table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+.ps-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:.65rem;text-transform:uppercase;color:var(--muted);font-weight:700;border-bottom:1.5px solid var(--border);}
 .ps-table th:not(:first-child){text-align:right;}
-.ps-table td{padding:7px 10px;border-bottom:1px solid var(--border);font-size:.79rem;}
+.ps-table td{padding:8px 10px;border-bottom:1px solid var(--border);font-size:.79rem;}
 .ps-table td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
 .ps-table tr:last-child td{border-bottom:none;}
-.ps-total{background:var(--green-lt);border:1.5px solid var(--green);border-radius:9px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
-.ps-total-lbl{font-weight:700;font-size:.9rem;}
-.ps-total-val{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;color:var(--green);}
-.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.ps-box{background:var(--s2);border-radius:9px;padding:12px 14px;}
-.ps-box-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin-bottom:8px;}
-.ps-box-row{display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;}
-.ps-box-row span:last-child{font-family:'DM Mono',monospace;font-weight:600;}
+.ps-table tr.section-head td{background:var(--s2);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+.ps-table tr.deduct td:not(:first-child){color:var(--red);}
+.ps-table tr.subtotal td{font-weight:700;border-top:2px solid var(--border);}
+.ps-total-box{background:var(--green-lt);border:2px solid var(--green);border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.ps-total-lbl{font-weight:700;font-size:.95rem;color:var(--green);}
+.ps-total-val{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--green);}
 
 /* TOAST */
 .toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--text);color:#fff;padding:10px 18px;border-radius:9px;font-size:.77rem;font-weight:500;box-shadow:var(--shadow);animation:fadeIn .18s;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* LOADING */
-.spinner{display:inline-block;width:22px;height:22px;border:2.5px solid var(--s2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+/* SPINNER */
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--s2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-state{text-align:center;padding:60px;color:var(--muted);}
 
 /* PRINT */
 @media print{
-  .topbar,.period-bar,.page-hdr,.staff-grid,.no-print{display:none!important;}
-  #payslipArea{display:block!important;}
-  .payslip-wrap{border:none;box-shadow:none;padding:0;}
+  .topbar,.period-bar,.page-hdr,.staff-grid,#summaryArea,.no-print{display:none!important;}
+  .overlay{position:static!important;background:none!important;padding:0!important;display:block!important;}
+  .modal{box-shadow:none!important;border:none!important;padding:0!important;width:100%!important;}
+  #payslipModal{display:block!important;}
+  .modal-actions{display:none!important;}
 }
 </style>
 </head>
@@ -180,10 +196,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </nav>
 
-<!-- ADD/EDIT HOURS MODAL -->
+<!-- ADD HOURS MODAL -->
 <div class="overlay" id="hoursModal">
   <div class="modal">
-    <div class="modal-title" id="hoursModalTitle">Tilføj timer</div>
+    <div class="modal-title">Tilføj / Ret timer</div>
     <div class="fg">
       <label class="fl">Medarbejder</label>
       <select class="fc" id="hm_staff"></select>
@@ -220,28 +236,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
+<!-- SET RATE MODAL -->
+<div class="overlay" id="rateModal">
+  <div class="modal" style="width:340px;">
+    <div class="modal-title">Sæt timeløn</div>
+    <div class="fg">
+      <label class="fl">Medarbejder</label>
+      <div class="fc" id="rateEmpName" style="background:var(--s2);cursor:default;color:var(--muted);"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">Timeløn (DKK)</label>
+      <input class="fc" type="number" id="rateVal" placeholder="f.eks. 180" min="0" step="1">
+    </div>
+    <div class="form-err" id="rateErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="rateCancelBtn">Annuller</button>
+      <button class="btn btn-acc" id="rateSaveBtn">Gem sats</button>
+    </div>
+  </div>
+</div>
+
 <!-- PAYSLIP MODAL -->
 <div class="overlay" id="payslipModal">
-  <div class="modal" style="width:740px;max-width:calc(100vw - 16px);">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <div class="modal-title" style="margin-bottom:0;">Lønseddel</div>
+  <div class="modal" style="width:680px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;" class="modal-actions no-print" id="psActions">
+      <div style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;">Lønseddel</div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print</button>
         <button class="btn btn-ghost btn-sm" id="psCloseBtn">✕ Luk</button>
       </div>
     </div>
-    <div id="payslipArea"></div>
+    <div id="payslipContent"></div>
   </div>
 </div>
 
-<!-- MAIN PAGE -->
+<!-- MAIN -->
 <div class="page" id="mainPage" style="display:none;">
   <div class="page-hdr">
     <div>
       <div class="page-title">Lønoversigt</div>
       <div class="page-sub" id="periodLabel"></div>
     </div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn btn-ghost no-print" id="addHoursBtn">+ Tilføj / Ret timer</button>
       <button class="btn btn-ghost no-print" id="refreshBtn">↻ Opdater</button>
     </div>
@@ -255,15 +291,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="btn btn-acc btn-sm" id="loadPeriodBtn">Hent data</button>
   </div>
 
-  <!-- Staff cards -->
+  <!-- Summary -->
+  <div id="summaryArea" style="display:none;" class="summary-bar">
+    <div class="sum-item">
+      <div class="sum-lbl">Totale timer</div>
+      <div class="sum-val" id="sumHours">—</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-lbl">Total nettoløn</div>
+      <div class="sum-val green" id="sumPay">—</div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-lbl">Medarbejdere</div>
+      <div class="sum-val" id="sumStaff">—</div>
+    </div>
+  </div>
+
+  <!-- Loading -->
   <div class="loading-state" id="loadingState">
     <div class="spinner"></div>
-    <div style="margin-top:10px;font-size:.8rem;">Henter medarbejdere og timer…</div>
+    <div style="margin-top:12px;font-size:.8rem;">Henter data…</div>
   </div>
-  <div id="staffGrid" class="staff-grid" style="display:none;"></div>
 
-  <!-- Summary -->
-  <div id="summaryArea" style="display:none;"></div>
+  <!-- Staff grid -->
+  <div id="staffGrid" class="staff-grid" style="display:none;"></div>
 </div>
 
 <!-- FIREBASE -->
@@ -284,25 +335,26 @@ const CFG = {
 try {
   const app = getApps().length ? getApps()[0] : initializeApp(CFG);
   const db  = getFirestore(app);
-
   window.fb = {
     loadCustomers: async () => {
       const s = await getDocs(collection(db,'customers'));
       return s.docs.map(d => ({id:d.id,...d.data()}));
     },
+    // Returns d.data().value — already a JS value (object/array), NOT a JSON string
     getCustData: async (key) => {
       try {
         const d = await getDoc(doc(db,'customerData',key));
         return d.exists() ? d.data().value : null;
       } catch(e) { return null; }
     },
+    // Stores val as-is inside {value: val}
     setCustData: async (key, val) => {
       await setDoc(doc(db,'customerData',key), {value: val});
     }
   };
   window._fbReady = true;
 } catch(e) {
-  console.error('Firebase error:', e);
+  console.error('Firebase init error:', e);
   window._fbReady = false;
 }
 </script>
@@ -311,48 +363,50 @@ try {
 <script>
 'use strict';
 
-// ── State ────────────────────────────────────────────────────────────────────
-var _customer   = null;
-var _staff      = [];
-var _clockData  = {}; // {staffId: {dateStr: {inTime,outTime,approved,note}}}
-var _payrollData= {}; // extra entries added via admin
-var _selMonth   = new Date().getMonth();
-var _selYear    = new Date().getFullYear();
+// ── State ─────────────────────────────────────────────────────────────────────
+var _customer    = null;
+var _staff       = [];     // [{id, name, role, rate, ...}]
+var _clockData   = {};     // {staffId: {dateStr: {inTime,outTime,approved,note}}}
+var _extraData   = {};     // admin-added/edited entries: {staffId: {dateStr: {...}}}
+var _rateEditing = null;   // staff id being rate-edited
+var _selMonth    = new Date().getMonth();
+var _selYear     = new Date().getFullYear();
 
-// ── Danish tax constants ─────────────────────────────────────────────────────
-var ATP_RATE     = 99;      // DKK per month (standard)
-var AM_RATE      = 0.08;    // 8% AM-bidrag
-var A_SKAT_RATE  = 0.37;    // ~37% A-skat on remainder (simplified)
-var FERIE_RATE   = 0.125;   // 12.5% feriepenge
-var PENSION_EMP  = 0.04;    // 4% employee pension
-var PENSION_EMP_CO = 0.08;  // 8% employer pension
-var MEAL_ALLOW   = 0;       // set per customer if needed
+// ── Danish payroll constants ───────────────────────────────────────────────────
+// These match standard Danish payroll rules
+var ATP_PER_MONTH = 99;    // DKK — standard ATP employee contribution
+var AM_PCT        = 0.08;  // 8% AM-bidrag (labour market contribution)
+var ASKAT_PCT     = 0.37;  // ~37% A-skat — simplified, no trækprocent stored
+var FERIE_PCT     = 0.125; // 12.5% feriepenge
+var PENSION_E_PCT = 0.04;  // 4% employee pension
+var PENSION_C_PCT = 0.08;  // 8% employer pension
 
-// ── Colours for avatars ──────────────────────────────────────────────────────
-var AV_COLS = ['#bf4a0a','#1b6e40','#1b4896','#6b21a8','#b45309','#0e7490'];
-function avCol(i){ return AV_COLS[i % AV_COLS.length]; }
-function initials(name){ return (name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+// ── Avatar colours ────────────────────────────────────────────────────────────
+var AV_COLS = ['#bf4a0a','#1b6e40','#1b4896','#6b21a8','#b45309','#0e7490','#be185d'];
+function avCol(i) { return AV_COLS[i % AV_COLS.length]; }
+function initials(n) { return String(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 
-// ── Wait for Firebase ────────────────────────────────────────────────────────
+// ── Wait for Firebase ─────────────────────────────────────────────────────────
 function waitFb() {
   return new Promise(res => {
     if (window._fbReady !== undefined) { res(window._fbReady); return; }
-    var t = 0, iv = setInterval(() => {
-      if (window._fbReady !== undefined || ++t > 50) { clearInterval(iv); res(!!window._fbReady); }
+    var t = 0;
+    var iv = setInterval(() => {
+      if (window._fbReady !== undefined || ++t > 60) { clearInterval(iv); res(!!window._fbReady); }
     }, 100);
   });
 }
 
-// ── Password hash ────────────────────────────────────────────────────────────
+// ── Password hash ─────────────────────────────────────────────────────────────
 async function hashPw(pw) {
   try {
-    var buf  = new TextEncoder().encode(pw);
-    var hash = await crypto.subtle.digest('SHA-256', buf);
-    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    var buf = new TextEncoder().encode(pw);
+    var h   = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
   } catch(e) { return pw; }
 }
 
-// ── LOGIN ────────────────────────────────────────────────────────────────────
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
 document.getElementById('loginBtn').addEventListener('click', doLogin);
 document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
@@ -364,27 +418,23 @@ async function doLogin() {
   var btn   = document.getElementById('loginBtn');
   errEl.style.display = 'none';
   if (!email || !pw) { showErr(errEl,'Udfyld email og adgangskode.'); return; }
-
   btn.disabled = true; btn.textContent = 'Logger ind…';
   try {
     var ok = await waitFb();
-    if (!ok) throw new Error('Kan ikke forbinde til databasen.');
+    if (!ok) throw new Error('Kan ikke forbinde til Firebase.');
     var custs = await window.fb.loadCustomers();
     var match = null;
     for (var c of custs) {
       if (c.email && c.email.toLowerCase() === email) {
-        var h = await hashPw(pw);
-        if (h === c.password) { match = c; break; }
+        if ((await hashPw(pw)) === c.password) { match = c; break; }
       }
     }
-    if (!match) throw new Error('Forkert email eller adgangskode.');
-    if (match.status !== 'active') throw new Error('Kontoen er ikke aktiv.');
+    if (!match)                                              throw new Error('Forkert email eller adgangskode.');
+    if (match.status !== 'active')                          throw new Error('Kontoen er ikke aktiv.');
     if (match.expiryDate && new Date(match.expiryDate) < new Date()) throw new Error('Abonnementet er udløbet.');
     _customer = match;
     enterApp();
-  } catch(err) {
-    showErr(errEl, err.message);
-  }
+  } catch(err) { showErr(errEl, err.message); }
   btn.disabled = false; btn.textContent = 'Log ind →';
 }
 
@@ -398,7 +448,7 @@ function enterApp() {
 }
 
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  _customer = null; _staff = []; _clockData = {};
+  _customer = null; _staff = []; _clockData = {}; _extraData = {};
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('topbar').style.display      = 'none';
   document.getElementById('mainPage').style.display    = 'none';
@@ -406,15 +456,19 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   document.getElementById('loginPw').value    = '';
 });
 
-// ── PERIOD PICKER ────────────────────────────────────────────────────────────
-var MONTHS_DA = ['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+// ── PERIOD PICKER ──────────────────────────────────────────────────────────────
+var MONTHS = ['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
 
 function buildPeriodPicker() {
   var ms = document.getElementById('monthSel');
   var ys = document.getElementById('yearSel');
-  ms.innerHTML = MONTHS_DA.map((m,i) => '<option value="'+i+'"'+(i===_selMonth?' selected':'')+'>'+m+'</option>').join('');
+  ms.innerHTML = MONTHS.map((m,i) => '<option value="'+i+'"'+(i===_selMonth?' selected':'')+'>'+m+'</option>').join('');
   var yr = new Date().getFullYear();
-  ys.innerHTML = [yr-1,yr,yr+1].map(y => '<option value="'+y+'"'+(y===_selYear?' selected':'')+'>'+y+'</option>').join('');
+  [yr-1,yr,yr+1].forEach(y => {
+    var o = document.createElement('option');
+    o.value = y; o.textContent = y; if(y===_selYear) o.selected=true;
+    ys.appendChild(o);
+  });
 }
 
 document.getElementById('loadPeriodBtn').addEventListener('click', () => {
@@ -423,373 +477,502 @@ document.getElementById('loadPeriodBtn').addEventListener('click', () => {
   loadAllData();
 });
 
-// ── LOAD ALL DATA ────────────────────────────────────────────────────────────
+// ── LOAD ALL DATA ──────────────────────────────────────────────────────────────
 async function loadAllData() {
-  document.getElementById('loadingState').style.display = 'flex';
-  document.getElementById('staffGrid').style.display    = 'none';
-  document.getElementById('summaryArea').style.display  = 'none';
+  document.getElementById('loadingState').style.display  = 'block';
+  document.getElementById('staffGrid').style.display     = 'none';
+  document.getElementById('summaryArea').style.display   = 'none';
 
   try {
     var custId = _customer.id;
 
-    // Keys follow shiftdesk.html custKey() pattern:
-    // custKey(k) = 'cust_' + customer.id + '_' + k
-    // customer.id is already 'cust_TIMESTAMP' → keys are 'cust_cust_TIMESTAMP_staff' etc.
-    // fbGetData returns d.data().value — already a JS object, NOT a JSON string.
-    // localStorage stores JSON strings — need JSON.parse().
+    // shiftdesk.html custKey(k) = 'cust_' + customer.id + '_' + k
+    // customer.id is already 'cust_TIMESTAMP'
+    // → real Firebase key = 'cust_cust_TIMESTAMP_staff' etc.
+    // fb.getCustData() returns d.data().value — already a JS value, NOT a JSON string.
 
     var staffKey = 'cust_' + custId + '_staff';
     var clockKey = 'cust_' + custId + '_clockHistory';
-    var payKey   = 'cust_' + custId + '_payrollEntries';
+    var extraKey = 'cust_' + custId + '_payrollExtra';
+    var ratesKey = 'cust_' + custId + '_payrollRates';
 
-    // ── Staff ─────────────────────────────────────────────────────────────
+    // Staff
     var staffVal = await window.fb.getCustData(staffKey);
     if (staffVal && Array.isArray(staffVal)) {
-      _staff = staffVal; // already a JS array from Firebase
+      _staff = staffVal;
     } else {
-      // Fallback to localStorage (stored as JSON string by shiftdesk.html)
-      try {
-        var ls = localStorage.getItem('shiftdesk_staff');
-        _staff = ls ? JSON.parse(ls) : [];
-      } catch(e) { _staff = []; }
+      // Fallback localStorage — stored as JSON string
+      try { var ls = localStorage.getItem('shiftdesk_staff'); _staff = ls ? JSON.parse(ls) : []; }
+      catch(e) { _staff = []; }
     }
 
-    // ── Clock history ─────────────────────────────────────────────────────
+    // Clock history
     var clockVal = await window.fb.getCustData(clockKey);
-    if (clockVal && typeof clockVal === 'object') {
-      _clockData = clockVal; // already a JS object from Firebase
+    if (clockVal && typeof clockVal === 'object' && !Array.isArray(clockVal)) {
+      _clockData = clockVal;
     } else {
-      // Fallback to localStorage
-      try {
-        var lc = localStorage.getItem('shiftdesk_clockhistory');
-        _clockData = lc ? JSON.parse(lc) : {};
-      } catch(e) { _clockData = {}; }
+      try { var lc = localStorage.getItem('shiftdesk_clockhistory'); _clockData = lc ? JSON.parse(lc) : {}; }
+      catch(e) { _clockData = {}; }
     }
 
-    // ── Payroll entries (admin-added, stored by this page) ────────────────
-    var payVal = await window.fb.getCustData(payKey);
-    if (payVal && typeof payVal === 'object') {
-      _payrollData = payVal;
-    } else {
-      _payrollData = {};
+    // Extra admin-added entries
+    var extraVal = await window.fb.getCustData(extraKey);
+    _extraData = (extraVal && typeof extraVal === 'object') ? extraVal : {};
+
+    // Saved hourly rates (overrides per staff id)
+    var ratesVal = await window.fb.getCustData(ratesKey);
+    if (ratesVal && typeof ratesVal === 'object') {
+      // Apply saved rates to staff objects
+      _staff = _staff.map(s => {
+        var saved = ratesVal[String(s.id)];
+        return saved !== undefined ? Object.assign({}, s, {rate: saved}) : s;
+      });
     }
 
-    renderStaffGrid();
   } catch(err) {
-    toast('Fejl ved indlæsning: ' + err.message);
-    document.getElementById('loadingState').style.display = 'none';
+    toast('Fejl: ' + err.message);
   }
 
   document.getElementById('loadingState').style.display = 'none';
+  renderAll();
 }
 
-// ── GET HOURS FOR PERIOD ─────────────────────────────────────────────────────
-function getPeriodEntries(staffId) {
+// ── GET ENTRIES FOR PERIOD ─────────────────────────────────────────────────────
+function getEntries(staffId) {
   var entries = [];
-  var sid = String(staffId);
+  var sidStr  = String(staffId);
 
-  // From ShiftDesk clock history
-  var ch = _clockData[staffId] || _clockData[sid] || {};
+  // Clock history from ShiftDesk — keys can be integer or string
+  var ch = _clockData[staffId] || _clockData[sidStr] || {};
   Object.keys(ch).forEach(dateStr => {
     var e = ch[dateStr];
+    if (!e || !e.inTime || !e.outTime) return;
     var d = new Date(dateStr);
-    if (d.getMonth() === _selMonth && d.getFullYear() === _selYear) {
-      entries.push({
-        dateStr:  dateStr,
-        inTime:   e.inTime,
-        outTime:  e.outTime,
-        approved: e.approved || false,
-        note:     e.note || '',
-        source:   'shiftdesk'
-      });
-    }
+    if (isNaN(d.getTime())) return;
+    if (d.getMonth() !== _selMonth || d.getFullYear() !== _selYear) return;
+    entries.push({
+      dateStr:  dateStr,
+      inTime:   e.inTime,
+      outTime:  e.outTime,
+      approved: !!e.approved,
+      note:     e.note || '',
+      source:   'shiftdesk'
+    });
   });
 
-  // From payroll admin entries (overrides or additions)
-  var pe = _payrollData[sid] || {};
-  Object.keys(pe).forEach(dateStr => {
-    var e = pe[dateStr];
+  // Extra admin entries
+  var ex = _extraData[sidStr] || {};
+  Object.keys(ex).forEach(dateStr => {
+    var e = ex[dateStr];
+    if (!e || !e.inTime || !e.outTime) return;
     var d = new Date(dateStr);
-    if (d.getMonth() === _selMonth && d.getFullYear() === _selYear) {
-      // Override existing or add new
-      var idx = entries.findIndex(x => x.dateStr === dateStr);
-      if (idx >= 0) { entries[idx] = Object.assign({}, entries[idx], e, {source:'admin'}); }
-      else { entries.push(Object.assign({}, e, {dateStr, source:'admin'})); }
-    }
+    if (isNaN(d.getTime())) return;
+    if (d.getMonth() !== _selMonth || d.getFullYear() !== _selYear) return;
+    var idx = entries.findIndex(x => x.dateStr === dateStr);
+    if (idx >= 0) entries[idx] = Object.assign({}, entries[idx], e, {source:'admin'});
+    else entries.push(Object.assign({dateStr, source:'admin'}, e));
   });
 
   return entries.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
 }
 
-function calcHours(inTime, outTime) {
+// ── CALCULATE HOURS ────────────────────────────────────────────────────────────
+function calcMins(inTime, outTime) {
   if (!inTime || !outTime) return 0;
   var [ih,im] = inTime.split(':').map(Number);
   var [oh,om] = outTime.split(':').map(Number);
-  var mins = (oh*60+om) - (ih*60+im);
-  return Math.max(0, mins / 60);
+  return Math.max(0, (oh*60+om) - (ih*60+im));
 }
 
-function calcPayroll(staffMember, entries) {
-  var approvedEntries = entries.filter(e => e.approved);
-  var totalHours = approvedEntries.reduce((sum, e) => sum + calcHours(e.inTime, e.outTime), 0);
-  var rate       = staffMember.rate || 0;
-  var bruttoLon  = Math.round(totalHours * rate);
-  var ferieAf    = Math.round(bruttoLon * FERIE_RATE);
-  var amGrundlag = bruttoLon + ferieAf;
-  var amBidrag   = Math.round(amGrundlag * AM_RATE);
-  var atp        = totalHours > 0 ? ATP_RATE : 0;
-  var pensionEmp = Math.round(bruttoLon * PENSION_EMP);
-  var pensionCo  = Math.round(bruttoLon * PENSION_EMP_CO);
-  var aSkattegrundlag = amGrundlag - amBidrag - atp - pensionEmp;
-  var aSkat      = Math.round(Math.max(0, aSkattegrundlag) * A_SKAT_RATE);
-  var nettoLon   = amGrundlag - amBidrag - atp - pensionEmp - aSkat;
+// ── CALCULATE PAYROLL ──────────────────────────────────────────────────────────
+function calcPay(s, entries) {
+  var approved = entries.filter(e => e.approved);
+  var totalMins = approved.reduce((sum, e) => sum + calcMins(e.inTime, e.outTime), 0);
+  var totalHours = totalMins / 60;
+  var rate = s.rate || 0;
+
+  // Step 1: Bruttoløn
+  var bruttoLon = Math.round(totalHours * rate);
+
+  // Step 2: Feriepenge 12.5% — added on top of bruttoløn
+  var feriePenge = Math.round(bruttoLon * FERIE_PCT);
+
+  // Step 3: AM-grundlag = bruttoløn + feriepenge
+  var amGrundlag = bruttoLon + feriePenge;
+
+  // Step 4: AM-bidrag 8% of AM-grundlag
+  var amBidrag = Math.round(amGrundlag * AM_PCT);
+
+  // Step 5: ATP — only if there were actual hours
+  var atp = (totalHours > 0 && rate > 0) ? ATP_PER_MONTH : 0;
+
+  // Step 6: Pension employee 4% of bruttoløn
+  var pensionE = Math.round(bruttoLon * PENSION_E_PCT);
+
+  // Step 7: Pension employer 8% of bruttoløn (cost to employer, not deducted from employee)
+  var pensionC = Math.round(bruttoLon * PENSION_C_PCT);
+
+  // Step 8: A-skat grundlag = amGrundlag - amBidrag - atp - pensionE
+  var aSkattegrundlag = Math.max(0, amGrundlag - amBidrag - atp - pensionE);
+
+  // Step 9: A-skat ~37%
+  var aSkat = Math.round(aSkattegrundlag * ASKAT_PCT);
+
+  // Step 10: Nettoløn = amGrundlag - amBidrag - atp - pensionE - aSkat
+  var nettoLon = amGrundlag - amBidrag - atp - pensionE - aSkat;
 
   return {
-    totalHours, bruttoLon, ferieAf, amGrundlag, amBidrag,
-    atp, pensionEmp, pensionCo, aSkat, nettoLon, rate
+    totalHours, totalMins, rate, bruttoLon, feriePenge,
+    amGrundlag, amBidrag, atp, pensionE, pensionC,
+    aSkattegrundlag, aSkat, nettoLon,
+    approvedCount: approved.length
   };
 }
 
-// ── RENDER STAFF GRID ────────────────────────────────────────────────────────
-function renderStaffGrid() {
-  var grid  = document.getElementById('staffGrid');
-  var month = MONTHS_DA[_selMonth] + ' ' + _selYear;
-  document.getElementById('periodLabel').textContent = 'Periode: ' + month;
+// ── RENDER ALL ─────────────────────────────────────────────────────────────────
+function renderAll() {
+  var grid = document.getElementById('staffGrid');
+
+  document.getElementById('periodLabel').textContent =
+    'Periode: ' + MONTHS[_selMonth] + ' ' + _selYear;
 
   if (!_staff.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);">' +
-      '<div style="font-size:2rem;margin-bottom:12px;">👥</div>' +
-      '<div style="font-family:\'Fraunces\',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:6px;">Ingen medarbejdere fundet</div>' +
-      '<div style="font-size:.8rem;">Åbn ShiftDesk og tilføj medarbejdere — de synkroniserer automatisk hertil.</div>' +
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted);">' +
+      '<div style="font-size:2.5rem;margin-bottom:14px;">👥</div>' +
+      '<div style="font-family:\'Fraunces\',serif;font-size:1rem;font-weight:700;color:var(--text);margin-bottom:8px;">Ingen medarbejdere fundet</div>' +
+      '<div style="font-size:.8rem;max-width:320px;margin:0 auto;">Åbn ShiftDesk, klik <strong>Publish</strong> (øverst til højre) for at synkronisere medarbejdere hertil.</div>' +
       '</div>';
     grid.style.display = 'grid';
-    document.getElementById('loadingState').style.display = 'none';
     return;
   }
 
   var html = '';
-  var totalPay = 0;
-  var totalHrs = 0;
+  var totHours = 0, totNet = 0;
 
   _staff.forEach((s, idx) => {
-    var entries = getPeriodEntries(s.id);
-    var pay     = calcPayroll(s, entries);
-    var approvedCount = entries.filter(e=>e.approved).length;
-    totalPay += pay.nettoLon;
-    totalHrs += pay.totalHours;
+    var entries = getEntries(s.id);
+    var pay     = calcPay(s, entries);
+    totHours   += pay.totalHours;
+    totNet     += pay.nettoLon;
 
-    html += '<div class="staff-card">';
-    html += '<div class="sc-head">';
-    html += '<div class="sc-av" style="background:'+avCol(idx)+';color:#fff;">'+initials(s.name)+'</div>';
-    html += '<div><div class="sc-name">'+esc(s.name)+'</div><div class="sc-role">'+esc(s.role||'')+'</div></div>';
-    html += '<div class="sc-rate">'+(s.rate?s.rate+' DKK/t':'Ingen sats')+'</div>';
+    var col = avCol(idx);
+
+    html += '<div class="emp-card">';
+
+    // ── Head ──
+    html += '<div class="emp-head">';
+    html += '<div class="emp-av" style="background:'+col+';">'+initials(s.name)+'</div>';
+    html += '<div><div class="emp-name">'+esc(s.name)+'</div><div class="emp-role">'+esc(s.role||'')+'</div></div>';
+    html += '<div class="emp-rate">';
+    if (s.rate) {
+      html += '<div class="rate-val">'+s.rate+' DKK/t</div>';
+    } else {
+      html += '<div class="rate-val" style="color:#b45309;">Ingen sats</div>';
+    }
+    html += '<span class="rate-edit" data-rate="'+s.id+'">Sæt sats</span>';
     html += '</div>';
-    html += '<div class="sc-body">';
+    html += '</div>';
 
+    // ── Hours ──
+    html += '<div class="hours-section">';
+    html += '<div class="section-lbl">Timer — '+MONTHS[_selMonth]+' '+_selYear+'</div>';
     if (!entries.length) {
       html += '<div class="no-hours">Ingen registrerede timer denne periode</div>';
     } else {
       html += '<table class="hours-table">';
       html += '<thead><tr><th>Dato</th><th>Ind</th><th>Ud</th><th>Timer</th><th>Status</th></tr></thead><tbody>';
       entries.forEach(e => {
-        var hrs = calcHours(e.inTime, e.outTime);
-        var dFmt = e.dateStr ? new Date(e.dateStr).toLocaleDateString('da-DK',{day:'2-digit',month:'short'}) : '—';
+        var hrs = (calcMins(e.inTime,e.outTime)/60).toFixed(1);
+        var dFmt = new Date(e.dateStr+'T12:00:00').toLocaleDateString('da-DK',{weekday:'short',day:'2-digit',month:'short'});
         html += '<tr>';
         html += '<td>'+dFmt+'</td>';
-        html += '<td>'+(e.inTime||'—')+'</td>';
-        html += '<td>'+(e.outTime||'—')+'</td>';
-        html += '<td style="font-family:\'DM Mono\',monospace;font-weight:600;">'+hrs.toFixed(1)+'t</td>';
-        html += '<td><span class="ap-badge '+(e.approved?'ap-ok':'ap-pending')+'">'+(e.approved?'✓ Godkendt':'Afventer')+'</span></td>';
+        html += '<td style="font-family:\'DM Mono\',monospace;">'+e.inTime+'</td>';
+        html += '<td style="font-family:\'DM Mono\',monospace;">'+e.outTime+'</td>';
+        html += '<td style="font-family:\'DM Mono\',monospace;font-weight:600;">'+hrs+'t</td>';
+        html += '<td><span class="'+(e.approved?'ap-ok':'ap-no')+'">'+(e.approved?'✓ Godkendt':'Afventer')+'</span></td>';
         html += '</tr>';
       });
       html += '</tbody></table>';
     }
+    html += '</div>';
 
-    html += '<div class="sc-row"><span class="sc-key">Godkendte dage</span><span class="sc-val approved">'+approvedCount+'</span></div>';
-    html += '<div class="sc-row"><span class="sc-key">Godkendte timer</span><span class="sc-val approved">'+pay.totalHours.toFixed(1)+'t</span></div>';
-    html += '<div class="sc-row"><span class="sc-key">Bruttoløn</span><span class="sc-val">'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</span></div>';
-    html += '<div class="sc-row"><span class="sc-key">Nettoløn (ca.)</span><span class="sc-val approved">'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+    // ── Payroll breakdown ──
+    html += '<div class="breakdown">';
+    html += '<div class="section-lbl" style="padding-top:10px;">Lønberegning</div>';
+
+    if (!s.rate) {
+      html += '<div style="color:#b45309;font-size:.76rem;padding:8px 0;">Sæt timeløn for at se lønberegning</div>';
+    } else {
+      // Earnings
+      html += '<div class="br-row"><span class="br-lbl">Timeløn ('+pay.totalHours.toFixed(2)+' t × '+pay.rate+' kr)</span><span class="br-val">'+fmt(pay.bruttoLon)+' kr</span></div>';
+      html += '<div class="br-row"><span class="br-lbl">Feriepenge (12,5%)</span><span class="br-val">'+fmt(pay.feriePenge)+' kr</span></div>';
+      html += '<div class="br-row" style="font-weight:600;"><span class="br-lbl">AM-grundlag</span><span class="br-val">'+fmt(pay.amGrundlag)+' kr</span></div>';
+
+      html += '<div class="br-divider"></div>';
+
+      // Deductions
+      html += '<div class="br-row deduct"><span class="br-lbl">− AM-bidrag (8%)</span><span class="br-val">'+fmt(pay.amBidrag)+' kr</span></div>';
+      html += '<div class="br-row deduct"><span class="br-lbl">− ATP</span><span class="br-val">'+fmt(pay.atp)+' kr</span></div>';
+      html += '<div class="br-row deduct"><span class="br-lbl">− Pension medarbejder (4%)</span><span class="br-val">'+fmt(pay.pensionE)+' kr</span></div>';
+      html += '<div class="br-row deduct"><span class="br-lbl">− A-skat (ca. 37%)</span><span class="br-val">'+fmt(pay.aSkat)+' kr</span></div>';
+
+      html += '<div class="br-row total"><span class="br-lbl">Til udbetaling</span><span class="br-val" style="font-size:.95rem;">'+fmt(pay.nettoLon)+' kr</span></div>';
+    }
     html += '</div>';
-    html += '<div class="sc-foot">';
-    html += '<button class="btn btn-blue btn-sm" data-sid="'+s.id+'">📄 Lønseddel</button>';
-    html += '<button class="btn btn-ghost btn-sm" data-edit="'+s.id+'">✏ Ret timer</button>';
+
+    // ── Footer ──
+    html += '<div class="emp-foot">';
+    html += '<button class="btn btn-blue btn-sm" data-payslip="'+s.id+'">📄 Lønseddel</button>';
+    html += '<button class="btn btn-ghost btn-sm" data-hours="'+s.id+'">✏ Ret timer</button>';
     html += '</div>';
-    html += '</div>';
+
+    html += '</div>'; // emp-card
   });
 
   grid.innerHTML = html;
   grid.style.display = 'grid';
 
-  // Payslip buttons
-  grid.querySelectorAll('[data-sid]').forEach(btn => {
-    btn.addEventListener('click', () => openPayslip(parseInt(btn.getAttribute('data-sid'))));
-  });
-  // Edit hours buttons
-  grid.querySelectorAll('[data-edit]').forEach(btn => {
-    btn.addEventListener('click', () => openAddHours(parseInt(btn.getAttribute('data-edit'))));
-  });
+  // Wire buttons
+  grid.querySelectorAll('[data-payslip]').forEach(b =>
+    b.addEventListener('click', () => openPayslip(parseInt(b.getAttribute('data-payslip')))));
+  grid.querySelectorAll('[data-hours]').forEach(b =>
+    b.addEventListener('click', () => openAddHours(parseInt(b.getAttribute('data-hours')))));
+  grid.querySelectorAll('[data-rate]').forEach(b =>
+    b.addEventListener('click', () => openRateModal(parseInt(b.getAttribute('data-rate')))));
 
   // Summary
-  var sumEl = document.getElementById('summaryArea');
-  sumEl.innerHTML = '<div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:18px 22px;display:flex;gap:32px;flex-wrap:wrap;align-items:center;">' +
-    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Totale timer</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;">'+totalHrs.toFixed(1)+'t</div></div>' +
-    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Total nettoløn</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;color:var(--green);">'+totalPay.toLocaleString('da-DK')+' DKK</div></div>' +
-    '<div style="flex:1;"><div style="font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);">Medarbejdere</div><div style="font-family:\'Fraunces\',serif;font-size:1.8rem;font-weight:700;">'+_staff.length+'</div></div>' +
-    '</div>';
-  sumEl.style.display = 'block';
+  document.getElementById('sumHours').textContent = totHours.toFixed(1) + 't';
+  document.getElementById('sumPay').textContent   = fmt(totNet) + ' kr';
+  document.getElementById('sumStaff').textContent = _staff.length;
+  document.getElementById('summaryArea').style.display = 'grid';
 }
 
-// ── ADD / EDIT HOURS MODAL ───────────────────────────────────────────────────
+// ── SET RATE MODAL ─────────────────────────────────────────────────────────────
+document.getElementById('rateCancelBtn').addEventListener('click', () =>
+  document.getElementById('rateModal').classList.remove('open'));
+document.getElementById('rateModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('rateModal'))
+    document.getElementById('rateModal').classList.remove('open');
+});
+document.getElementById('rateSaveBtn').addEventListener('click', saveRate);
+
+function openRateModal(sid) {
+  _rateEditing = sid;
+  var s = _staff.find(x => x.id === sid);
+  document.getElementById('rateEmpName').textContent = s ? s.name : '';
+  document.getElementById('rateVal').value = s && s.rate ? s.rate : '';
+  document.getElementById('rateErr').style.display = 'none';
+  document.getElementById('rateModal').classList.add('open');
+  setTimeout(() => document.getElementById('rateVal').focus(), 100);
+}
+
+async function saveRate() {
+  var val   = parseFloat(document.getElementById('rateVal').value);
+  var errEl = document.getElementById('rateErr');
+  errEl.style.display = 'none';
+  if (isNaN(val) || val < 0) { showErr(errEl, 'Angiv en gyldig sats.'); return; }
+
+  var btn = document.getElementById('rateSaveBtn');
+  btn.disabled = true; btn.textContent = 'Gemmer…';
+
+  try {
+    var custId   = _customer.id;
+    var ratesKey = 'cust_' + custId + '_payrollRates';
+    var ratesVal = await window.fb.getCustData(ratesKey);
+    var rates    = (ratesVal && typeof ratesVal === 'object') ? ratesVal : {};
+    rates[String(_rateEditing)] = val;
+    await window.fb.setCustData(ratesKey, rates);
+
+    // Update local staff array
+    _staff = _staff.map(s => s.id === _rateEditing ? Object.assign({}, s, {rate: val}) : s);
+    document.getElementById('rateModal').classList.remove('open');
+    renderAll();
+    toast('✓ Timeløn gemt: ' + val + ' DKK/t');
+  } catch(err) {
+    showErr(errEl, 'Fejl: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Gem sats';
+}
+
+// ── ADD HOURS MODAL ────────────────────────────────────────────────────────────
 document.getElementById('addHoursBtn').addEventListener('click', () => openAddHours(null));
-document.getElementById('hmCancelBtn').addEventListener('click', closeHoursModal);
+document.getElementById('hmCancelBtn').addEventListener('click', () =>
+  document.getElementById('hoursModal').classList.remove('open'));
+document.getElementById('hoursModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('hoursModal'))
+    document.getElementById('hoursModal').classList.remove('open');
+});
 document.getElementById('hmSaveBtn').addEventListener('click', saveHours);
 
-document.getElementById('hoursModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('hoursModal')) closeHoursModal();
-});
-
-function openAddHours(preselectedSid) {
+function openAddHours(preId) {
   var sel = document.getElementById('hm_staff');
-  sel.innerHTML = _staff.map(s => '<option value="'+s.id+'"'+(s.id===preselectedSid?' selected':'')+'>'+esc(s.name)+' ('+esc(s.role||'')+')</option>').join('');
-  document.getElementById('hm_date').value     = new Date().toISOString().split('T')[0];
-  document.getElementById('hm_in').value       = '';
-  document.getElementById('hm_out').value      = '';
-  document.getElementById('hm_note').value     = '';
-  document.getElementById('hm_approved').checked = true;
-  document.getElementById('hmErr').style.display = 'none';
+  sel.innerHTML = _staff.map(s =>
+    '<option value="'+s.id+'"'+(s.id===preId?' selected':'')+'>'+esc(s.name)+' ('+esc(s.role||'')+')</option>'
+  ).join('');
+  document.getElementById('hm_date').value        = new Date().toISOString().split('T')[0];
+  document.getElementById('hm_in').value          = '';
+  document.getElementById('hm_out').value         = '';
+  document.getElementById('hm_note').value        = '';
+  document.getElementById('hm_approved').checked  = true;
+  document.getElementById('hmErr').style.display  = 'none';
   document.getElementById('hoursModal').classList.add('open');
   setTimeout(() => document.getElementById('hm_date').focus(), 100);
 }
 
-function closeHoursModal() {
-  document.getElementById('hoursModal').classList.remove('open');
-}
-
 async function saveHours() {
-  var sid     = parseInt(document.getElementById('hm_staff').value);
-  var date    = document.getElementById('hm_date').value;
-  var inTime  = document.getElementById('hm_in').value;
-  var outTime = document.getElementById('hm_out').value;
-  var note    = document.getElementById('hm_note').value.trim();
-  var approved= document.getElementById('hm_approved').checked;
-  var errEl   = document.getElementById('hmErr');
+  var sid      = parseInt(document.getElementById('hm_staff').value);
+  var date     = document.getElementById('hm_date').value;
+  var inTime   = document.getElementById('hm_in').value;
+  var outTime  = document.getElementById('hm_out').value;
+  var note     = document.getElementById('hm_note').value.trim();
+  var approved = document.getElementById('hm_approved').checked;
+  var errEl    = document.getElementById('hmErr');
   errEl.style.display = 'none';
 
-  if (!date)    { showErr(errEl,'Vælg en dato.'); return; }
-  if (!inTime)  { showErr(errEl,'Angiv mødetidspunkt.'); return; }
-  if (!outTime) { showErr(errEl,'Angiv hjemgangstidspunkt.'); return; }
-  if (inTime >= outTime) { showErr(errEl,'Hjemgang skal være efter mødetid.'); return; }
+  if (!date)               { showErr(errEl,'Vælg en dato.'); return; }
+  if (!inTime)             { showErr(errEl,'Angiv mødetidspunkt.'); return; }
+  if (!outTime)            { showErr(errEl,'Angiv hjemgangstidspunkt.'); return; }
+  if (inTime >= outTime)   { showErr(errEl,'Hjemgang skal være efter mødetid.'); return; }
 
   var btn = document.getElementById('hmSaveBtn');
   btn.disabled = true; btn.textContent = 'Gemmer…';
 
   try {
-    var custId = _customer.id;
-    var sidStr = String(sid);
+    var sidStr   = String(sid);
+    var custId   = _customer.id;
+    var extraKey = 'cust_' + custId + '_payrollExtra';
 
-    if (!_payrollData[sidStr]) _payrollData[sidStr] = {};
-    _payrollData[sidStr][date] = { inTime, outTime, approved, note, dateStr: date, source: 'admin' };
+    if (!_extraData[sidStr]) _extraData[sidStr] = {};
+    _extraData[sidStr][date] = { inTime, outTime, approved, note, dateStr: date, source: 'admin' };
 
-    var payKey = 'cust_' + custId + '_payrollEntries';
-    await window.fb.setCustData(payKey, _payrollData);
+    // Store as raw JS object — fb.setCustData wraps it in {value: obj}
+    await window.fb.setCustData(extraKey, _extraData);
 
-    closeHoursModal();
-    renderStaffGrid();
+    document.getElementById('hoursModal').classList.remove('open');
+    renderAll();
     toast('✓ Timer gemt');
   } catch(err) {
     showErr(errEl, 'Fejl: ' + err.message);
   }
-
   btn.disabled = false; btn.textContent = 'Gem timer';
 }
 
-// ── PAYSLIP ──────────────────────────────────────────────────────────────────
-document.getElementById('psCloseBtn').addEventListener('click', () => {
-  document.getElementById('payslipModal').classList.remove('open');
-});
+// ── PAYSLIP ────────────────────────────────────────────────────────────────────
+document.getElementById('psCloseBtn').addEventListener('click', () =>
+  document.getElementById('payslipModal').classList.remove('open'));
 document.getElementById('printBtn').addEventListener('click', () => window.print());
+document.getElementById('payslipModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('payslipModal'))
+    document.getElementById('payslipModal').classList.remove('open');
+});
 
 function openPayslip(sid) {
-  var s       = _staff.find(x => x.id === sid);
+  var s        = _staff.find(x => x.id === sid);
   if (!s) return;
-  var entries = getPeriodEntries(sid);
-  var pay     = calcPayroll(s, entries);
-  var month   = MONTHS_DA[_selMonth] + ' ' + _selYear;
-  var today   = new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'long',year:'numeric'});
-  var approvedEntries = entries.filter(e=>e.approved);
+  var entries  = getEntries(sid);
+  var pay      = calcPay(s, entries);
+  var month    = MONTHS[_selMonth] + ' ' + _selYear;
+  var approved = entries.filter(e => e.approved);
 
   var html = '<div class="payslip-wrap">';
 
-  // Header
-  html += '<div class="ps-header">';
-  html += '<div><div class="ps-company">'+esc(_customer.name||'Virksomhed')+'</div><div class="ps-sub">Lønseddel — '+month+'</div></div>';
-  html += '<div class="ps-meta"><table>';
-  html += '<tr><td>Medarbejder:</td><td>'+esc(s.name)+'</td></tr>';
-  html += '<tr><td>Stilling:</td><td>'+esc(s.role||'—')+'</td></tr>';
-  html += '<tr><td>Betalingsdato:</td><td>'+today+'</td></tr>';
-  html += '<tr><td>Lønperiode:</td><td>'+month+'</td></tr>';
-  html += '<tr><td>Timelønssats:</td><td>'+(s.rate||0)+' DKK/t</td></tr>';
-  html += '</table></div>';
+  // Company + employee info
+  html += '<div class="ps-co">'+esc(_customer.name||'Virksomhed')+'</div>';
+  html += '<div class="ps-sub-title">Lønseddel — '+month+'</div>';
+
+  html += '<div class="ps-two">';
+
+  // Left: employee info
+  html += '<div class="ps-box">';
+  html += '<div class="ps-box-title">Medarbejder</div>';
+  html += '<div class="ps-box-row"><span>Navn</span><span>'+esc(s.name)+'</span></div>';
+  html += '<div class="ps-box-row"><span>Stilling</span><span>'+esc(s.role||'—')+'</span></div>';
+  html += '<div class="ps-box-row"><span>Timelønssats</span><span>'+fmt(s.rate||0)+' DKK/t</span></div>';
+  html += '<div class="ps-box-row"><span>Godkendte dage</span><span>'+pay.approvedCount+'</span></div>';
+  html += '<div class="ps-box-row"><span>Godkendte timer</span><span>'+pay.totalHours.toFixed(2)+'</span></div>';
   html += '</div>';
+
+  // Right: period info
+  html += '<div class="ps-box">';
+  html += '<div class="ps-box-title">Lønperiode</div>';
+  html += '<div class="ps-box-row"><span>Periode</span><span>'+month+'</span></div>';
+  html += '<div class="ps-box-row"><span>Betalingsdato</span><span>'+new Date().toLocaleDateString('da-DK',{day:'2-digit',month:'long',year:'numeric'})+'</span></div>';
+  html += '<div class="ps-box-row"><span>Virksomhed</span><span>'+esc(_customer.name||'—')+'</span></div>';
+  html += '</div>';
+
+  html += '</div>'; // ps-two
 
   // Hours detail
-  if (approvedEntries.length) {
-    html += '<div class="ps-section">';
-    html += '<div class="ps-sec-title">Godkendte timer</div>';
-    html += '<table class="ps-table"><thead><tr><th>Dato</th><th>Mødte</th><th>Gik</th><th>Timer</th></tr></thead><tbody>';
-    approvedEntries.forEach(e => {
-      var hrs = calcHours(e.inTime, e.outTime);
-      var dFmt = new Date(e.dateStr).toLocaleDateString('da-DK',{weekday:'short',day:'2-digit',month:'short'});
-      html += '<tr><td>'+dFmt+'</td><td>'+e.inTime+'</td><td>'+e.outTime+'</td><td>'+hrs.toFixed(2)+'</td></tr>';
+  if (approved.length) {
+    html += '<div class="ps-box-title" style="margin-bottom:8px;">Registrerede timer</div>';
+    html += '<table class="ps-table"><thead><tr>';
+    html += '<th>Dato</th><th>Mødte ind</th><th>Gik hjem</th><th>Timer</th>';
+    html += '</tr></thead><tbody>';
+    approved.forEach(e => {
+      var hrs  = (calcMins(e.inTime,e.outTime)/60).toFixed(2);
+      var dFmt = new Date(e.dateStr+'T12:00:00').toLocaleDateString('da-DK',{weekday:'long',day:'2-digit',month:'short'});
+      html += '<tr><td>'+dFmt+'</td><td>'+e.inTime+'</td><td>'+e.outTime+'</td><td>'+hrs+'</td></tr>';
     });
-    html += '<tr style="font-weight:700;background:var(--s2);"><td colspan="3">Total timer</td><td>'+pay.totalHours.toFixed(2)+'</td></tr>';
+    html += '<tr class="subtotal"><td colspan="3">Total godkendte timer</td><td>'+pay.totalHours.toFixed(2)+'</td></tr>';
     html += '</tbody></table>';
-    html += '</div>';
   }
 
-  // Salary calculation
-  html += '<div class="ps-section">';
-  html += '<div class="ps-sec-title">Lønberegning</div>';
-  html += '<table class="ps-table"><thead><tr><th>Beskrivelse</th><th>Grundlag</th><th>Sats</th><th>Beløb</th></tr></thead><tbody>';
-  html += '<tr><td>Timeløn</td><td>'+pay.totalHours.toFixed(2)+' t</td><td>'+pay.rate+' DKK/t</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr><td>Feriepenge (12,5%)</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td><td>12,5%</td><td>'+pay.ferieAf.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr style="font-weight:600;"><td>AM-grundlag</td><td></td><td></td><td>'+pay.amGrundlag.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr style="color:var(--red);"><td>AM-bidrag (8%)</td><td>'+pay.amGrundlag.toLocaleString('da-DK')+' DKK</td><td>8%</td><td>−'+pay.amBidrag.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr style="color:var(--red);"><td>ATP</td><td></td><td>Fast</td><td>−'+pay.atp.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr style="color:var(--red);"><td>Pension (medarbejder 4%)</td><td>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</td><td>4%</td><td>−'+pay.pensionEmp.toLocaleString('da-DK')+' DKK</td></tr>';
-  html += '<tr style="color:var(--red);"><td>A-skat (ca. 37%)</td><td>'+(pay.amGrundlag-pay.amBidrag-pay.atp-pay.pensionEmp).toLocaleString('da-DK')+' DKK</td><td>37%</td><td>−'+pay.aSkat.toLocaleString('da-DK')+' DKK</td></tr>';
+  // Salary calculation table
+  html += '<div class="ps-box-title" style="margin:16px 0 8px;">Lønberegning</div>';
+  html += '<table class="ps-table"><thead><tr>';
+  html += '<th>Beskrivelse</th><th>Grundlag</th><th>Sats</th><th>Beløb (DKK)</th>';
+  html += '</tr></thead><tbody>';
+
+  html += '<tr class="section-head"><td colspan="4">Indtjening</td></tr>';
+  html += '<tr><td>Timeløn</td><td>'+pay.totalHours.toFixed(2)+' t</td><td>'+fmt(pay.rate)+' DKK/t</td><td>'+fmt(pay.bruttoLon)+'</td></tr>';
+  html += '<tr><td>Feriepenge</td><td>'+fmt(pay.bruttoLon)+' DKK</td><td>12,5%</td><td>'+fmt(pay.feriePenge)+'</td></tr>';
+  html += '<tr class="subtotal"><td colspan="3">AM-grundlag</td><td>'+fmt(pay.amGrundlag)+'</td></tr>';
+
+  html += '<tr class="section-head"><td colspan="4">Fradrag</td></tr>';
+  html += '<tr class="deduct"><td>AM-bidrag</td><td>'+fmt(pay.amGrundlag)+' DKK</td><td>8%</td><td>−'+fmt(pay.amBidrag)+'</td></tr>';
+  html += '<tr class="deduct"><td>ATP (medarbejder)</td><td>—</td><td>Fast</td><td>−'+fmt(pay.atp)+'</td></tr>';
+  html += '<tr class="deduct"><td>Pension (medarbejder)</td><td>'+fmt(pay.bruttoLon)+' DKK</td><td>4%</td><td>−'+fmt(pay.pensionE)+'</td></tr>';
+  html += '<tr class="deduct"><td>A-skat</td><td>'+fmt(pay.aSkattegrundlag)+' DKK</td><td>~37%</td><td>−'+fmt(pay.aSkat)+'</td></tr>';
+
   html += '</tbody></table>';
-  html += '<div class="ps-total"><span class="ps-total-lbl">Til udbetaling</span><span class="ps-total-val">'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+
+  html += '<div class="ps-total-box">';
+  html += '<span class="ps-total-lbl">Til udbetaling</span>';
+  html += '<span class="ps-total-val">'+fmt(pay.nettoLon)+' DKK</span>';
   html += '</div>';
 
-  // Bottom grid
-  html += '<div class="ps-grid" style="margin-top:16px;">';
+  // Employer costs
+  html += '<div class="ps-two" style="margin-top:16px;">';
   html += '<div class="ps-box">';
   html += '<div class="ps-box-title">Ferie & Pension</div>';
-  html += '<div class="ps-box-row"><span>Feriepenge optjent</span><span>'+pay.ferieAf.toLocaleString('da-DK')+' DKK</span></div>';
-  html += '<div class="ps-box-row"><span>Pension medarbejder</span><span>'+pay.pensionEmp.toLocaleString('da-DK')+' DKK</span></div>';
-  html += '<div class="ps-box-row"><span>Pension arbejdsgiver</span><span>'+pay.pensionCo.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Feriepenge optjent</span><span>'+fmt(pay.feriePenge)+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Pension medarbejder (4%)</span><span>'+fmt(pay.pensionE)+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Pension arbejdsgiver (8%)</span><span>'+fmt(pay.pensionC)+' DKK</span></div>';
   html += '</div>';
   html += '<div class="ps-box">';
   html += '<div class="ps-box-title">Opsummering</div>';
-  html += '<div class="ps-box-row"><span>Bruttoløn</span><span>'+pay.bruttoLon.toLocaleString('da-DK')+' DKK</span></div>';
-  html += '<div class="ps-box-row"><span>AM-bidrag</span><span>'+pay.amBidrag.toLocaleString('da-DK')+' DKK</span></div>';
-  html += '<div class="ps-box-row"><span>A-skat</span><span>'+pay.aSkat.toLocaleString('da-DK')+' DKK</span></div>';
-  html += '<div class="ps-box-row" style="font-weight:700;color:var(--green);border-top:1px solid var(--border);padding-top:4px;margin-top:4px;"><span>Nettoløn</span><span>'+pay.nettoLon.toLocaleString('da-DK')+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>Bruttoløn</span><span>'+fmt(pay.bruttoLon)+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>AM-bidrag</span><span>'+fmt(pay.amBidrag)+' DKK</span></div>';
+  html += '<div class="ps-box-row"><span>A-skat</span><span>'+fmt(pay.aSkat)+' DKK</span></div>';
+  html += '<div class="ps-box-row" style="font-weight:700;color:var(--green);border-top:1px solid var(--border);padding-top:5px;margin-top:3px;">';
+  html += '<span>Nettoløn</span><span>'+fmt(pay.nettoLon)+' DKK</span></div>';
   html += '</div>';
   html += '</div>';
+
   html += '</div>'; // payslip-wrap
 
-  document.getElementById('payslipArea').innerHTML = html;
+  document.getElementById('payslipContent').innerHTML = html;
   document.getElementById('payslipModal').classList.add('open');
 }
 
-// ── REFRESH ──────────────────────────────────────────────────────────────────
+// ── UTILS ──────────────────────────────────────────────────────────────────────
 document.getElementById('refreshBtn').addEventListener('click', loadAllData);
 
-// ── UTILS ────────────────────────────────────────────────────────────────────
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmt(n) {
+  return Number(n||0).toLocaleString('da-DK');
 }
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
 function toast(msg) {
@@ -799,7 +982,7 @@ function toast(msg) {
   setTimeout(() => t.remove(), 2800);
 }
 
-// ── AUTO LOGIN from ShiftDesk session ───────────────────────────────────────
+// ── AUTO LOGIN from ShiftDesk session ──────────────────────────────────────────
 (async function() {
   try {
     var sdAuth = sessionStorage.getItem('sd_auth');

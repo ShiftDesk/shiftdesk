@@ -315,6 +315,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </div>
 
+  <!-- Virksomhed info bar — shown after filling in company details -->
+  <div id="virksomhedBar" style="display:none;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:36px;height:36px;background:var(--green-lt);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏢</div>
+          <div>
+            <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;" id="vbar_navn"></div>
+            <div style="font-size:.68rem;color:var(--muted);" id="vbar_adresse"></div>
+          </div>
+        </div>
+        <div style="height:28px;width:1px;background:var(--border);flex-shrink:0;" class="no-print"></div>
+        <div style="font-size:.72rem;color:var(--muted);">
+          <span id="vbar_leder"></span>
+          <span id="vbar_cvr" style="margin-left:12px;font-family:'DM Mono',monospace;"></span>
+          <span id="vbar_reg" style="margin-left:12px;"></span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-xs no-print" id="vbarEditBtn">✏ Rediger</button>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="stat-grid" id="statGrid"></div>
 
@@ -579,7 +601,20 @@ function enterApp() {
   document.getElementById('mainPage').style.display='block';
   document.getElementById('userDisplay').textContent=_cust.name||_cust.email;
   document.getElementById('todayLabel').textContent='I dag: '+new Date().toLocaleDateString('da-DK',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('vbarEditBtn').addEventListener('click', openVirksomhed);
   loadData();
+}
+
+function renderVirksomhedBar() {
+  var v=_virksomhed||{};
+  var bar=document.getElementById('virksomhedBar');
+  if(!v.navn) { bar.style.display='none'; return; }
+  bar.style.display='block';
+  document.getElementById('vbar_navn').textContent=v.navn||'';
+  document.getElementById('vbar_adresse').textContent=v.adresse||'';
+  document.getElementById('vbar_leder').textContent=v.leder?'👤 '+v.leder:'';
+  document.getElementById('vbar_cvr').textContent=v.cvr?'CVR: '+v.cvr:'';
+  document.getElementById('vbar_reg').textContent=v.reg_dato?'Reg: '+v.reg_dato:'';
 }
 
 document.getElementById('logoutBtn').addEventListener('click',()=>{
@@ -604,6 +639,7 @@ async function loadData() {
     var vv=await window.fb.get(vkKey());
     _virksomhed=(vv&&typeof vv==='object'&&!Array.isArray(vv))?vv:{};
   } catch(e){_virksomhed={};}
+  renderVirksomhedBar();
   renderAll();
 }
 
@@ -1032,6 +1068,7 @@ async function saveVirksomhed() {
     }, acts);
     await window.fb.set(vkKey(), _virksomhed);
     document.getElementById('virksomhedModal').classList.remove('open');
+    renderVirksomhedBar();
     toast('✓ Virksomhedsoplysninger gemt');
   } catch(err){
     var e=document.getElementById('virksomhedErr');

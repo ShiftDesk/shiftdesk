@@ -1014,7 +1014,7 @@ function renderVejledning(el) {
   <div class="vej-h2">📚 Regler og vejledning</div>
 
   <div class="acc" id="acc_gag">
-    <button class="acc-btn" onclick="toggleAcc('acc_gag')">
+    <button class="acc-btn" data-acc="acc_gag">
       <div class="acc-left"><span class="acc-emoji">🧼</span><div><div class="acc-title">Gode Arbejdsgange (GAG)</div><div class="acc-sub">Fundamentet for al egenkontrol — rengøring, hygiejne og vedligeholdelse</div></div></div>
       <span class="acc-arrow">▼</span>
     </button>
@@ -1033,7 +1033,7 @@ function renderVejledning(el) {
   </div>
 
   <div class="acc" id="acc_allergen">
-    <button class="acc-btn" onclick="toggleAcc('acc_allergen')">
+    <button class="acc-btn" data-acc="acc_allergen">
       <div class="acc-left"><span class="acc-emoji">🦠</span><div><div class="acc-title">Allergener &amp; særlige risici</div><div class="acc-sub">14 lovpligtige allergener du skal have styr på</div></div></div>
       <span class="acc-arrow">▼</span>
     </button>
@@ -1055,7 +1055,7 @@ function renderVejledning(el) {
   </div>
 
   <div class="acc" id="acc_spor">
-    <button class="acc-btn" onclick="toggleAcc('acc_spor')">
+    <button class="acc-btn" data-acc="acc_spor">
       <div class="acc-left"><span class="acc-emoji">🔗</span><div><div class="acc-title">Sporbarhed</div><div class="acc-sub">Krav til dokumentation af leverandører og råvarer</div></div></div>
       <span class="acc-arrow">▼</span>
     </button>
@@ -1073,7 +1073,7 @@ function renderVejledning(el) {
   </div>
 
   <div class="acc" id="acc_korr">
-    <button class="acc-btn" onclick="toggleAcc('acc_korr')">
+    <button class="acc-btn" data-acc="acc_korr">
       <div class="acc-left"><span class="acc-emoji">⚡</span><div><div class="acc-title">Korrigerende handlinger</div><div class="acc-sub">Hvad gør du, når noget går galt?</div></div></div>
       <span class="acc-arrow">▼</span>
     </button>
@@ -1127,6 +1127,7 @@ function renderVejledning(el) {
   el.querySelectorAll('.acc-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
       var acc = btn.closest('.acc');
+      if(!acc) return;
       var isOpen = acc.classList.contains('open');
       el.querySelectorAll('.acc.open').forEach(function(a){ a.classList.remove('open'); });
       if(!isOpen) acc.classList.add('open');
@@ -1134,11 +1135,6 @@ function renderVejledning(el) {
   });
 }
 
-function toggleAcc(id) {
-  var acc=document.getElementById(id);
-  if(!acc) return;
-  acc.classList.toggle('open');
-}
 function renderHistorik(el) {
   var dates=Object.keys(_records).sort((a,b)=>b.localeCompare(a)).slice(0,30);
   if(!dates.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted);">Ingen registreringer endnu</div>';return;}

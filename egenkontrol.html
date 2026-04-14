@@ -289,7 +289,7 @@ var SCHEMAS = {
       title:'Varmebehandling', freq:'Daglig ved tilberedning',
       desc:'Kernetemperatur min 75°C. Varmholdelse min 65°C',
       fields:[
-        {type:'temps', label:'Kernetemperaturer', items:[
+        {type:'temps', label:'Kernetemperaturer', namedRows:true, items:[
           {name:'Ret 1', min:75, unit:'°C'},
           {name:'Ret 2', min:75, unit:'°C'},
           {name:'Varmholdelse', min:65, unit:'°C'},
@@ -610,56 +610,135 @@ function openSchema(schemaId) {
   document.getElementById('regModal').classList.add('open');
 
   // Wire temp input live feedback
-  document.querySelectorAll('.temp-inp').forEach(inp=>{
-    inp.addEventListener('input',()=>updateTempStatus(inp));
+  document.querySelectorAll('.temp-inp[type="number"]').forEach(function(inp){
+    inp.addEventListener('input',function(){updateTempStatus(inp);});
     updateTempStatus(inp);
+  });
+
+  // Wire "+ Tilføj køleenhed/ret" buttons
+  s.fields.forEach(function(f){
+    if(f.type==='temps') {
+      var btn=document.getElementById('addTempBtn_'+s.id);
+      if(btn) btn.addEventListener('click',function(){
+        var countEl=document.getElementById('tempCount_'+s.id);
+        var i=parseInt(countEl.value);
+        var defaultName = f.items[0] && f.items[0].min ? 'Ny ret' : 'Ny køleenhed';
+        var minVal=f.items[0]?f.items[0].min||'':'';
+        var maxVal=f.items[0]?f.items[0].max||'':'';
+        var row=document.createElement('div');
+        row.className='temp-row';
+        row.id='temprow_'+i;
+        row.innerHTML=
+          '<input class="temp-inp" type="text" id="temp_name_'+i+'" value="'+defaultName+'" placeholder="Navn..." style="width:130px;text-align:left;font-size:.76rem;">'+
+          '<input class="temp-inp" type="number" step="0.1" id="temp_'+i+'" data-min="'+minVal+'" data-max="'+maxVal+'" placeholder="—">'+
+          '<span class="temp-unit">°C</span>'+
+          '<span class="temp-status" id="ts_'+i+'"></span>';
+        btn.parentNode.insertBefore(row, btn);
+        var newInp=document.getElementById('temp_'+i);
+        newInp.addEventListener('input',function(){updateTempStatus(newInp);});
+        countEl.value=i+1;
+      });
+    }
+    if(f.type==='checklist') {
+      var addBtn=document.getElementById('addCheckBtn_'+s.id);
+      if(addBtn) addBtn.addEventListener('click',function(){
+        var countEl=document.getElementById('checkCount_'+s.id);
+        var inp=document.getElementById('newCheckInp_'+s.id);
+        var txt=(inp?inp.value.trim():'');
+        if(!txt) return;
+        var i=parseInt(countEl.value);
+        var group=document.getElementById('checkGroup_'+s.id);
+        var row=document.createElement('div');
+        row.className='check-row';
+        row.id='checkrow_'+i;
+        row.innerHTML='<input type="checkbox" id="chk_'+i+'" checked style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;">'+
+          '<label for="chk_'+i+'" class="check-lbl">'+esc(txt)+'</label>';
+        group.appendChild(row);
+        countEl.value=i+1;
+        if(inp) inp.value='';
+      });
+    }
   });
 }
 
-function buildForm(s,existing) {
+function buildForm(s, existing) {
   var html='<div style="font-size:.72rem;color:var(--muted);margin-bottom:14px;">'+fmtDate(todayStr())+'</div>';
+
   s.fields.forEach(f=>{
     var val=existing&&existing[f.id]?existing[f.id]:'';
+
     if(f.type==='temps') {
-      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>';
-      f.items.forEach((item,i)=>{
+      // Dynamic temp rows — load saved extras from existing record
+      var extraTemps = existing&&existing['extra_temps'] ? existing['extra_temps'] : [];
+      var allItems = f.items.concat(extraTemps.map(function(e){ return {name:e.name,min:f.items[0]?f.items[0].min:'',max:f.items[0]?f.items[0].max:'',unit:'°C',_extra:true}; }));
+
+      html+='<div class="fg" id="tempGroup_'+f.label.replace(/\s/g,'_')+'">';
+      html+='<label class="fl">'+esc(f.label)+'</label>';
+      allItems.forEach(function(item,i){
         var tempVal=existing&&existing['temp_'+i]!==undefined?existing['temp_'+i]:'';
-        html+='<div class="temp-row">'+
-          '<span class="temp-name">'+esc(item.name)+'</span>'+
-          '<input class="temp-inp" type="number" step="0.1" id="temp_'+i+'" data-min="'+(item.min||'')+'" data-max="'+(item.max||'')+'" value="'+esc(String(tempVal))+'" placeholder="—">'+
-          '<span class="temp-unit">'+item.unit+'</span>'+
-          '<span class="temp-status" id="ts_'+i+'"></span>'+
-        '</div>';
+        var savedName=existing&&existing['temp_name_'+i]?existing['temp_name_'+i]:item.name;
+        var isNamed=item.named||item._extra||f.namedRows;
+        html+='<div class="temp-row" id="temprow_'+i+'">';
+        if(isNamed || f.namedRows) {
+          html+='<input class="temp-inp" type="text" id="temp_name_'+i+'" value="'+esc(savedName)+'" placeholder="Navn..." style="width:130px;text-align:left;font-size:.76rem;">';
+        } else {
+          html+='<span class="temp-name">'+esc(item.name)+'</span>';
+        }
+        html+='<input class="temp-inp" type="number" step="0.1" id="temp_'+i+'" '+
+          'data-min="'+(item.min||'')+'" data-max="'+(item.max||'')+'" '+
+          'value="'+esc(String(tempVal))+'" placeholder="—">';
+        html+='<span class="temp-unit">°C</span>';
+        html+='<span class="temp-status" id="ts_'+i+'"></span>';
+        html+='</div>';
       });
+      html+='<button type="button" class="btn btn-ghost btn-xs" id="addTempBtn_'+s.id+'" style="margin-top:6px;">+ Tilføj køleenhed/ret</button>';
+      html+='<input type="hidden" id="tempCount_'+s.id+'" value="'+allItems.length+'">';
       html+='</div>';
+
     } else if(f.type==='checklist') {
+      // Dynamic checklist — load saved extras
+      var extraChecks = existing&&existing['extra_checks'] ? existing['extra_checks'] : [];
+      var allItems2 = f.items.concat(extraChecks);
+
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>';
-      f.items.forEach((item,i)=>{
+      html+='<div id="checkGroup_'+s.id+'">';
+      allItems2.forEach(function(item,i){
         var checked=existing&&existing['chk_'+i]?'checked':'';
-        html+='<div class="check-row">'+
-          '<input type="checkbox" id="chk_'+i+'" '+checked+' style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;">'+
-          '<label for="chk_'+i+'" class="check-lbl">'+esc(item)+'</label>'+
-        '</div>';
+        html+='<div class="check-row" id="checkrow_'+i+'">';
+        html+='<input type="checkbox" id="chk_'+i+'" '+checked+' style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;">';
+        html+='<label for="chk_'+i+'" class="check-lbl">'+esc(item)+'</label>';
+        html+='</div>';
       });
       html+='</div>';
+      html+='<div style="display:flex;gap:6px;margin-top:8px;">';
+      html+='<input class="fc" type="text" id="newCheckInp_'+s.id+'" placeholder="Tilføj nyt punkt..." style="flex:1;">';
+      html+='<button type="button" class="btn btn-green btn-xs" id="addCheckBtn_'+s.id+'">+ Tilføj</button>';
+      html+='</div>';
+      html+='<input type="hidden" id="checkCount_'+s.id+'" value="'+allItems2.length+'">';
+      html+='</div>';
+
     } else if(f.type==='radio') {
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
         '<div style="display:flex;gap:10px;">';
-      f.options.forEach(opt=>{
+      f.options.forEach(function(opt){
         var checked=val===opt?'checked':'';
         html+='<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer;">'+
           '<input type="radio" name="'+f.id+'" value="'+esc(opt)+'" '+checked+' style="accent-color:var(--green);"> '+esc(opt)+'</label>';
       });
       html+='</div></div>';
+
     } else if(f.type==='textarea') {
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
         '<textarea class="fc" id="'+f.id+'" rows="3" style="resize:vertical;" placeholder="Skriv her...">'+esc(val)+'</textarea></div>';
+
     } else if(f.type==='text') {
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
         '<input class="fc" type="text" id="'+f.id+'" value="'+esc(val)+'" autocomplete="off"></div>';
+
     } else if(f.type==='number') {
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
         '<input class="fc" type="number" step="0.1" id="'+f.id+'" value="'+esc(val)+'"></div>';
+
     } else if(f.type==='time') {
       html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
         '<input class="fc" type="time" id="'+f.id+'" value="'+esc(val)+'"></div>';
@@ -697,24 +776,51 @@ async function saveRegistration() {
   var s=_regSchema;
   if(!s) return;
   var btn=document.getElementById('regSaveBtn');
-  btn.disabled=true;btn.textContent='Gemmer…';
+  btn.disabled=true; btn.textContent='Gemmer…';
 
   try {
     var data={};
-    s.fields.forEach(f=>{
+
+    s.fields.forEach(function(f){
       if(f.type==='temps') {
-        f.items.forEach((_,i)=>{
+        var countEl=document.getElementById('tempCount_'+s.id);
+        var total=countEl?parseInt(countEl.value):f.items.length;
+        var extraTemps=[];
+        for(var i=0;i<total;i++){
           var v=document.getElementById('temp_'+i);
           if(v) data['temp_'+i]=v.value!==''?parseFloat(v.value):'';
-        });
+          // Save name for dynamic rows (beyond original items)
+          var nameEl=document.getElementById('temp_name_'+i);
+          if(nameEl) {
+            // Save name regardless for all named rows
+            data['temp_name_'+i]=nameEl.value.trim();
+          }
+          // Track extra items (beyond original schema items)
+          if(i>=f.items.length) {
+            var nm=document.getElementById('temp_name_'+i);
+            extraTemps.push({name:nm?nm.value.trim():'Extra '+(i+1)});
+          }
+        }
+        if(extraTemps.length) data['extra_temps']=extraTemps;
+
       } else if(f.type==='checklist') {
-        f.items.forEach((_,i)=>{
-          var v=document.getElementById('chk_'+i);
-          if(v) data['chk_'+i]=v.checked;
-        });
+        var countEl2=document.getElementById('checkCount_'+s.id);
+        var total2=countEl2?parseInt(countEl2.value):f.items.length;
+        var extraChecks=[];
+        for(var i=0;i<total2;i++){
+          var v2=document.getElementById('chk_'+i);
+          if(v2) data['chk_'+i]=v2.checked;
+          // Track extra items (beyond original schema items)
+          if(i>=f.items.length) {
+            var lbl=document.querySelector('label[for="chk_'+i+'"]');
+            extraChecks.push(lbl?lbl.textContent:'Punkt '+(i+1));
+          }
+        }
+        if(extraChecks.length) data['extra_checks']=extraChecks;
+
       } else if(f.type==='radio') {
-        var v=document.querySelector('input[name="'+f.id+'"]:checked');
-        data[f.id]=v?v.value:'';
+        var v3=document.querySelector('input[name="'+f.id+'"]:checked');
+        data[f.id]=v3?v3.value:'';
       } else {
         var el=document.getElementById(f.id);
         if(el) data[f.id]=el.value.trim();
@@ -725,7 +831,7 @@ async function saveRegistration() {
     var afv=document.getElementById('afvigelse');
     data.afvigelse=afv?afv.value.trim():'';
 
-    await saveRecord(s.id,data);
+    await saveRecord(s.id, data);
     document.getElementById('regModal').classList.remove('open');
     renderAll();
     toast('✓ '+s.title+' gemt');
@@ -734,7 +840,7 @@ async function saveRegistration() {
     errEl.textContent='Fejl: '+err.message;
     errEl.style.display='block';
   }
-  btn.disabled=false;btn.textContent='✓ Gem kontrol';
+  btn.disabled=false; btn.textContent='✓ Gem kontrol';
 }
 
 // ── Historik ──────────────────────────────────────────────────────────────────

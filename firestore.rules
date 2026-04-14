@@ -44,9 +44,9 @@ service cloud.firestore {
     //
     // Both single and double prefix variants are accepted for safety.
     match /customerData/{id} {
-      allow read: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
-      allow write: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
-      allow delete: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+      allow read: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+      allow write: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
+      allow delete: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+');
     }
 
   }

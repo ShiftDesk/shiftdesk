@@ -230,6 +230,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="logo"><div class="logo-dot"></div>ShiftDesk <span class="eco-badge">EGENKONTROL</span></div>
   <div class="topbar-r">
     <div class="user-pill"><div class="upd"></div><span id="userDisplay"></span></div>
+    <button class="tbtn" id="virksomhedBtn">🏢 Virksomhed</button>
     <button class="tbtn" id="logoutBtn">Log ud</button>
   </div>
 </nav>
@@ -258,6 +259,50 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
+<!-- VIRKSOMHED MODAL — Kort beskrivelse af virksomhed (officielt krav) -->
+<div class="overlay" id="virksomhedModal">
+  <div class="modal" style="width:580px;">
+    <div class="modal-title">🏢 Kort beskrivelse af virksomhed</div>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:16px;">Jf. Fødevarestyrelsens egenkontrolprogram — skal opbevares og fremvises ved kontrol</div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Virksomhedens navn</label><input class="fc" type="text" id="v_navn" placeholder="Restaurant ApS" autocomplete="off"></div>
+      <div class="fg"><label class="fl">CVR-nummer</label><input class="fc" type="text" id="v_cvr" placeholder="12345678" maxlength="8" autocomplete="off"></div>
+    </div>
+    <div class="fg"><label class="fl">Adresse</label><input class="fc" type="text" id="v_adresse" placeholder="Vesterbrogade 1, 1620 København V" autocomplete="off"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">Virksomhedsleder</label><input class="fc" type="text" id="v_leder" placeholder="Fulde navn" autocomplete="off"></div>
+      <div class="fg"><label class="fl">Telefon</label><input class="fc" type="tel" id="v_tlf" placeholder="+45 12 34 56 78" autocomplete="off"></div>
+    </div>
+    <div class="fg"><label class="fl">Autoriseret/registreret af Fødevarestyrelsen den</label><input class="fc" type="date" id="v_reg_dato"></div>
+    <div class="fg">
+      <label class="fl">Import/modtagelse af fødevarer fra udlandet</label>
+      <div style="display:flex;gap:16px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer;"><input type="radio" name="v_import" value="nej" checked style="accent-color:var(--green);"> Nej</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer;"><input type="radio" name="v_import" value="ja" style="accent-color:var(--green);"> Ja — registreret dato: <input class="fc" type="date" id="v_import_dato" style="width:140px;margin-left:6px;"></label>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Produkter (pizza, burger, kebab, pølser, softice osv.)</label><textarea class="fc" id="v_produkter" rows="2" placeholder="Beskriv virksomhedens produkter..."></textarea></div>
+    <div class="fg" style="background:var(--s2);border-radius:10px;padding:12px 14px;">
+      <div class="fl" style="margin-bottom:8px;">Aktiviteter — sæt kryds ved relevante</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_varemodtagelse" style="accent-color:var(--green);"> Varemodtagelse</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_opbevaring" style="accent-color:var(--green);"> Opbevaring køl og frost</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_opvarmning" style="accent-color:var(--green);"> Opvarmning/varmebehandling</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_nedkoeling" style="accent-color:var(--green);"> Nedkøling</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_varmholdelse" style="accent-color:var(--green);"> Varmholdelse</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_udenfor_koel" style="accent-color:var(--green);"> Salg udenfor køl</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_udbringning" style="accent-color:var(--green);"> Vareudbringning</label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:.78rem;cursor:pointer;"><input type="checkbox" id="v_act_sporbarhed" checked style="accent-color:var(--green);"> Sporbarhed (obligatorisk)</label>
+      </div>
+    </div>
+    <div class="form-err" id="virksomhedErr"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="virksomhedCancelBtn">Luk</button>
+      <button class="btn btn-green" id="virksomhedSaveBtn">💾 Gem virksomhedsoplysninger</button>
+    </div>
+  </div>
+</div>
+
 <!-- MAIN -->
 <div class="page" id="mainPage" style="display:none;">
   <div class="page-hdr">
@@ -278,6 +323,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="tab active" data-tab="daglig">📅 Daglig</button>
     <button class="tab" data-tab="ugentlig">📆 Ugentlig</button>
     <button class="tab" data-tab="maanedlig">🗓 Månedlig</button>
+    <button class="tab" data-tab="skemaer">📊 Skemaer</button>
     <button class="tab" data-tab="historik">📂 Historik</button>
     <button class="tab" data-tab="vejledning">📖 Vejledning</button>
   </div>
@@ -316,6 +362,7 @@ try {
 // ── State ─────────────────────────────────────────────────────────────────────
 var _cust    = null;
 var _records = {}; // {date: {schemaId: {data, ok, note, afvigelse, ts, user}}}
+var _virksomhed = {}; // official business description from PDF
 var _activeTab = 'daglig';
 var _regSchema = null; // currently open schema
 
@@ -498,7 +545,7 @@ function toast(msg){var t=document.createElement('div');t.className='toast';t.te
 function todayStr(){return new Date().toISOString().split('T')[0];}
 function fmtDate(ds){return new Date(ds+'T12:00:00').toLocaleDateString('da-DK',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
 function fmtDateTime(ts){if(!ts)return '—';return new Date(ts).toLocaleString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
-function ekKey(){return 'cust_'+_cust.id+'_egenkontrol';}
+function vkKey(){ return 'cust_'+_cust.id+'_egenVirksomhed'; }
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 document.getElementById('loginBtn').addEventListener('click', doLogin);
@@ -545,11 +592,18 @@ document.getElementById('logoutBtn').addEventListener('click',()=>{
 });
 
 // ── Load / Save ───────────────────────────────────────────────────────────────
+function ekKey(){ return 'cust_'+_cust.id+'_egenkontrol'; }
+function vkKey(){ return 'cust_'+_cust.id+'_egenVirksomhed'; }
+
 async function loadData() {
   try {
     var val=await window.fb.get(ekKey());
     _records=(val&&typeof val==='object'&&!Array.isArray(val))?val:{};
   } catch(e){_records={};}
+  try {
+    var vv=await window.fb.get(vkKey());
+    _virksomhed=(vv&&typeof vv==='object'&&!Array.isArray(vv))?vv:{};
+  } catch(e){_virksomhed={};}
   renderAll();
 }
 
@@ -632,6 +686,7 @@ function renderTab(tab) {
   var el=document.getElementById('tabContent');
   if(tab==='historik'){renderHistorik(el);return;}
   if(tab==='vejledning'){renderVejledning(el);return;}
+  if(tab==='skemaer'){renderSkemaer(el);return;}
   var schemas=SCHEMAS[tab]||[];
   var today=todayStr();
   var todayRec=_records[today]||{};
@@ -926,6 +981,325 @@ async function saveRegistration() {
     errEl.style.display='block';
   }
   btn.disabled=false; btn.textContent='✓ Gem kontrol';
+}
+
+// ── Virksomhed modal ──────────────────────────────────────────────────────────
+document.getElementById('virksomhedBtn').addEventListener('click', openVirksomhed);
+document.getElementById('virksomhedCancelBtn').addEventListener('click', ()=>document.getElementById('virksomhedModal').classList.remove('open'));
+document.getElementById('virksomhedModal').addEventListener('click', function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('virksomhedSaveBtn').addEventListener('click', saveVirksomhed);
+
+function openVirksomhed() {
+  var v=_virksomhed||{};
+  document.getElementById('v_navn').value        = v.navn    || (_cust?_cust.name:'') || '';
+  document.getElementById('v_cvr').value         = v.cvr     || '';
+  document.getElementById('v_adresse').value     = v.adresse || '';
+  document.getElementById('v_leder').value       = v.leder   || '';
+  document.getElementById('v_tlf').value         = v.tlf     || '';
+  document.getElementById('v_reg_dato').value    = v.reg_dato || '';
+  document.getElementById('v_produkter').value   = v.produkter || '';
+  document.getElementById('v_import_dato').value = v.import_dato || '';
+  // Import radio
+  var imp = document.querySelector('input[name="v_import"][value="'+(v.import||'nej')+'"]');
+  if(imp) imp.checked = true;
+  // Activities
+  ['varemodtagelse','opbevaring','opvarmning','nedkoeling','varmholdelse','udenfor_koel','udbringning','sporbarhed'].forEach(function(k){
+    var el=document.getElementById('v_act_'+k); if(el) el.checked = v['act_'+k]!==false;
+  });
+  document.getElementById('virksomhedErr').style.display='none';
+  document.getElementById('virksomhedModal').classList.add('open');
+}
+
+async function saveVirksomhed() {
+  var btn=document.getElementById('virksomhedSaveBtn');
+  btn.disabled=true; btn.textContent='Gemmer…';
+  try {
+    var imp=document.querySelector('input[name="v_import"]:checked');
+    var acts={};
+    ['varemodtagelse','opbevaring','opvarmning','nedkoeling','varmholdelse','udenfor_koel','udbringning','sporbarhed'].forEach(function(k){
+      var el=document.getElementById('v_act_'+k); acts['act_'+k]=el?el.checked:false;
+    });
+    _virksomhed=Object.assign({
+      navn:     document.getElementById('v_navn').value.trim(),
+      cvr:      document.getElementById('v_cvr').value.trim(),
+      adresse:  document.getElementById('v_adresse').value.trim(),
+      leder:    document.getElementById('v_leder').value.trim(),
+      tlf:      document.getElementById('v_tlf').value.trim(),
+      reg_dato: document.getElementById('v_reg_dato').value,
+      produkter:document.getElementById('v_produkter').value.trim(),
+      import:   imp?imp.value:'nej',
+      import_dato:document.getElementById('v_import_dato').value,
+    }, acts);
+    await window.fb.set(vkKey(), _virksomhed);
+    document.getElementById('virksomhedModal').classList.remove('open');
+    toast('✓ Virksomhedsoplysninger gemt');
+  } catch(err){
+    var e=document.getElementById('virksomhedErr');
+    e.textContent='Fejl: '+err.message; e.style.display='block';
+  }
+  btn.disabled=false; btn.textContent='💾 Gem virksomhedsoplysninger';
+}
+
+// ── Skemaer (official Fødevarestyrelsen schemas) ──────────────────────────────
+function renderSkemaer(el) {
+  var v=_virksomhed||{};
+  var navn=v.navn||(_cust?_cust.name:'')||'—';
+  var adr=v.adresse||'—';
+  var leder=v.leder||'—';
+  var today=todayStr();
+
+  el.innerHTML=`
+<div class="vej-section">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div class="vej-h2" style="margin-bottom:0;">📊 Officielle skemaer</div>
+    <button class="btn btn-ghost btn-sm no-print" id="editVirkBtn">🏢 Ret virksomhedsoplysninger</button>
+  </div>
+
+  <!-- Virksomhedsbeskrivelse -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px;">
+    <div class="vej-h2" style="font-size:.9rem;margin-bottom:12px;">Kort beskrivelse af virksomhed</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.8rem;">
+      <div><span style="color:var(--muted);">Virksomhedens navn og adresse:</span><br><strong>${esc(navn)}</strong><br>${esc(adr)}</div>
+      <div><span style="color:var(--muted);">Virksomhedsleder:</span><br><strong>${esc(leder)}</strong></div>
+      <div><span style="color:var(--muted);">Registreret af Fødevarestyrelsen:</span><br><strong>${esc(v.reg_dato||'—')}</strong></div>
+      <div><span style="color:var(--muted);">Produkter:</span><br><strong>${esc(v.produkter||'—')}</strong></div>
+    </div>
+    ${!v.navn?'<div class="vej-notice" style="margin-top:12px;"><strong>⚠️ Udfyld virksomhedsoplysninger</strong>Klik "Ret virksomhedsoplysninger" ovenfor for at udfylde navn, adresse, leder m.m. som krævet af Fødevarestyrelsen.</div>':''}
+  </div>
+
+  <!-- Skema 1: Varemodtagelse -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:var(--blue);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;">Skema 1 — Varemodtagelse</div><div style="font-size:.7rem;opacity:.82;">Kontrolleres ved hver leverance. Fejl skal altid skrives ned.</div></div>
+      <div style="font-size:.72rem;opacity:.75;">Temperaturgrænser: Køl max +5°C / Fisk max +2°C / Dybfrost max -18°C</div>
+    </div>
+    <div style="overflow-x:auto;padding:16px;">
+      <table class="vej-table" id="skema1Table">
+        <thead><tr><th>Dato</th><th>Vare / Leverandør</th><th>Temp °C</th><th>Dato/mærkning/emballage OK</th><th>OK</th><th>Fejl</th><th>Udført af</th></tr></thead>
+        <tbody id="skema1Body"></tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fc" type="date" id="s1_dato" value="${today}" style="width:140px;">
+        <input class="fc" type="text" id="s1_vare" placeholder="Vare / Leverandør" style="flex:1;min-width:150px;">
+        <input class="fc" type="number" step="0.1" id="s1_temp" placeholder="°C" style="width:80px;">
+        <select class="fc" id="s1_maerk" style="width:110px;"><option value="ok">✓ OK</option><option value="fejl">✗ Fejl</option></select>
+        <select class="fc" id="s1_ok" style="width:80px;"><option value="ok">OK</option><option value="fejl">Fejl</option></select>
+        <input class="fc" type="text" id="s1_af" placeholder="Udført af" style="width:110px;">
+        <button class="btn btn-green btn-sm" id="s1AddBtn">+ Tilføj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skema 2: Opbevaring køl og frost -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:#0e7490;color:#fff;padding:14px 18px;">
+      <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;">Skema 2 — Opbevaring køl og frost</div>
+      <div style="font-size:.7rem;opacity:.82;">Kontrollen skal udføres dagligt. Fejl skal altid skrives ned.</div>
+    </div>
+    <div style="overflow-x:auto;padding:16px;">
+      <table class="vej-table" id="skema2Table">
+        <thead><tr><th>Dato</th><th>Køl/Frys nr.</th><th>Max temp</th><th>Målt °C</th><th>OK</th><th>Fejl — hvad er gjort</th><th>Udført af</th></tr></thead>
+        <tbody id="skema2Body"></tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fc" type="date" id="s2_dato" value="${today}" style="width:140px;">
+        <input class="fc" type="text" id="s2_enhed" placeholder="Køl 1 / Frys 2..." style="width:120px;">
+        <input class="fc" type="text" id="s2_max" placeholder="Max °C" style="width:80px;">
+        <input class="fc" type="number" step="0.1" id="s2_temp" placeholder="Målt °C" style="width:90px;">
+        <select class="fc" id="s2_ok" style="width:80px;"><option value="ok">OK</option><option value="fejl">Fejl</option></select>
+        <input class="fc" type="text" id="s2_fejl" placeholder="Hvad er gjort ved fejl" style="flex:1;min-width:140px;">
+        <input class="fc" type="text" id="s2_af" placeholder="Udført af" style="width:110px;">
+        <button class="btn btn-green btn-sm" id="s2AddBtn">+ Tilføj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skema 3: Opvarmning og nedkøling -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:var(--acc);color:#fff;padding:14px 18px;">
+      <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;">Skema 3 — Opvarmning og nedkøling</div>
+      <div style="font-size:.7rem;opacity:.82;">Opvarmning min 75°C. Nedkøling fra 65°C til 10°C på max 4 timer.</div>
+    </div>
+    <div style="overflow-x:auto;padding:16px;">
+      <table class="vej-table" id="skema3Table">
+        <thead><tr><th>Dato</th><th>Fødevare</th><th>Type</th><th>Temp °C</th><th>Start kl.</th><th>Slut kl.</th><th>OK</th><th>Bemærkninger</th><th>Udført af</th></tr></thead>
+        <tbody id="skema3Body"></tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fc" type="date" id="s3_dato" value="${today}" style="width:140px;">
+        <input class="fc" type="text" id="s3_fode" placeholder="Fødevare" style="flex:1;min-width:120px;">
+        <select class="fc" id="s3_type" style="width:130px;"><option value="opvarmning">Opvarmning</option><option value="nedkoeling">Nedkøling</option></select>
+        <input class="fc" type="number" step="0.1" id="s3_temp" placeholder="°C" style="width:80px;">
+        <input class="fc" type="time" id="s3_start" style="width:100px;">
+        <input class="fc" type="time" id="s3_slut" style="width:100px;">
+        <select class="fc" id="s3_ok" style="width:80px;"><option value="ok">OK</option><option value="fejl">Fejl</option></select>
+        <input class="fc" type="text" id="s3_bem" placeholder="Bemærkninger" style="width:140px;">
+        <input class="fc" type="text" id="s3_af" placeholder="Udført af" style="width:110px;">
+        <button class="btn btn-green btn-sm" id="s3AddBtn">+ Tilføj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skema 4: Varmholdelse -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:#6b21a8;color:#fff;padding:14px 18px;">
+      <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;">Skema 4 — Varmholdelse</div>
+      <div style="font-size:.7rem;opacity:.82;">Min 65°C overalt i fødevaren. Salg udenfor køl max 3 timer.</div>
+    </div>
+    <div style="overflow-x:auto;padding:16px;">
+      <table class="vej-table" id="skema4Table">
+        <thead><tr><th>Dato</th><th>Fødevare</th><th>Temp °C</th><th>OK kl.</th><th>OK</th><th>Fejl — hvad er gjort</th><th>Udført af</th></tr></thead>
+        <tbody id="skema4Body"></tbody>
+      </table>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input class="fc" type="date" id="s4_dato" value="${today}" style="width:140px;">
+        <input class="fc" type="text" id="s4_fode" placeholder="Fødevare" style="flex:1;min-width:120px;">
+        <input class="fc" type="number" step="0.1" id="s4_temp" placeholder="°C" style="width:80px;">
+        <input class="fc" type="time" id="s4_kl" style="width:100px;">
+        <select class="fc" id="s4_ok" style="width:80px;"><option value="ok">OK</option><option value="fejl">Fejl</option></select>
+        <input class="fc" type="text" id="s4_fejl" placeholder="Hvad er gjort ved fejl" style="flex:1;min-width:140px;">
+        <input class="fc" type="text" id="s4_af" placeholder="Udført af" style="width:110px;">
+        <button class="btn btn-green btn-sm" id="s4AddBtn">+ Tilføj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skema 7: Årlig kontrol -->
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <div style="background:var(--green);color:#fff;padding:14px 18px;">
+      <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;">Skema 7 — Årlig kontrol og revision</div>
+      <div style="font-size:.7rem;opacity:.82;">Gennemgås minimum 1 gang årligt og ved ændringer i aktiviteterne</div>
+    </div>
+    <div style="padding:16px;">
+      <table class="vej-table">
+        <thead><tr><th>Kontrol af</th><th>Spørgsmål</th><th>Ja ✓</th><th>Nej — hvad gøres</th></tr></thead>
+        <tbody>
+          ${[
+            ['Vedligeholdelse','Bliver vedligeholdelsesplanen fulgt?','s7_vedl','s7_vedl_nej'],
+            ['Skadedyr','Er der sikret mod skadedyr? (Døre, vinduer, kloaker)','s7_skade','s7_skade_nej'],
+            ['Rengøring','Følges rengøringsplanen? Er den tilstrækkelig?','s7_reng','s7_reng_nej'],
+            ['Produktion','Er produktionen den samme som ved sidste gennemgang?','s7_prod','s7_prod_nej'],
+            ['Termometre','Er termometre kontrolleret inden for det sidste år?','s7_termo','s7_termo_nej'],
+            ['Medarbejdere','Er alle medarbejdere instrueret i egenkontrol?','s7_medl','s7_medl_nej'],
+            ['Egenkontrol','Passer egenkontrollen til nuværende aktiviteter?','s7_ek','s7_ek_nej'],
+          ].map(([k,sp,cid,nid])=>`<tr><td style="font-weight:600;">${k}</td><td style="font-size:.76rem;">${sp}</td><td style="text-align:center;"><input type="checkbox" id="${cid}" style="width:16px;height:16px;accent-color:var(--green);"></td><td><input class="fc" type="text" id="${nid}" placeholder="Beskriv handling..." style="font-size:.74rem;"></td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.76rem;color:var(--muted);">Kontrolleret af:</span>
+        <input class="fc" type="text" id="s7_kontrolleret" placeholder="Navn" style="width:180px;">
+        <span style="font-size:.76rem;color:var(--muted);">Dato:</span>
+        <input class="fc" type="date" id="s7_dato" value="${today}" style="width:140px;">
+        <button class="btn btn-green btn-sm" id="s7SaveBtn">💾 Gem revision</button>
+      </div>
+      <div id="s7SavedInfo" style="display:none;margin-top:8px;font-size:.74rem;color:var(--green);"></div>
+    </div>
+  </div>
+</div>`;
+
+  // Wire edit virksomhed button
+  var evb=el.querySelector('#editVirkBtn');
+  if(evb) evb.addEventListener('click', openVirksomhed);
+
+  // Load and render saved skema data
+  loadSkemaRows('skema1', 'skema1Body', ['dato','vare','temp','maerk','ok','af']);
+  loadSkemaRows('skema2', 'skema2Body', ['dato','enhed','max','temp','ok','fejl','af']);
+  loadSkemaRows('skema3', 'skema3Body', ['dato','fode','type','temp','start','slut','ok','bem','af']);
+  loadSkemaRows('skema4', 'skema4Body', ['dato','fode','temp','kl','ok','fejl','af']);
+  loadS7();
+
+  // Wire add buttons
+  wireSkemaAdd('s1', 'skema1', ['dato','vare','temp','maerk','ok','af'], 'skema1Body',
+    r=>`<tr><td>${r.dato}</td><td>${esc(r.vare)}</td><td style="font-family:'DM Mono',monospace;">${r.temp}°C</td><td>${r.maerk==='ok'?'✓ OK':'✗ Fejl'}</td><td class="${r.ok==='ok'?'vej-good':'vej-danger'}">${r.ok==='ok'?'✓':'✗'}</td><td></td><td>${esc(r.af)}</td></tr>`);
+  wireSkemaAdd('s2', 'skema2', ['dato','enhed','max','temp','ok','fejl','af'], 'skema2Body',
+    r=>`<tr><td>${r.dato}</td><td>${esc(r.enhed)}</td><td style="font-family:'DM Mono',monospace;">${r.max}°C</td><td style="font-family:'DM Mono',monospace;">${r.temp}°C</td><td class="${r.ok==='ok'?'vej-good':'vej-danger'}">${r.ok==='ok'?'✓':'✗'}</td><td style="font-size:.72rem;">${esc(r.fejl)}</td><td>${esc(r.af)}</td></tr>`);
+  wireSkemaAdd('s3', 'skema3', ['dato','fode','type','temp','start','slut','ok','bem','af'], 'skema3Body',
+    r=>`<tr><td>${r.dato}</td><td>${esc(r.fode)}</td><td>${r.type==='opvarmning'?'🔥 Opvarmning':'❄️ Nedkøling'}</td><td style="font-family:'DM Mono',monospace;">${r.temp}°C</td><td>${r.start||'—'}</td><td>${r.slut||'—'}</td><td class="${r.ok==='ok'?'vej-good':'vej-danger'}">${r.ok==='ok'?'✓':'✗'}</td><td style="font-size:.72rem;">${esc(r.bem)}</td><td>${esc(r.af)}</td></tr>`);
+  wireSkemaAdd('s4', 'skema4', ['dato','fode','temp','kl','ok','fejl','af'], 'skema4Body',
+    r=>`<tr><td>${r.dato}</td><td>${esc(r.fode)}</td><td style="font-family:'DM Mono',monospace;">${r.temp}°C</td><td>${r.kl||'—'}</td><td class="${r.ok==='ok'?'vej-good':'vej-danger'}">${r.ok==='ok'?'✓':'✗'}</td><td style="font-size:.72rem;">${esc(r.fejl)}</td><td>${esc(r.af)}</td></tr>`);
+
+  // Skema 7 save
+  var s7btn=el.querySelector('#s7SaveBtn');
+  if(s7btn) s7btn.addEventListener('click', saveS7);
+}
+
+function skemaKey(name){ return 'cust_'+_cust.id+'_'+name; }
+
+async function loadSkemaRows(name, tbodyId, fields) {
+  try {
+    var val=await window.fb.get(skemaKey(name));
+    var rows=Array.isArray(val)?val:[];
+    var tbody=document.getElementById(tbodyId);
+    if(!tbody) return;
+    // rebuild using wireSkemaAdd row builder — just insert HTML directly
+    tbody.innerHTML='';
+    rows.forEach(function(r){
+      var tr=document.createElement('tr');
+      tr.innerHTML=Object.values(r).slice(0,fields.length).map(function(v,i){
+        return '<td style="font-size:.76rem;">'+esc(String(v||''))+'</td>';
+      }).join('');
+      tbody.appendChild(tr);
+    });
+  } catch(e){}
+}
+
+function wireSkemaAdd(prefix, name, fields, tbodyId, rowFn) {
+  var btn=document.getElementById(prefix+'AddBtn');
+  if(!btn) return;
+  btn.addEventListener('click', async function(){
+    var row={};
+    fields.forEach(function(f){
+      var el=document.getElementById(prefix+'_'+f);
+      row[f]=el?el.value.trim():'';
+    });
+    if(!row[fields[1]]) return; // require at least second field
+    // Save to Firebase
+    try {
+      var existing=await window.fb.get(skemaKey(name));
+      var rows=Array.isArray(existing)?existing:[];
+      rows.push(Object.assign({}, row, {ts:Date.now()}));
+      await window.fb.set(skemaKey(name), rows);
+      // Append row to table
+      var tbody=document.getElementById(tbodyId);
+      if(tbody){ tbody.insertAdjacentHTML('beforeend', rowFn(row)); }
+      // Clear inputs (except date)
+      fields.slice(1).forEach(function(f){
+        var el=document.getElementById(prefix+'_'+f);
+        if(el&&el.tagName==='INPUT'&&el.type!=='date') el.value='';
+        if(el&&el.tagName==='SELECT') el.selectedIndex=0;
+      });
+      toast('✓ Række gemt');
+    } catch(err){ toast('Fejl: '+err.message); }
+  });
+}
+
+async function loadS7() {
+  try {
+    var val=await window.fb.get(skemaKey('skema7'));
+    if(!val||typeof val!=='object') return;
+    ['vedl','skade','reng','prod','termo','medl','ek'].forEach(function(k){
+      var cb=document.getElementById('s7_'+k); if(cb) cb.checked=!!val[k];
+      var ni=document.getElementById('s7_'+k+'_nej'); if(ni) ni.value=val[k+'_nej']||'';
+    });
+    var ki=document.getElementById('s7_kontrolleret'); if(ki) ki.value=val.kontrolleret||'';
+    var di=document.getElementById('s7_dato'); if(di) di.value=val.dato||todayStr();
+    var si=document.getElementById('s7SavedInfo');
+    if(si&&val.dato){si.textContent='Sidst gemt: '+fmtDate(val.dato)+' af '+esc(val.kontrolleret||'—');si.style.display='block';}
+  } catch(e){}
+}
+
+async function saveS7() {
+  var data={dato:document.getElementById('s7_dato').value, kontrolleret:document.getElementById('s7_kontrolleret').value.trim()};
+  ['vedl','skade','reng','prod','termo','medl','ek'].forEach(function(k){
+    var cb=document.getElementById('s7_'+k); data[k]=cb?cb.checked:false;
+    var ni=document.getElementById('s7_'+k+'_nej'); data[k+'_nej']=ni?ni.value.trim():'';
+  });
+  try {
+    await window.fb.set(skemaKey('skema7'), data);
+    var si=document.getElementById('s7SavedInfo');
+    if(si){si.textContent='✓ Gemt '+fmtDate(data.dato)+' af '+esc(data.kontrolleret||'—');si.style.display='block';}
+    toast('✓ Revision gemt');
+  } catch(err){ toast('Fejl: '+err.message); }
 }
 
 // ── Vejledning ────────────────────────────────────────────────────────────────

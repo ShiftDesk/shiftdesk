@@ -315,25 +315,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </div>
 
-  <!-- Virksomhed info bar — shown after filling in company details -->
-  <div id="virksomhedBar" style="display:none;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:none;">
+  <!-- Virksomhed info bar — always visible -->
+  <div id="virksomhedBar" style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:36px;height:36px;background:var(--green-lt);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏢</div>
-          <div>
-            <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;" id="vbar_navn"></div>
-            <div style="font-size:.68rem;color:var(--muted);" id="vbar_adresse"></div>
-          </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="width:36px;height:36px;background:var(--green-lt);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏢</div>
+        <div>
+          <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;" id="vbar_navn">—</div>
+          <div style="font-size:.68rem;color:var(--muted);" id="vbar_adresse">Udfyld virksomhedsoplysninger</div>
         </div>
-        <div style="height:28px;width:1px;background:var(--border);flex-shrink:0;" class="no-print"></div>
-        <div style="font-size:.72rem;color:var(--muted);">
+        <div style="height:24px;width:1px;background:var(--border);flex-shrink:0;"></div>
+        <div style="font-size:.72rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;">
           <span id="vbar_leder"></span>
-          <span id="vbar_cvr" style="margin-left:12px;font-family:'DM Mono',monospace;"></span>
-          <span id="vbar_reg" style="margin-left:12px;"></span>
+          <span id="vbar_cvr" style="font-family:'DM Mono',monospace;"></span>
+          <span id="vbar_reg"></span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-xs no-print" id="vbarEditBtn">✏ Rediger</button>
+      <button class="btn btn-ghost btn-xs no-print" id="vbarEditBtn">✏ Udfyld</button>
     </div>
   </div>
 
@@ -607,14 +605,15 @@ function enterApp() {
 
 function renderVirksomhedBar() {
   var v=_virksomhed||{};
-  var bar=document.getElementById('virksomhedBar');
-  if(!v.navn) { bar.style.display='none'; return; }
-  bar.style.display='block';
-  document.getElementById('vbar_navn').textContent=v.navn||'';
-  document.getElementById('vbar_adresse').textContent=v.adresse||'';
-  document.getElementById('vbar_leder').textContent=v.leder?'👤 '+v.leder:'';
-  document.getElementById('vbar_cvr').textContent=v.cvr?'CVR: '+v.cvr:'';
-  document.getElementById('vbar_reg').textContent=v.reg_dato?'Reg: '+v.reg_dato:'';
+  var navn = v.navn || (_cust?_cust.name:'') || '';
+  document.getElementById('vbar_navn').textContent    = navn || '—';
+  document.getElementById('vbar_adresse').textContent = v.adresse || (navn?'':'Klik "Udfyld" for at tilføje virksomhedsoplysninger');
+  document.getElementById('vbar_leder').textContent   = v.leder ? '👤 '+v.leder : '';
+  document.getElementById('vbar_cvr').textContent     = v.cvr   ? 'CVR: '+v.cvr : '';
+  document.getElementById('vbar_reg').textContent     = v.reg_dato ? 'Reg: '+v.reg_dato : '';
+  // Update button text
+  var btn=document.getElementById('vbarEditBtn');
+  if(btn) btn.textContent = v.navn ? '✏ Rediger' : '✏ Udfyld';
 }
 
 document.getElementById('logoutBtn').addEventListener('click',()=>{

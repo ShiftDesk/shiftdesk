@@ -611,6 +611,23 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
+// Permanent accordion delegation — fires for any .acc-btn click inside tabContent
+document.getElementById('tabContent').addEventListener('click', function(e){
+  var btn = e.target.closest('[data-acc]');
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  var accId = btn.getAttribute('data-acc');
+  var tabContent = document.getElementById('tabContent');
+  var allAccs = tabContent.querySelectorAll('.acc');
+  var targetAcc = null;
+  allAccs.forEach(function(a){ if(a.id===accId) targetAcc=a; });
+  if(!targetAcc) return;
+  var isOpen = targetAcc.classList.contains('open');
+  allAccs.forEach(function(a){ a.classList.remove('open'); });
+  if(!isOpen) targetAcc.classList.add('open');
+});
+
 function renderTab(tab) {
   var el=document.getElementById('tabContent');
   if(tab==='historik'){renderHistorik(el);return;}
@@ -1123,22 +1140,7 @@ function renderVejledning(el) {
 </div>
 `;
 
-  // Wire accordion toggles using direct approach
-  setTimeout(function(){
-    el.querySelectorAll('[data-acc]').forEach(function(btn){
-      btn.addEventListener('click', function(e){
-        e.stopPropagation();
-        var accId = btn.getAttribute('data-acc');
-        var acc = document.getElementById(accId);
-        if(!acc) return;
-        var isOpen = acc.classList.contains('open');
-        // Close all
-        el.querySelectorAll('.acc').forEach(function(a){ a.classList.remove('open'); });
-        // Open if was closed
-        if(!isOpen) acc.classList.add('open');
-      });
-    });
-  }, 0);
+  // Accordion clicks handled by permanent delegation on tabContent
 }
 
 function renderHistorik(el) {

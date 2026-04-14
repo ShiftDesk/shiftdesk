@@ -361,6 +361,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </label>
       </div>
     </div>
+    <div class="fg" style="background:#e4f2ec;border:1.5px solid #1b6e40;border-radius:10px;padding:12px 14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:.78rem;font-weight:700;color:#1b6e40;margin-bottom:2px;">📋 Egenkontrol Add-on</div>
+          <div style="font-size:.68rem;color:#1b6e40;">Giver adgang til digital egenkontrol — temperatur, rengøring, HACCP</div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="f_hasEgenkontrol" style="width:18px;height:18px;accent-color:#1b6e40;cursor:pointer;">
+          <span style="font-size:.75rem;font-weight:600;color:#1b6e40;">Aktiveret</span>
+        </label>
+      </div>
+    </div>
     <div class="form-err" id="formErr"></div>
     <div class="modal-actions">
       <button class="btn-del-sm" id="deleteBtn" style="display:none;">🗑 Delete</button>
@@ -676,7 +688,8 @@ function renderTable() {
     var planClass  = c.plan === 'pro' ? 'plan-pro' : 'plan-starter';
     var budgetTag  = c.hasBudget ? '<span class="budget-tag">📊 Budget</span>' : '';
     var payrollTag = c.hasPayroll ? '<span class="budget-tag" style="background:#f5f0ff;color:#6b21a8;border-color:#c4b5fd;">💰 Løn</span>' : '';
-    var planCell   = '<span class="plan-badge ' + planClass + '">' + planLabel + '</span>' + budgetTag + payrollTag;
+    var egenTag    = c.hasEgenkontrol ? '<span class="budget-tag" style="background:#e4f2ec;color:#1b6e40;border-color:#a8d5bc;">📋 Egenkontrol</span>' : '';
+    var planCell   = '<span class="plan-badge ' + planClass + '">' + planLabel + '</span>' + budgetTag + payrollTag + egenTag;
 
     // Subscription cell
     var subCell = '';
@@ -749,6 +762,7 @@ function openAdd() {
   document.getElementById('f_notes').value              = '';
   document.getElementById('f_hasBudget').checked        = false;
   document.getElementById('f_hasPayroll').checked       = false;
+  document.getElementById('f_hasEgenkontrol').checked   = false;
   document.getElementById('customerModal').classList.add('open');
   setTimeout(function(){ document.getElementById('f_name').focus(); }, 100);
 }
@@ -773,6 +787,7 @@ function openEdit(id) {
   document.getElementById('f_notes').value              = c.notes    || '';
   document.getElementById('f_hasBudget').checked        = c.hasBudget === true;
   document.getElementById('f_hasPayroll').checked       = c.hasPayroll === true;
+  document.getElementById('f_hasEgenkontrol').checked   = c.hasEgenkontrol === true;
   document.getElementById('customerModal').classList.add('open');
 }
 
@@ -792,8 +807,9 @@ async function saveCustomer() {
   var startDate = document.getElementById('f_startdate').value || today();
   var status    = document.getElementById('f_status').value;
   var notes     = document.getElementById('f_notes').value.trim();
-  var hasBudget  = document.getElementById('f_hasBudget').checked;
-  var hasPayroll = document.getElementById('f_hasPayroll').checked;
+  var hasBudget       = document.getElementById('f_hasBudget').checked;
+  var hasPayroll      = document.getElementById('f_hasPayroll').checked;
+  var hasEgenkontrol  = document.getElementById('f_hasEgenkontrol').checked;
   var expiryDate= calcExpiry(startDate, duration);
   var errEl     = document.getElementById('formErr');
   errEl.style.display = 'none';
@@ -830,7 +846,7 @@ async function saveCustomer() {
         customers[idx] = Object.assign({}, customers[idx], {
           name:name, contact:contact, email:email, password:finalPw,
           plan:plan, duration:duration, startDate:startDate,
-          expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, hasPayroll:hasPayroll
+          expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, hasPayroll:hasPayroll, hasEgenkontrol:hasEgenkontrol
         });
         if (window._fbReady && window.fb) {
           await window.fb.saveCustomer(customers[idx]);
@@ -846,7 +862,7 @@ async function saveCustomer() {
         name:name, contact:contact, email:email, password:pwHash,
         plan:plan, duration:duration, startDate:startDate,
         expiryDate:expiryDate, status:status, notes:notes,
-        hasBudget:hasBudget, hasPayroll:hasPayroll, createdAt:new Date().toISOString()
+        hasBudget:hasBudget, hasPayroll:hasPayroll, hasEgenkontrol:hasEgenkontrol, createdAt:new Date().toISOString()
       };
       customers.push(newCust);
       if (window._fbReady && window.fb) {

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShiftDesk — Egenkontrol</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f1;--white:#fff;--s2:#f0ede7;--border:#e3ddd4;--b2:#c9c3b8;
+  --text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--acc-lt:#fdf0e8;
+  --green:#1b6e40;--green-lt:#e4f2ec;--blue:#1b4896;--blue-lt:#e6edf9;
+  --red:#c0392b;--red-lt:#fdf0f0;--yellow:#92400e;--yellow-lt:#fffbeb;
+  --shadow:0 4px 16px rgba(0,0,0,.11);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
+.login-box{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:48px 40px;width:400px;max-width:calc(100vw - 32px);box-shadow:0 24px 80px rgba(0,0,0,.11);}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.login-dot{width:12px;height:12px;border-radius:50%;background:var(--green);}
+.login-brand{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:700;}
+.login-tagline{font-size:.75rem;color:var(--muted);margin-bottom:32px;padding-left:22px;}
+.lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+.inp{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:9px;padding:11px 13px;font-family:'DM Mono',monospace;font-size:.85rem;outline:none;transition:border-color .13s;margin-bottom:12px;}
+.inp:focus{border-color:var(--green);background:#fff;}
+.login-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;}
+.login-err{font-size:.73rem;color:var(--red);margin-bottom:8px;display:none;padding:8px 10px;background:var(--red-lt);border-radius:7px;border:1px solid #f5c0c0;}
+
+/* TOPBAR */
+.topbar{background:#fff;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;position:sticky;top:0;z-index:200;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+.logo{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--green);}
+.eco-badge{background:var(--green-lt);color:var(--green);border:1px solid #a8d5bc;font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;font-family:'DM Mono',monospace;}
+.topbar-r{display:flex;align-items:center;gap:8px;}
+.user-pill{font-size:.72rem;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:5px 11px;display:flex;align-items:center;gap:6px;}
+.upd{width:7px;height:7px;border-radius:50%;background:var(--green);}
+.tbtn{background:transparent;border:1.5px solid var(--b2);color:var(--muted);border-radius:7px;padding:5px 12px;font-size:.72rem;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.tbtn:hover{background:var(--red-lt);border-color:var(--red);color:var(--red);}
+
+/* LAYOUT */
+.page{max-width:1100px;margin:0 auto;padding:28px 20px;}
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+.page-title{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;}
+.page-sub{font-size:.76rem;color:var(--muted);margin-top:2px;}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.78rem;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .14s;white-space:nowrap;}
+.btn:hover{transform:translateY(-1px);}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
+.btn-acc{background:var(--acc);color:#fff;} .btn-acc:hover{background:#9d3c07;}
+.btn-green{background:var(--green);color:#fff;} .btn-green:hover{background:#145530;}
+.btn-ghost{background:#fff;border:1.5px solid var(--b2);color:var(--text);} .btn-ghost:hover{border-color:var(--text);background:var(--text);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;} .btn-blue:hover{background:#133870;}
+.btn-sm{padding:5px 10px;font-size:.7rem;}
+.btn-xs{padding:3px 8px;font-size:.66rem;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:5px;}
+.tab{flex:1;text-align:center;padding:8px 12px;border-radius:8px;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;color:var(--muted);border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.tab.active{background:var(--green);color:#fff;}
+.tab:hover:not(.active){background:var(--s2);}
+
+/* SCHEMA CARDS */
+.schema-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px;}
+.schema-card{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:box-shadow .15s;}
+.schema-card:hover{box-shadow:var(--shadow);}
+.sc-head{padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.sc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.sc-title{font-weight:700;font-size:.88rem;}
+.sc-freq{font-size:.65rem;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;}
+.sc-status{margin-left:auto;text-align:right;}
+.sc-last{font-size:.65rem;color:var(--muted);}
+.sc-badge{font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:20px;display:inline-block;margin-top:2px;}
+.badge-ok{background:var(--green-lt);color:var(--green);}
+.badge-due{background:#fff3e0;color:#b45309;}
+.badge-overdue{background:var(--red-lt);color:var(--red);}
+.sc-foot{padding:10px 16px;background:var(--s2);border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);}
+
+/* HISTORY TABLE */
+.hist-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.hist-table th{background:var(--s2);padding:7px 12px;text-align:left;font-size:.65rem;text-transform:uppercase;color:var(--muted);font-weight:700;border-bottom:1.5px solid var(--border);}
+.hist-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.hist-table tr:last-child td{border-bottom:none;}
+.ok-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;}
+.err-dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;}
+
+/* FORM MODAL */
+.overlay{position:fixed;inset:0;background:rgba(18,15,10,.46);z-index:500;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:32px 12px 48px;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:24px;width:520px;max-width:100%;box-shadow:0 20px 60px rgba(0,0,0,.14);border:1.5px solid var(--border);animation:slideUp .2s ease;flex-shrink:0;}
+@keyframes slideUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;margin-bottom:18px;}
+.fg{margin-bottom:13px;}
+.fl{font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+.fc{width:100%;background:var(--s2);border:1.5px solid var(--b2);color:var(--text);border-radius:8px;padding:9px 11px;font-family:'DM Mono',monospace;font-size:.82rem;outline:none;transition:border-color .13s;}
+.fc:focus{border-color:var(--green);background:#fff;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+.form-err{font-size:.73rem;color:var(--red);margin-bottom:6px;display:none;background:var(--red-lt);border-radius:7px;padding:7px 10px;border:1px solid #f5c0c0;}
+
+/* TEMP FIELD */
+.temp-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;background:var(--s2);border-radius:8px;padding:8px 12px;}
+.temp-name{font-size:.78rem;flex:1;}
+.temp-inp{width:90px;background:#fff;border:1.5px solid var(--b2);border-radius:7px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:.85rem;outline:none;text-align:center;}
+.temp-inp:focus{border-color:var(--green);}
+.temp-unit{font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;}
+.temp-status{font-size:.7rem;font-weight:700;min-width:60px;text-align:right;}
+.temp-ok{color:var(--green);}
+.temp-err{color:var(--red);}
+
+/* RENGØRING CHECKLIST */
+.check-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.check-row:last-child{border-bottom:none;}
+.check-lbl{font-size:.8rem;flex:1;}
+.check-note{font-size:.72rem;color:var(--muted);}
+
+/* SUMMARY CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;}
+.stat-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px;}
+.stat-val{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;line-height:1;}
+.stat-sub{font-size:.7rem;color:var(--muted);margin-top:4px;}
+
+/* SPINNER */
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--s2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--text);color:#fff;padding:10px 18px;border-radius:9px;font-size:.77rem;font-weight:500;box-shadow:var(--shadow);animation:fadeIn .18s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* AFVIGELSE */
+.afvigelse-box{background:var(--red-lt);border:1.5px solid #f5c0c0;border-radius:9px;padding:10px 13px;margin-top:8px;}
+
+@media print{
+  .topbar,.tabs,.no-print{display:none!important;}
+  .modal{box-shadow:none!important;border:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><div class="login-dot"></div><div class="login-brand">ShiftDesk</div></div>
+    <div class="login-tagline">Egenkontrol — Fødevaresikkerhed</div>
+    <div style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;margin-bottom:18px;">Log ind</div>
+    <label class="lbl">Email</label>
+    <input class="inp" type="email" id="loginEmail" placeholder="din@email.dk" autocomplete="email">
+    <label class="lbl">Adgangskode</label>
+    <input class="inp" type="password" id="loginPw" placeholder="Adgangskode" autocomplete="current-password">
+    <div class="login-err" id="loginErr"></div>
+    <button class="login-btn" id="loginBtn">Log ind →</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<nav class="topbar" id="topbar" style="display:none;">
+  <div class="logo"><div class="logo-dot"></div>ShiftDesk <span class="eco-badge">EGENKONTROL</span></div>
+  <div class="topbar-r">
+    <div class="user-pill"><div class="upd"></div><span id="userDisplay"></span></div>
+    <button class="tbtn" id="logoutBtn">Log ud</button>
+  </div>
+</nav>
+
+<!-- REGISTRATION MODAL -->
+<div class="overlay" id="regModal">
+  <div class="modal" id="regModalInner">
+    <div class="modal-title" id="regModalTitle">Egenkontrol</div>
+    <div id="regModalBody"></div>
+    <div class="form-err" id="regErr"></div>
+    <div class="modal-actions no-print">
+      <button class="btn btn-ghost" id="regCancelBtn">Annuller</button>
+      <button class="btn btn-green" id="regSaveBtn">✓ Gem kontrol</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="overlay" id="histModal">
+  <div class="modal" style="width:680px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div class="modal-title" id="histTitle" style="margin-bottom:0;">Historik</div>
+      <button class="btn btn-ghost btn-sm" id="histCloseBtn">✕ Luk</button>
+    </div>
+    <div id="histBody"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="page" id="mainPage" style="display:none;">
+  <div class="page-hdr">
+    <div>
+      <div class="page-title">📋 Egenkontrol</div>
+      <div class="page-sub" id="todayLabel"></div>
+    </div>
+    <div style="display:flex;gap:8px;" class="no-print">
+      <button class="btn btn-ghost btn-sm" id="printBtn">🖨 Print oversigt</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-grid" id="statGrid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs no-print">
+    <button class="tab active" data-tab="daglig">📅 Daglig</button>
+    <button class="tab" data-tab="ugentlig">📆 Ugentlig</button>
+    <button class="tab" data-tab="maanedlig">🗓 Månedlig</button>
+    <button class="tab" data-tab="historik">📂 Historik</button>
+  </div>
+
+  <!-- Schema grids -->
+  <div id="tabContent"></div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, getDocs, getDoc, setDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const CFG = {
+  apiKey:'AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M',
+  authDomain:'shiftdesk-admin.firebaseapp.com',
+  projectId:'shiftdesk-admin',
+  storageBucket:'shiftdesk-admin.firebasestorage.app',
+  messagingSenderId:'942500137972',
+  appId:'1:942500137972:web:c0e0755c97f3590bcb07a1'
+};
+try {
+  const app = getApps().length ? getApps()[0] : initializeApp(CFG);
+  const db  = getFirestore(app);
+  window.fb = {
+    loadCustomers: async () => { const s=await getDocs(collection(db,'customers')); return s.docs.map(d=>({id:d.id,...d.data()})); },
+    get: async (key) => { try { const d=await getDoc(doc(db,'customerData',key)); return d.exists()?d.data().value:null; } catch(e){return null;} },
+    set: async (key,val) => { await setDoc(doc(db,'customerData',key),{value:val}); }
+  };
+  window._fbReady=true;
+} catch(e){ window._fbReady=false; }
+</script>
+
+<script>
+'use strict';
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var _cust    = null;
+var _records = {}; // {date: {schemaId: {data, ok, note, afvigelse, ts, user}}}
+var _activeTab = 'daglig';
+var _regSchema = null; // currently open schema
+
+// ── Schema definitions based on Fødevarestyrelsen requirements ────────────────
+var SCHEMAS = {
+  daglig: [
+    {
+      id:'koel_temp', icon:'🌡️', color:'#e6edf9', iconBg:'#1b4896',
+      title:'Kølekontrol', freq:'Daglig',
+      desc:'Temperaturer i køle og frys. Køl max 5°C, Dybfrost max -18°C',
+      fields:[
+        {type:'temps', label:'Temperaturer', items:[
+          {name:'Køleskab 1', max:5, unit:'°C'},
+          {name:'Køleskab 2', max:5, unit:'°C'},
+          {name:'Fryseskab', max:-18, unit:'°C'},
+          {name:'Kølemontre', max:5, unit:'°C'},
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+    {
+      id:'modtage', icon:'📦', color:'#e4f2ec', iconBg:'#1b6e40',
+      title:'Modtagekontrol', freq:'Daglig ved levering',
+      desc:'Kontrol af modtagne varer — temperaturer og kvalitet',
+      fields:[
+        {type:'text', id:'leverandor', label:'Leverandør'},
+        {type:'temps', label:'Temperaturer ved modtagelse', items:[
+          {name:'Kølevarer', max:5, unit:'°C'},
+          {name:'Frostvarer', max:-15, unit:'°C'},
+        ]},
+        {type:'radio', id:'emballage', label:'Emballage hel og ren?', options:['Ja','Nej']},
+        {type:'radio', id:'holdbarhed', label:'Holdbarhedsdato OK?', options:['Ja','Nej']},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+    {
+      id:'varme', icon:'🔥', color:'#fdf0e8', iconBg:'#bf4a0a',
+      title:'Varmebehandling', freq:'Daglig ved tilberedning',
+      desc:'Kernetemperatur min 75°C. Varmholdelse min 65°C',
+      fields:[
+        {type:'temps', label:'Kernetemperaturer', items:[
+          {name:'Ret 1', min:75, unit:'°C'},
+          {name:'Ret 2', min:75, unit:'°C'},
+          {name:'Varmholdelse', min:65, unit:'°C'},
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+    {
+      id:'nedkoeling', icon:'❄️', color:'#e6edf9', iconBg:'#0e7490',
+      title:'Nedkøling', freq:'Daglig ved nedkøling',
+      desc:'Fra 65°C til 10°C på max 4 timer',
+      fields:[
+        {type:'text', id:'produkt', label:'Produkt'},
+        {type:'time', id:'start_tid', label:'Starttidspunkt (65°C)'},
+        {type:'time', id:'slut_tid', label:'Sluttidspunkt (10°C)'},
+        {type:'number', id:'slut_temp', label:'Sluttemperatur (°C)'},
+        {type:'radio', id:'ok', label:'Nedkøling gennemført korrekt (<4 timer)?', options:['Ja','Nej']},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+    {
+      id:'reng_daglig', icon:'🧹', color:'#f5f0ff', iconBg:'#6b21a8',
+      title:'Daglig rengøring', freq:'Daglig',
+      desc:'Rengøring kontrolleres dagligt inden produktion',
+      fields:[
+        {type:'checklist', label:'Kontrolpunkter', items:[
+          'Arbejdsflader rengjorte',
+          'Gulve rengjorte',
+          'Opvaskemaskine rengjort',
+          'Kølerum rengjort',
+          'Affaldsstativer tømt og rengjort',
+          'Hænder vasket — personalehygiejne OK',
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+  ],
+  ugentlig: [
+    {
+      id:'reng_ugentlig', icon:'🧽', color:'#f5f0ff', iconBg:'#6b21a8',
+      title:'Ugentlig rengøring', freq:'Ugentlig',
+      desc:'Grundig rengøring af alle lokaler og inventar',
+      fields:[
+        {type:'checklist', label:'Kontrolpunkter', items:[
+          'Vægge og lofter rengjorte',
+          'Køleskabe/frysere rengjorte indvendigt',
+          'Ovne og komfurer rengjorte',
+          'Emhætte og filter rengjort',
+          'Hylder og skabe rengjorte',
+          'Toilet og personalefaciliteter rengjorte',
+          'Udenoms arealer ryddet',
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / Afvigelser'}
+      ]
+    },
+    {
+      id:'skadedyr', icon:'🐭', color:'#fff3e0', iconBg:'#b45309',
+      title:'Skadedyrskontrol', freq:'Ugentlig',
+      desc:'Kontrol for skadedyr — mus, rotter, insekter',
+      fields:[
+        {type:'radio', id:'tegn', label:'Tegn på skadedyr observeret?', options:['Nej','Ja']},
+        {type:'checklist', label:'Kontrollerede steder', items:[
+          'Køkken og lagerrum',
+          'Kloakriste fastgjorte og hele',
+          'Døre og vinduer tætte',
+          'Ingen åbne fødevarepakninger',
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / handlinger'}
+      ]
+    },
+    {
+      id:'termometer', icon:'🌡️', color:'#e4f2ec', iconBg:'#1b6e40',
+      title:'Termometerkalibrering', freq:'Ugentlig',
+      desc:'Kontrol af at termometre viser korrekte temperaturer',
+      fields:[
+        {type:'radio', id:'ok', label:'Termometre viser korrekte temperaturer?', options:['Ja','Nej']},
+        {type:'textarea', id:'note', label:'Bemærkninger / kalibreringer foretaget'}
+      ]
+    },
+  ],
+  maanedlig: [
+    {
+      id:'vedligehold', icon:'🔧', color:'#e6edf9', iconBg:'#1b4896',
+      title:'Vedligeholdelse', freq:'Månedlig',
+      desc:'Gennemgang af maskiner, inventar og lokaler',
+      fields:[
+        {type:'checklist', label:'Kontrolpunkter', items:[
+          'Køleskabe og frysere fungerer korrekt',
+          'Ovne og komfurer fungerer korrekt',
+          'Opvaskemaskine fungerer — skylletemperatur min 80°C',
+          'Emhætte fungerer',
+          'Gulve, vægge og lofter hele og afvaskelige',
+          'Inventar og maskiner uden rust og skader',
+        ]},
+        {type:'textarea', id:'note', label:'Bemærkninger / reparationer bestilt'}
+      ]
+    },
+    {
+      id:'allergen', icon:'⚠️', color:'#fff3e0', iconBg:'#b45309',
+      title:'Allergenkontrol', freq:'Månedlig',
+      desc:'Kontrol af allergeninformation og mærkning',
+      fields:[
+        {type:'radio', id:'menu_ok', label:'Menukort allergener opdateret?', options:['Ja','Nej']},
+        {type:'radio', id:'personal_ok', label:'Personale informeret om allergener?', options:['Ja','Nej']},
+        {type:'radio', id:'krydskontam', label:'Procedurer for krydsforurening fulgt?', options:['Ja','Nej']},
+        {type:'textarea', id:'note', label:'Bemærkninger'}
+      ]
+    },
+    {
+      id:'sporbarhed', icon:'🔍', color:'#fdf0e8', iconBg:'#bf4a0a',
+      title:'Sporbarhed', freq:'Månedlig',
+      desc:'Kontrol af sporbarhed på leverandører og varer',
+      fields:[
+        {type:'radio', id:'leverandor_liste', label:'Leverandørliste opdateret?', options:['Ja','Nej']},
+        {type:'radio', id:'tilbagekald', label:'Procedure for tilbagekald på plads?', options:['Ja','Nej']},
+        {type:'textarea', id:'note', label:'Bemærkninger'}
+      ]
+    },
+  ]
+};
+
+// All schemas flat
+function allSchemas() {
+  return [...SCHEMAS.daglig, ...SCHEMAS.ugentlig, ...SCHEMAS.maanedlig];
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function waitFb() {
+  return new Promise(res => {
+    if(window._fbReady!==undefined){res(window._fbReady);return;}
+    var t=0,iv=setInterval(()=>{if(window._fbReady!==undefined||++t>60){clearInterval(iv);res(!!window._fbReady);}},100);
+  });
+}
+async function hashPw(pw) {
+  try{var b=new TextEncoder().encode(pw),h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){return pw;}
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function fmtDate(ds){return new Date(ds+'T12:00:00').toLocaleDateString('da-DK',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
+function fmtDateTime(ts){if(!ts)return '—';return new Date(ts).toLocaleString('da-DK',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+function ekKey(){return 'cust_'+_cust.id+'_egenkontrol';}
+
+// ── Login ─────────────────────────────────────────────────────────────────────
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('loginPw').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('loginEmail').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogin() {
+  var email=(document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  var pw=document.getElementById('loginPw').value;
+  var errEl=document.getElementById('loginErr');
+  var btn=document.getElementById('loginBtn');
+  errEl.style.display='none';
+  if(!email||!pw){errEl.textContent='Udfyld email og adgangskode.';errEl.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Logger ind…';
+  try {
+    if(!await waitFb()) throw new Error('Kan ikke forbinde til Firebase.');
+    var custs=await window.fb.loadCustomers();
+    var match=null;
+    for(var c of custs){if(c.email&&c.email.toLowerCase()===email&&(await hashPw(pw))===c.password){match=c;break;}}
+    if(!match) throw new Error('Forkert email eller adgangskode.');
+    if(match.status!=='active') throw new Error('Kontoen er ikke aktiv.');
+    _cust=match;
+    enterApp();
+  } catch(err){errEl.textContent=err.message;errEl.style.display='block';}
+  btn.disabled=false;btn.textContent='Log ind →';
+}
+
+function enterApp() {
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('mainPage').style.display='block';
+  document.getElementById('userDisplay').textContent=_cust.name||_cust.email;
+  document.getElementById('todayLabel').textContent='I dag: '+new Date().toLocaleDateString('da-DK',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  loadData();
+}
+
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  _cust=null;_records={};
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('mainPage').style.display='none';
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPw').value='';
+});
+
+// ── Load / Save ───────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    var val=await window.fb.get(ekKey());
+    _records=(val&&typeof val==='object'&&!Array.isArray(val))?val:{};
+  } catch(e){_records={};}
+  renderAll();
+}
+
+async function saveRecord(schemaId, data) {
+  var today=todayStr();
+  if(!_records[today]) _records[today]={};
+  _records[today][schemaId]=Object.assign({},data,{ts:Date.now(),date:today});
+  await window.fb.set(ekKey(), _records);
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderTab(_activeTab);
+}
+
+function renderStats() {
+  var today=todayStr();
+  var todayRec=_records[today]||{};
+  var totalToday=SCHEMAS.daglig.length;
+  var doneToday=SCHEMAS.daglig.filter(s=>todayRec[s.id]).length;
+
+  // Count this week
+  var weekDone=0,weekTotal=0;
+  for(var i=0;i<7;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var ds=d.toISOString().split('T')[0];
+    var rec=_records[ds]||{};
+    SCHEMAS.daglig.forEach(s=>{weekTotal++;if(rec[s.id])weekDone++;});
+  }
+
+  // Count afvigelser this month
+  var afvigelser=0;
+  var now=new Date();
+  Object.keys(_records).forEach(ds=>{
+    var d=new Date(ds+'T12:00:00');
+    if(d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()){
+      Object.values(_records[ds]).forEach(rec=>{if(rec.afvigelse)afvigelser++;});
+    }
+  });
+
+  document.getElementById('statGrid').innerHTML=
+    statCard('Daglig kontrol i dag', doneToday+'/'+totalToday, doneToday===totalToday?'✓ Komplet':'Mangler '+(totalToday-doneToday), doneToday===totalToday?'var(--green)':'var(--acc)')+
+    statCard('Udført denne uge', weekDone+'', 'af '+weekTotal+' daglige kontroller', 'var(--blue)')+
+    statCard('Afvigelser denne måned', afvigelser+'', afvigelser===0?'Ingen afvigelser':'Kræver opmærksomhed', afvigelser===0?'var(--green)':'var(--red)');
+}
+
+function statCard(lbl,val,sub,col) {
+  return '<div class="stat-card"><div class="stat-lbl">'+esc(lbl)+'</div><div class="stat-val" style="color:'+col+';">'+esc(val)+'</div><div class="stat-sub">'+esc(sub)+'</div></div>';
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    _activeTab=t.getAttribute('data-tab');
+    renderTab(_activeTab);
+  });
+});
+
+function renderTab(tab) {
+  var el=document.getElementById('tabContent');
+  if(tab==='historik'){renderHistorik(el);return;}
+  var schemas=SCHEMAS[tab]||[];
+  var today=todayStr();
+  var todayRec=_records[today]||{};
+
+  var html='<div class="schema-grid">';
+  schemas.forEach(s=>{
+    var rec=todayRec[s.id];
+    var status=getStatus(s,rec,tab);
+    html+=schemaCard(s,rec,status);
+  });
+  html+='</div>';
+  el.innerHTML=html;
+
+  // Wire click handlers
+  el.querySelectorAll('[data-open]').forEach(card=>{
+    card.addEventListener('click',()=>openSchema(card.getAttribute('data-open')));
+  });
+  el.querySelectorAll('[data-hist]').forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();openHistorik(btn.getAttribute('data-hist'));});
+  });
+}
+
+function getStatus(schema, rec, tab) {
+  if(!rec) {
+    if(tab==='daglig') return {label:'Ikke udført', cls:'badge-overdue'};
+    return {label:'Afventer', cls:'badge-due'};
+  }
+  if(rec.afvigelse) return {label:'⚠ Afvigelse', cls:'badge-overdue'};
+  return {label:'✓ Godkendt', cls:'badge-ok'};
+}
+
+function schemaCard(s, rec, status) {
+  return '<div class="schema-card" data-open="'+s.id+'">' +
+    '<div class="sc-head" style="background:'+s.color+';">'+
+      '<div class="sc-icon" style="background:'+s.iconBg+';">'+s.icon+'</div>'+
+      '<div><div class="sc-title">'+esc(s.title)+'</div><div class="sc-freq">'+esc(s.freq)+'</div></div>'+
+      '<div class="sc-status">'+
+        (rec?'<div class="sc-last">'+fmtDateTime(rec.ts)+'</div>':'')+
+        '<span class="sc-badge '+status.cls+'">'+status.label+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sc-foot" style="display:flex;align-items:center;justify-content:space-between;">'+
+      '<span>'+esc(s.desc)+'</span>'+
+      '<button class="btn btn-ghost btn-xs no-print" data-hist="'+s.id+'" style="flex-shrink:0;margin-left:8px;">Historik</button>'+
+    '</div>'+
+  '</div>';
+}
+
+// ── Schema registration form ──────────────────────────────────────────────────
+function openSchema(schemaId) {
+  var s=allSchemas().find(x=>x.id===schemaId);
+  if(!s) return;
+  _regSchema=s;
+  document.getElementById('regModalTitle').textContent=s.icon+' '+s.title;
+  document.getElementById('regErr').style.display='none';
+
+  var today=todayStr();
+  var existing=(_records[today]&&_records[today][schemaId])||null;
+
+  document.getElementById('regModalBody').innerHTML=buildForm(s,existing);
+  document.getElementById('regModal').classList.add('open');
+
+  // Wire temp input live feedback
+  document.querySelectorAll('.temp-inp').forEach(inp=>{
+    inp.addEventListener('input',()=>updateTempStatus(inp));
+    updateTempStatus(inp);
+  });
+}
+
+function buildForm(s,existing) {
+  var html='<div style="font-size:.72rem;color:var(--muted);margin-bottom:14px;">'+fmtDate(todayStr())+'</div>';
+  s.fields.forEach(f=>{
+    var val=existing&&existing[f.id]?existing[f.id]:'';
+    if(f.type==='temps') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>';
+      f.items.forEach((item,i)=>{
+        var tempVal=existing&&existing['temp_'+i]!==undefined?existing['temp_'+i]:'';
+        html+='<div class="temp-row">'+
+          '<span class="temp-name">'+esc(item.name)+'</span>'+
+          '<input class="temp-inp" type="number" step="0.1" id="temp_'+i+'" data-min="'+(item.min||'')+'" data-max="'+(item.max||'')+'" value="'+esc(String(tempVal))+'" placeholder="—">'+
+          '<span class="temp-unit">'+item.unit+'</span>'+
+          '<span class="temp-status" id="ts_'+i+'"></span>'+
+        '</div>';
+      });
+      html+='</div>';
+    } else if(f.type==='checklist') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>';
+      f.items.forEach((item,i)=>{
+        var checked=existing&&existing['chk_'+i]?'checked':'';
+        html+='<div class="check-row">'+
+          '<input type="checkbox" id="chk_'+i+'" '+checked+' style="width:16px;height:16px;accent-color:var(--green);flex-shrink:0;">'+
+          '<label for="chk_'+i+'" class="check-lbl">'+esc(item)+'</label>'+
+        '</div>';
+      });
+      html+='</div>';
+    } else if(f.type==='radio') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
+        '<div style="display:flex;gap:10px;">';
+      f.options.forEach(opt=>{
+        var checked=val===opt?'checked':'';
+        html+='<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer;">'+
+          '<input type="radio" name="'+f.id+'" value="'+esc(opt)+'" '+checked+' style="accent-color:var(--green);"> '+esc(opt)+'</label>';
+      });
+      html+='</div></div>';
+    } else if(f.type==='textarea') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
+        '<textarea class="fc" id="'+f.id+'" rows="3" style="resize:vertical;" placeholder="Skriv her...">'+esc(val)+'</textarea></div>';
+    } else if(f.type==='text') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
+        '<input class="fc" type="text" id="'+f.id+'" value="'+esc(val)+'" autocomplete="off"></div>';
+    } else if(f.type==='number') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
+        '<input class="fc" type="number" step="0.1" id="'+f.id+'" value="'+esc(val)+'"></div>';
+    } else if(f.type==='time') {
+      html+='<div class="fg"><label class="fl">'+esc(f.label)+'</label>'+
+        '<input class="fc" type="time" id="'+f.id+'" value="'+esc(val)+'"></div>';
+    }
+  });
+
+  // Afvigelse
+  var afvVal=existing&&existing.afvigelse?existing.afvigelse:'';
+  html+='<div class="afvigelse-box"><label class="fl" style="color:var(--red);">⚠ Afvigelse / Korrigerende handling (udfyldes ved fejl)</label>'+
+    '<textarea class="fc" id="afvigelse" rows="2" style="background:#fff;" placeholder="Beskriv fejl og hvad der blev gjort...">'+esc(afvVal)+'</textarea></div>';
+
+  return html;
+}
+
+function updateTempStatus(inp) {
+  var i=inp.id.replace('temp_','');
+  var el=document.getElementById('ts_'+i);
+  if(!el) return;
+  var val=parseFloat(inp.value);
+  if(isNaN(val)){el.textContent='';return;}
+  var min=inp.getAttribute('data-min');
+  var max=inp.getAttribute('data-max');
+  var ok=true;
+  if(min!==''&&val<parseFloat(min)) ok=false;
+  if(max!==''&&val>parseFloat(max)) ok=false;
+  el.textContent=ok?'✓ OK':'✗ Fejl';
+  el.className='temp-status '+(ok?'temp-ok':'temp-err');
+}
+
+document.getElementById('regCancelBtn').addEventListener('click',()=>document.getElementById('regModal').classList.remove('open'));
+document.getElementById('regModal').addEventListener('click',e=>{if(e.target===document.getElementById('regModal'))document.getElementById('regModal').classList.remove('open');});
+document.getElementById('regSaveBtn').addEventListener('click',saveRegistration);
+
+async function saveRegistration() {
+  var s=_regSchema;
+  if(!s) return;
+  var btn=document.getElementById('regSaveBtn');
+  btn.disabled=true;btn.textContent='Gemmer…';
+
+  try {
+    var data={};
+    s.fields.forEach(f=>{
+      if(f.type==='temps') {
+        f.items.forEach((_,i)=>{
+          var v=document.getElementById('temp_'+i);
+          if(v) data['temp_'+i]=v.value!==''?parseFloat(v.value):'';
+        });
+      } else if(f.type==='checklist') {
+        f.items.forEach((_,i)=>{
+          var v=document.getElementById('chk_'+i);
+          if(v) data['chk_'+i]=v.checked;
+        });
+      } else if(f.type==='radio') {
+        var v=document.querySelector('input[name="'+f.id+'"]:checked');
+        data[f.id]=v?v.value:'';
+      } else {
+        var el=document.getElementById(f.id);
+        if(el) data[f.id]=el.value.trim();
+      }
+    });
+
+    // Afvigelse
+    var afv=document.getElementById('afvigelse');
+    data.afvigelse=afv?afv.value.trim():'';
+
+    await saveRecord(s.id,data);
+    document.getElementById('regModal').classList.remove('open');
+    renderAll();
+    toast('✓ '+s.title+' gemt');
+  } catch(err){
+    var errEl=document.getElementById('regErr');
+    errEl.textContent='Fejl: '+err.message;
+    errEl.style.display='block';
+  }
+  btn.disabled=false;btn.textContent='✓ Gem kontrol';
+}
+
+// ── Historik ──────────────────────────────────────────────────────────────────
+function renderHistorik(el) {
+  var dates=Object.keys(_records).sort((a,b)=>b.localeCompare(a)).slice(0,30);
+  if(!dates.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted);">Ingen registreringer endnu</div>';return;}
+
+  var html='<div style="background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;">';
+  html+='<table class="hist-table"><thead><tr>';
+  html+='<th>Dato</th><th>Kontrol</th><th>Status</th><th>Afvigelse</th><th>Tidspunkt</th>';
+  html+='</tr></thead><tbody>';
+
+  dates.forEach(ds=>{
+    var dayRec=_records[ds];
+    Object.keys(dayRec).forEach(sid=>{
+      var rec=dayRec[sid];
+      var schema=allSchemas().find(x=>x.id===sid);
+      var hasAfv=rec.afvigelse&&rec.afvigelse.trim();
+      html+='<tr>';
+      html+='<td>'+fmtDate(ds)+'</td>';
+      html+='<td>'+(schema?schema.icon+' '+esc(schema.title):esc(sid))+'</td>';
+      html+='<td><span class="'+(hasAfv?'err-dot':'ok-dot')+'"></span> '+(hasAfv?'Afvigelse':'OK')+'</td>';
+      html+='<td style="font-size:.72rem;color:var(--red);">'+(hasAfv?esc(rec.afvigelse):'—')+'</td>';
+      html+='<td style="font-family:\'DM Mono\',monospace;font-size:.72rem;">'+fmtDateTime(rec.ts)+'</td>';
+      html+='</tr>';
+    });
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
+
+function openHistorik(schemaId) {
+  var s=allSchemas().find(x=>x.id===schemaId);
+  document.getElementById('histTitle').textContent=(s?s.icon+' '+s.title:'')+ ' — Historik';
+  var dates=Object.keys(_records).sort((a,b)=>b.localeCompare(a));
+  var entries=[];
+  dates.forEach(ds=>{if(_records[ds]&&_records[ds][schemaId])entries.push({date:ds,..._records[ds][schemaId]});});
+
+  if(!entries.length){document.getElementById('histBody').innerHTML='<div style="text-align:center;padding:32px;color:var(--muted);">Ingen registreringer endnu</div>';}
+  else {
+    var html='<table class="hist-table"><thead><tr><th>Dato</th><th>Status</th><th>Afvigelse</th><th>Tidspunkt</th></tr></thead><tbody>';
+    entries.forEach(e=>{
+      var hasAfv=e.afvigelse&&e.afvigelse.trim();
+      html+='<tr>';
+      html+='<td>'+fmtDate(e.date)+'</td>';
+      html+='<td><span class="'+(hasAfv?'err-dot':'ok-dot')+'"></span> '+(hasAfv?'Afvigelse':'OK')+'</td>';
+      html+='<td style="font-size:.72rem;color:var(--red);">'+(hasAfv?esc(e.afvigelse):'—')+'</td>';
+      html+='<td style="font-family:\'DM Mono\',monospace;font-size:.72rem;">'+fmtDateTime(e.ts)+'</td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('histBody').innerHTML=html;
+  }
+  document.getElementById('histModal').classList.add('open');
+}
+
+document.getElementById('histCloseBtn').addEventListener('click',()=>document.getElementById('histModal').classList.remove('open'));
+document.getElementById('histModal').addEventListener('click',e=>{if(e.target===document.getElementById('histModal'))document.getElementById('histModal').classList.remove('open');});
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+
+// ── Auto-login from ShiftDesk ─────────────────────────────────────────────────
+(async function(){
+  try {
+    var sdAuth=sessionStorage.getItem('sd_auth'), sdCid=sessionStorage.getItem('sd_cust_id');
+    if(sdAuth==='1'&&sdCid){
+      if(await waitFb()){
+        var custs=await window.fb.loadCustomers();
+        var match=custs.find(c=>c.id===sdCid&&c.status==='active');
+        if(match){_cust=match;enterApp();return;}
+      }
+    }
+  } catch(e){}
+  setTimeout(()=>{try{document.getElementById('loginEmail').focus();}catch(e){}},300);
+})();
+</script>
+</body>
+</html>

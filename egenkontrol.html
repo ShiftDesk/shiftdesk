@@ -1123,16 +1123,22 @@ function renderVejledning(el) {
 </div>
 `;
 
-  // Wire accordion toggles
-  el.querySelectorAll('.acc-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var acc = btn.closest('.acc');
-      if(!acc) return;
-      var isOpen = acc.classList.contains('open');
-      el.querySelectorAll('.acc.open').forEach(function(a){ a.classList.remove('open'); });
-      if(!isOpen) acc.classList.add('open');
+  // Wire accordion toggles using direct approach
+  setTimeout(function(){
+    el.querySelectorAll('[data-acc]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var accId = btn.getAttribute('data-acc');
+        var acc = document.getElementById(accId);
+        if(!acc) return;
+        var isOpen = acc.classList.contains('open');
+        // Close all
+        el.querySelectorAll('.acc').forEach(function(a){ a.classList.remove('open'); });
+        // Open if was closed
+        if(!isOpen) acc.classList.add('open');
+      });
     });
-  });
+  }, 0);
 }
 
 function renderHistorik(el) {

@@ -140,6 +140,72 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .topbar,.tabs,.no-print{display:none!important;}
   .modal{box-shadow:none!important;border:none!important;}
 }
+
+/* ── VEJLEDNING ────────────────────────────────────────────────────────────── */
+.vej-section{margin-bottom:32px;}
+.vej-h2{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--green);margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--green-lt);}
+.vej-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+.vej-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:20px;transition:box-shadow .15s;}
+.vej-card:hover{box-shadow:var(--shadow);}
+.vej-card-icon{font-size:1.6rem;margin-bottom:10px;}
+.vej-card h3{font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;color:var(--green);margin-bottom:8px;}
+.vej-card p{font-size:.78rem;color:var(--muted);line-height:1.65;}
+.vej-tag{display:inline-block;background:var(--green-lt);color:var(--green);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:10px;text-transform:uppercase;letter-spacing:.06em;}
+.vej-notice{background:#fffbeb;border:1px solid #f6c470;border-left:4px solid var(--yellow);border-radius:0 10px 10px 0;padding:13px 16px;margin:14px 0;font-size:.78rem;color:#5a3d00;line-height:1.7;}
+.vej-notice strong{display:block;margin-bottom:3px;}
+.vej-risk{background:#fff;border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.vej-risk-head{background:linear-gradient(90deg,var(--green),#4a7c2f);color:#fff;padding:20px 24px;}
+.vej-risk-head h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;margin-bottom:4px;}
+.vej-risk-head p{opacity:.82;font-size:.76rem;}
+.vej-risk-body{padding:20px 24px;}
+.vej-step{display:flex;gap:14px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--border);}
+.vej-step:last-child{border-bottom:none;}
+.vej-step-num{width:32px;height:32px;background:var(--green-lt);border:2px solid #a8d5bc;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--green);font-size:.8rem;flex-shrink:0;}
+.vej-step h4{font-family:'Fraunces',serif;font-size:.9rem;margin-bottom:5px;}
+.vej-step p{font-size:.76rem;color:var(--muted);line-height:1.6;}
+.vej-highlight{display:inline-block;background:#fffbeb;color:#7a5400;font-size:.72rem;font-weight:600;padding:2px 9px;border-radius:8px;margin-top:6px;}
+.ccp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px;}
+.ccp-box{background:var(--s2);border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:14px 16px;}
+.ccp-box.warn{border-left-color:#b45309;}
+.ccp-box.danger{border-left-color:var(--red);}
+.ccp-box h4{font-family:'Fraunces',serif;font-size:.85rem;font-weight:700;margin-bottom:5px;}
+.ccp-box p{font-size:.74rem;color:var(--muted);line-height:1.55;}
+.vej-table{width:100%;border-collapse:collapse;font-size:.78rem;border-radius:10px;overflow:hidden;box-shadow:0 1px 8px rgba(0,0,0,.07);}
+.vej-table thead{background:var(--green);color:#fff;}
+.vej-table th{padding:10px 14px;text-align:left;font-size:.67rem;text-transform:uppercase;letter-spacing:.06em;}
+.vej-table tbody tr:nth-child(even){background:var(--green-lt);}
+.vej-table tbody tr:nth-child(odd){background:#fff;}
+.vej-table td{padding:9px 14px;border-bottom:1px solid rgba(0,0,0,.05);}
+.vej-good{color:#2d7a1f;font-weight:600;} .vej-warn{color:#b45309;font-weight:600;} .vej-danger{color:var(--red);font-weight:600;}
+.acc{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:6px;}
+.acc-btn{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:'DM Sans',sans-serif;}
+.acc-btn:hover{background:var(--green-lt);}
+.acc-left{display:flex;align-items:center;gap:12px;}
+.acc-emoji{font-size:1.2rem;}
+.acc-title{font-family:'Fraunces',serif;font-size:.92rem;font-weight:700;color:var(--green);}
+.acc-sub{font-size:.72rem;color:var(--muted);margin-top:1px;}
+.acc-arrow{font-size:.68rem;color:var(--muted);transition:transform .25s;flex-shrink:0;}
+.acc.open .acc-arrow{transform:rotate(180deg);}
+.acc-body{display:none;padding:0 20px 18px;}
+.acc.open .acc-body{display:block;}
+.acc-body p{font-size:.78rem;color:#555;line-height:1.75;margin-bottom:10px;}
+.vej-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.vej-list li{display:flex;align-items:flex-start;gap:8px;font-size:.78rem;color:#444;line-height:1.6;}
+.vej-list li::before{content:'✓';width:18px;height:18px;background:var(--green);color:#fff;border-radius:50%;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:24px;}
+.dl-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px;}
+.dl-card-icon{font-size:1.5rem;margin-bottom:8px;}
+.dl-card h4{font-family:'Fraunces',serif;font-size:.85rem;font-weight:700;color:var(--green);margin-bottom:6px;}
+.dl-card p{font-size:.73rem;color:var(--muted);line-height:1.55;margin-bottom:12px;}
+.dl-btn{display:inline-block;background:var(--green);color:#fff;padding:6px 14px;border-radius:7px;font-size:.72rem;font-weight:600;text-decoration:none;transition:background .14s;}
+.dl-btn:hover{background:#145530;}
+.contact-box{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:22px 24px;display:flex;gap:16px;align-items:flex-start;}
+.contact-box-icon{font-size:2rem;flex-shrink:0;}
+.contact-box h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--green);margin-bottom:6px;}
+.contact-box p{font-size:.76rem;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.contact-links{display:flex;flex-direction:column;gap:6px;}
+.contact-link{font-size:.76rem;color:var(--green);text-decoration:none;}
+.contact-link:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -213,6 +279,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="tab" data-tab="ugentlig">📆 Ugentlig</button>
     <button class="tab" data-tab="maanedlig">🗓 Månedlig</button>
     <button class="tab" data-tab="historik">📂 Historik</button>
+    <button class="tab" data-tab="vejledning">📖 Vejledning</button>
   </div>
 
   <!-- Schema grids -->
@@ -547,6 +614,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 function renderTab(tab) {
   var el=document.getElementById('tabContent');
   if(tab==='historik'){renderHistorik(el);return;}
+  if(tab==='vejledning'){renderVejledning(el);return;}
   var schemas=SCHEMAS[tab]||[];
   var today=todayStr();
   var todayRec=_records[today]||{};
@@ -843,7 +911,234 @@ async function saveRegistration() {
   btn.disabled=false; btn.textContent='✓ Gem kontrol';
 }
 
-// ── Historik ──────────────────────────────────────────────────────────────────
+// ── Vejledning ────────────────────────────────────────────────────────────────
+function renderVejledning(el) {
+  el.innerHTML = `
+<div class="vej-section">
+  <div class="vej-h2">📋 Hvad er egenkontrol?</div>
+  <div class="vej-cards">
+    <div class="vej-card">
+      <div class="vej-card-icon">📋</div>
+      <h3>Skriftlig risikoanalyse</h3>
+      <p>Du skal gennemgå hvert procestrin i din restaurant og vurdere, hvilke farer der kan opstå. Risikoanalysen skal være skriftlig og dokumentere alle aktiviteter, risici og styringsmuligheder.</p>
+      <span class="vej-tag">Krav til alle</span>
+    </div>
+    <div class="vej-card">
+      <div class="vej-card-icon">🔄</div>
+      <h3>Procedurer for egenkontrol</h3>
+      <p>Baseret på din risikoanalyse skal du have klare procedurer for, hvordan du styrer kritiske kontrolpunkter som temperatur ved tilberedning, opbevaring og nedkøling.</p>
+      <span class="vej-tag">Krav til alle</span>
+    </div>
+    <div class="vej-card">
+      <div class="vej-card-icon">📝</div>
+      <h3>Dokumentation</h3>
+      <p>Du skal løbende dokumentere, at du følger dine procedurer. Hvis du f.eks. kontrollerer køleskabstemperaturen dagligt, skal resultatet noteres hver dag.</p>
+      <span class="vej-tag">Krav til alle</span>
+    </div>
+  </div>
+  <div class="vej-notice">
+    <strong>⚠️ Husk</strong>
+    Dit egenkontrolprogram, inklusiv risikoanalyse og dokumentation, skal altid være tilgængeligt i din virksomhed, så Fødevarestyrelsens tilsynsførende kan se det ved kontrolbesøg.
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="vej-h2">📊 Risikoanalysen trin for trin</div>
+  <div class="vej-risk">
+    <div class="vej-risk-head">
+      <h3>Din risikoanalyse skal indeholde tre elementer</h3>
+      <p>Gå systematisk igennem alle processer i dit køkken fra modtagelse til servering</p>
+    </div>
+    <div class="vej-risk-body">
+      <div class="vej-step">
+        <div class="vej-step-num">1</div>
+        <div>
+          <h4>Virksomhedens fødevareaktiviteter</h4>
+          <p>Liste alle aktiviteter i din restaurant: modtagelse af råvarer, opbevaring (køl, frys, tørt), optøning, tilberedning (stegning, kogning, bagning), nedkøling, anretning og servering.</p>
+          <span class="vej-highlight">Eks: Stegning af frikadeller → opbevaring i køleskab → genopvarmning</span>
+        </div>
+      </div>
+      <div class="vej-step">
+        <div class="vej-step-num">2</div>
+        <div>
+          <h4>Risici forbundet med aktiviteterne</h4>
+          <p>Vurder for hvert trin, hvilke farer der kan opstå: biologiske (bakterier, virus, parasitter), kemiske (rengøringsmidler, allergener) og fysiske (fremmedlegemer som knogler, sten, glasskår).</p>
+          <span class="vej-highlight">Eks: Salmonella ved utilstrækkelig stegning af kylling</span>
+        </div>
+      </div>
+      <div class="vej-step">
+        <div class="vej-step-num">3</div>
+        <div>
+          <h4>Styringsmuligheder og kritiske kontrolpunkter</h4>
+          <p>Beskriv, hvad du gør for at forhindre, at farerne opstår. Er der stor sandsynlighed for, at noget kan gå alvorligt galt, er det et Kritisk Kontrolpunkt (KKP) med skriftlige procedurer.</p>
+          <span class="vej-highlight">KKP eks: Minimumstemperatur for kylling = 75°C i midten</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="vej-h2">⚡ Kritiske kontrolpunkter (KKP)</div>
+  <div class="ccp-grid">
+    <div class="ccp-box"><h4>🌡️ Tilberedningstemperatur</h4><p>Kød og fjerkræ skal opnå tilstrækkelig kernetemperatur for at eliminere sygdomsfremkaldende bakterier.</p></div>
+    <div class="ccp-box warn"><h4>❄️ Koldopbevaring</h4><p>Letfordærvelige fødevarer skal opbevares ved max +5°C i køleskab og -18°C i fryser.</p></div>
+    <div class="ccp-box warn"><h4>⬇️ Nedkøling</h4><p>Varm mad skal nedkøles hurtigt fra 65°C til 10°C inden for maks. 3 timer for at undgå bakterievækst.</p></div>
+    <div class="ccp-box danger"><h4>🔄 Genopvarmning</h4><p>Rester og buffetmad skal genopvarmes til mindst 75°C og må kun genopvarmes én gang.</p></div>
+    <div class="ccp-box"><h4>🐟 Optøning</h4><p>Optøning skal ske i køleskab (under +5°C) eller i rindende koldt vand. Ikke ved stuetemperatur.</p></div>
+    <div class="ccp-box"><h4>🧤 Personlig hygiejne</h4><p>Korrekt håndhygiejne, brug af handsker ved behov og sygemeldingsprocedurer for syge medarbejdere.</p></div>
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="vej-h2">🌡️ Temperaturgrænser — referencetabel</div>
+  <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:18px;overflow-x:auto;">
+    <table class="vej-table">
+      <thead><tr><th>Aktivitet</th><th>Krav / Grænse</th><th>Status</th><th>Frekvens</th></tr></thead>
+      <tbody>
+        <tr><td>Køleskab (råvarer)</td><td>Max +5°C</td><td class="vej-good">✓ Kontroller dagligt</td><td>Dagligt</td></tr>
+        <tr><td>Fryser</td><td>-18°C eller koldere</td><td class="vej-good">✓ Kontroller dagligt</td><td>Dagligt</td></tr>
+        <tr><td>Tilberedning – kylling/fjerkræ</td><td>Min. 75°C i kernen</td><td class="vej-warn">⚠ KKP – dokumentér altid</td><td>Hver tilberedning</td></tr>
+        <tr><td>Tilberedning – svinekød</td><td>Min. 65°C i kernen</td><td class="vej-warn">⚠ KKP – dokumentér altid</td><td>Hver tilberedning</td></tr>
+        <tr><td>Tilberedning – hakket kød</td><td>Min. 72°C i kernen</td><td class="vej-danger">⚠ KKP – kritisk</td><td>Hver tilberedning</td></tr>
+        <tr><td>Nedkøling af varm mad</td><td>65°C → 10°C på max 3 timer</td><td class="vej-warn">⚠ KKP – dokumentér</td><td>Hver nedkøling</td></tr>
+        <tr><td>Varm buffet/bain-marie</td><td>Min. 65°C</td><td class="vej-warn">⚠ Kontroller løbende</td><td>Løbende</td></tr>
+        <tr><td>Modtagelse af kølevarer</td><td>Max +5°C ved levering</td><td class="vej-good">✓ Tjek ved modtagelse</td><td>Hver levering</td></tr>
+        <tr><td>Rengøring</td><td>Jf. rengøringsplan</td><td class="vej-good">✓ Sæt kryds i plan</td><td>Dagligt/ugentligt</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="vej-h2">📚 Regler og vejledning</div>
+
+  <div class="acc" id="acc_gag">
+    <button class="acc-btn" onclick="toggleAcc('acc_gag')">
+      <div class="acc-left"><span class="acc-emoji">🧼</span><div><div class="acc-title">Gode Arbejdsgange (GAG)</div><div class="acc-sub">Fundamentet for al egenkontrol — rengøring, hygiejne og vedligeholdelse</div></div></div>
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      <p>Gode Arbejdsgange (GAG) er fundamentet for din egenkontrol. Du og dine medarbejdere skal kunne redegøre for dem mundtligt — de skal ikke nødvendigvis nedskrives, men mange virksomheder vælger at gøre det alligevel.</p>
+      <ul class="vej-list">
+        <li>Tilstrækkelig rengøring af alle overflader, udstyr og inventar efter rengøringsplan</li>
+        <li>Regelmæssig vedligeholdelse af bygninger og udstyr for at undgå kontaminering</li>
+        <li>Effektiv skadedyrskontrol — ingen adgang for mus, rotter, insekter mv.</li>
+        <li>Medarbejdernes personlige hygiejne: håndhygiejne, rene uniformer, sygdomsprocedure</li>
+        <li>Korrekt mærkning af alle varer med modtagelsesdato og udløbsdato</li>
+        <li>Adskillelse af rå og tilberedte fødevarer (kryds-kontaminering)</li>
+      </ul>
+      <div class="vej-notice"><strong>💡 Tip</strong>Lav en ugentlig rengøringsplan, som medarbejderne afkrydser. Det er god dokumentation og sikrer, at intet glemmes.</div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc_allergen">
+    <button class="acc-btn" onclick="toggleAcc('acc_allergen')">
+      <div class="acc-left"><span class="acc-emoji">🦠</span><div><div class="acc-title">Allergener &amp; særlige risici</div><div class="acc-sub">14 lovpligtige allergener du skal have styr på</div></div></div>
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      <p>Som restaurant er du lovpligtig til at informere gæsterne om allergener i dine retter. Dette er en kemisk/biologisk risiko, der skal indgå i din risikoanalyse.</p>
+      <ul class="vej-list">
+        <li><strong>Gluten</strong> — hvede, rug, byg, havre, spelt, kamut</li>
+        <li><strong>Krebsdyr</strong> — rejer, hummer, krabber, languster</li>
+        <li><strong>Æg</strong> — og produkter heraf</li>
+        <li><strong>Fisk</strong> — og produkter heraf</li>
+        <li><strong>Jordnødder</strong> — og produkter heraf</li>
+        <li><strong>Soja</strong> — og produkter heraf</li>
+        <li><strong>Mælk</strong> — laktose og mælkeprodukter</li>
+        <li><strong>Nødder</strong> — mandel, hasselnød, valnød, cashew, pekannød, paranød, pistacienød, macadamianød</li>
+        <li><strong>Selleri, sennep, sesamfrø, svovldioxid/sulfitter, lupin, bløddyr</strong></li>
+      </ul>
+      <p>Allergeninformation skal være tilgængelig for gæster enten på menuen, mundtligt ved anmodning eller på skilt. Personale skal være trænet i at håndtere allergenforespørgsler korrekt.</p>
+    </div>
+  </div>
+
+  <div class="acc" id="acc_spor">
+    <button class="acc-btn" onclick="toggleAcc('acc_spor')">
+      <div class="acc-left"><span class="acc-emoji">🔗</span><div><div class="acc-title">Sporbarhed</div><div class="acc-sub">Krav til dokumentation af leverandører og råvarer</div></div></div>
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      <p>Du skal kunne spore alle dine råvarer ét trin bagud (til leverandøren) og ét trin fremad (til hvem du har solgt til, hvis relevant). Dette er et lovkrav for alle fødevarevirksomheder.</p>
+      <ul class="vej-list">
+        <li>Gem alle fakturaer, følgesedler og leverancedokumenter i mindst 5 år</li>
+        <li>Registrer leverandørens navn og kontaktoplysninger</li>
+        <li>Gem oplysninger om, hvad du har modtaget, fra hvem og hvornår</li>
+        <li>Ved tilbagekaldelse: gem korrespondance fra leverandør om defekte varer</li>
+        <li>Særlig sporbarhed for kød (oksekød), fisk og spirer — udvidet krav</li>
+      </ul>
+      <div class="vej-notice"><strong>💡 Praktisk tip</strong>Gem alle fakturaer og leverancesedler i en mappe (fysisk eller digital). Kategoriser dem efter måned, så du hurtigt kan finde dem ved kontrol.</div>
+    </div>
+  </div>
+
+  <div class="acc" id="acc_korr">
+    <button class="acc-btn" onclick="toggleAcc('acc_korr')">
+      <div class="acc-left"><span class="acc-emoji">⚡</span><div><div class="acc-title">Korrigerende handlinger</div><div class="acc-sub">Hvad gør du, når noget går galt?</div></div></div>
+      <span class="acc-arrow">▼</span>
+    </button>
+    <div class="acc-body">
+      <p>I dit egenkontrolprogram skal du beskrive, hvad du gør, hvis dine kritiske kontrolpunkter overskrides. Disse kaldes "korrigerende handlinger" og skal nedskrives.</p>
+      <ul class="vej-list">
+        <li><strong>Køleskab for varmt:</strong> Flyt varer til alternativt køl, undersøg årsag, reparer/udskift udstyr. Vurder om varerne er sikre eller skal kasseres.</li>
+        <li><strong>Utilstrækkelig tilberedningstemperatur:</strong> Sæt kødet tilbage til tilberedning til korrekt temperatur er opnået. Dokumentér hændelsen.</li>
+        <li><strong>Nedkøling tager for lang tid:</strong> Skift til mindre portioner, brug nedkølingsbakker eller isvandbad. Kassér hvis 3-timers grænse er overskredet.</li>
+        <li><strong>Fremmedelement fundet i mad:</strong> Kassér det berørte produkt, identificér kilden, informér gæsten hvis mad er serveret.</li>
+      </ul>
+      <p>Alle afvigelser og korrigerende handlinger skal noteres skriftligt med dato, beskrivelse af problemet og hvad du har gjort.</p>
+    </div>
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="vej-h2">📥 Officielle skemaer fra Fødevarestyrelsen</div>
+  <div class="dl-grid">
+    <div class="dl-card"><div class="dl-card-icon">📋</div><h4>Risikoanalyse med hjælpetekst</h4><p>Officielt skema fra Fødevarestyrelsen til din skriftlige risikoanalyse. Inkluderer vejledende tekst.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638179373121920394/Risikoanalyse_skema_Editerbar-PDF_004.pdf" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">📄</div><h4>Risikoanalyse — uden hjælpetekst</h4><p>Ren skabelon til risikoanalyse uden vejledende tekst — til erfarne brugere.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638179400748903893/Risikoanalyse_skema_Editerbar-PDF_003_uden-hj%C3%A6lp.pdf" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">🇬🇧</div><h4>Risk Analysis — English version</h4><p>Official risk analysis template in English for international staff and businesses.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638179379232189128/Risikoanalyse%20skema_eng_002.pdf" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">🍕</div><h4>Eksempel: Risikoanalyse med begrænset tilberedning</h4><p>Eksempel på udfyldt risikoanalyse for restaurant/café med begrænset madlavning.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638179379106413304/Risikoanalyse%20begr%C3%A6nset%20tilberedning.pdf" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">✅</div><h4>Skabelon til egenkontrolprogram (dansk)</h4><p>Komplet skabelon til egenkontrolprogram for mindre fødevarevirksomheder.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638532672442452340/Egenkontrol%20dansk%202024.PDF" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">🌐</div><h4>Own-check programme — English</h4><p>Complete own-check programme template in English for food businesses.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638532672357073065/Egenkontrol%20engelsk%202024.PDF" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">🛒</div><h4>Eksempel: Risikoanalyse uden tilberedning</h4><p>Eksempel for virksomheder der sælger men ikke tilbereder — f.eks. vin/bar.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638179379403065353/Risikoanalyse%20uden%20tilberedning.pdf" target="_blank">📥 Download PDF</a></div>
+    <div class="dl-card"><div class="dl-card-icon">🚢</div><h4>Guide til importørers egenkontrol</h4><p>Særlig vejledning til virksomheder der indfører fødevarer fra tredjelande.</p><a class="dl-btn" href="https://foedevarestyrelsen.dk/Media/638639831930528081/2024%20-%2010%20-%20Guide%20til%20import%C3%B8rer%20om%20egenkontrol.pdf" target="_blank">📥 Download PDF</a></div>
+  </div>
+</div>
+
+<div class="vej-section">
+  <div class="contact-box">
+    <div class="contact-box-icon">🏛️</div>
+    <div>
+      <h3>Styrelsen for Fødevarer, Landbrug og Fiskeri</h3>
+      <p>Fødevarestyrelsen og Landbrugs- og Fiskeristyrelsen er lagt sammen til én styrelse fra 1. januar 2026. Kontakt dem for vejledning om egenkontrol, kontrolbesøg eller spørgsmål om lovgivning.</p>
+      <div class="contact-links">
+        <a class="contact-link" href="https://foedevarestyrelsen.dk/kost-og-foedevarer/start-og-drift-af-foedevarevirksomhed/egenkontrol-og-risikoanalyse" target="_blank">🔗 Officiel side om egenkontrol</a>
+        <a class="contact-link" href="https://sikrefoedevarer.foedevarestyrelsen.dk/" target="_blank">🔗 Portal: Sikre Fødevarer — digitale værktøjer</a>
+        <a class="contact-link" href="https://foedevarestyrelsen.dk/kost-og-foedevarer/start-og-drift-af-foedevarevirksomhed/egenkontrol-og-risikoanalyse/haccp-principperne" target="_blank">🔗 Læs om HACCP-principperne</a>
+        <a class="contact-link" href="https://foedevarestyrelsen.dk/kost-og-foedevarer/start-og-drift-af-foedevarevirksomhed/egenkontrol-og-risikoanalyse/gode-arbejdsgange" target="_blank">🔗 Gode Arbejdsgange (GAG)</a>
+        <span class="contact-link">📞 Tlf: 72 27 69 00 — Hverdage 9-12 og 13-15 (fredag 9-12)</span>
+        <span class="contact-link">📍 Stationsparken 31-33, 2600 Glostrup</span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+  // Wire accordion toggles
+  el.querySelectorAll('.acc-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var acc = btn.closest('.acc');
+      var isOpen = acc.classList.contains('open');
+      el.querySelectorAll('.acc.open').forEach(function(a){ a.classList.remove('open'); });
+      if(!isOpen) acc.classList.add('open');
+    });
+  });
+}
+
+function toggleAcc(id) {
+  var acc=document.getElementById(id);
+  if(!acc) return;
+  acc.classList.toggle('open');
+}
 function renderHistorik(el) {
   var dates=Object.keys(_records).sort((a,b)=>b.localeCompare(a)).slice(0,30);
   if(!dates.length){el.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted);">Ingen registreringer endnu</div>';return;}

@@ -315,23 +315,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </div>
 
-  <!-- Virksomhed info bar — always visible -->
-  <div id="virksomhedBar" style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;">
+  <!-- Virksomhed info bar — always visible, directly below title -->
+  <div id="virksomhedBar" style="background:var(--green-lt);border:2px solid var(--green);border-radius:12px;padding:14px 18px;margin-bottom:18px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div style="width:36px;height:36px;background:var(--green-lt);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏢</div>
+        <div style="width:36px;height:36px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">🏢</div>
         <div>
-          <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;" id="vbar_navn">—</div>
-          <div style="font-size:.68rem;color:var(--muted);" id="vbar_adresse">Udfyld virksomhedsoplysninger</div>
+          <div style="font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;color:var(--green);" id="vbar_navn">—</div>
+          <div style="font-size:.68rem;color:var(--green);" id="vbar_adresse">Klik "Udfyld virksomhed" for at tilføje navn, adresse og leder</div>
         </div>
-        <div style="height:24px;width:1px;background:var(--border);flex-shrink:0;"></div>
-        <div style="font-size:.72rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;">
+        <div style="height:24px;width:1px;background:#a8d5bc;flex-shrink:0;"></div>
+        <div style="font-size:.72rem;color:var(--green);display:flex;gap:12px;flex-wrap:wrap;">
           <span id="vbar_leder"></span>
           <span id="vbar_cvr" style="font-family:'DM Mono',monospace;"></span>
           <span id="vbar_reg"></span>
         </div>
       </div>
-      <button class="btn btn-ghost btn-xs no-print" id="vbarEditBtn">✏ Udfyld</button>
+      <button class="btn btn-green btn-xs no-print" id="vbarEditBtn">✏ Udfyld virksomhed</button>
     </div>
   </div>
 

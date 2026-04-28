@@ -567,14 +567,12 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
           <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;">
             <div style="font-size:.7rem;font-weight:700;color:var(--navy);margin-bottom:10px;">Månedsoversigt 2026</div>
             <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
-              ${['Jan','Feb','Mar','Apr','Maj','Jun'].map((m,i)=>{
-                const h=[55,62,70,85,0,0][i];
-                const col=i<4?'var(--navy)':'var(--border)';
-                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
-                  <div style="width:100%;background:${col};border-radius:4px 4px 0 0;height:${h}%;"></div>
-                  <div style="font-size:.58rem;color:var(--muted);">${m}</div>
-                </div>`;
-              }).join('')}
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--navy);border-radius:4px 4px 0 0;height:55%;"></div><div style="font-size:.58rem;color:var(--muted);">Jan</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--navy);border-radius:4px 4px 0 0;height:62%;"></div><div style="font-size:.58rem;color:var(--muted);">Feb</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--navy);border-radius:4px 4px 0 0;height:70%;"></div><div style="font-size:.58rem;color:var(--muted);">Mar</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--navy);border-radius:4px 4px 0 0;height:85%;"></div><div style="font-size:.58rem;color:var(--muted);">Apr</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--border);border-radius:4px 4px 0 0;height:10%;"></div><div style="font-size:.58rem;color:var(--muted);">Maj</div></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="width:100%;background:var(--border);border-radius:4px 4px 0 0;height:10%;"></div><div style="font-size:.58rem;color:var(--muted);">Jun</div></div>
             </div>
           </div>
         </div>

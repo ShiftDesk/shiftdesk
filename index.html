@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShiftDesk — Vagtplanlægning & Løn til Restauranter</title>
+<meta name="description" content="ShiftDesk er den komplette platform til restauranter og fødevarevirksomheder. Vagtplanlægning, løn, egenkontrol og budget — alt på ét sted.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ─────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#1a2e5a;
+  --navy-dark:#0f1d3b;
+  --navy-light:#2a4080;
+  --blue:#2563eb;
+  --blue-lt:#eff6ff;
+  --accent:#e8a020;
+  --accent-lt:#fef9ec;
+  --green:#0f7049;
+  --bg:#f8f9fc;
+  --white:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --s2:#f1f5f9;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);
+  --shadow:0 4px 20px rgba(0,0,0,.1);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.15);
+  --r:14px;
+}
+
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--white);color:var(--text);line-height:1.6;overflow-x:hidden;}
+
+/* ── Typography ────────────────────────────────────────────────────────────── */
+.display{font-family:'Playfair Display',serif;}
+h1,h2,h3{font-family:'Playfair Display',serif;line-height:1.15;}
+
+/* ── Utilities ─────────────────────────────────────────────────────────────── */
+.container{max-width:1160px;margin:0 auto;padding:0 24px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:50px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;border:none;transition:all .2s;text-decoration:none;white-space:nowrap;}
+.btn:hover{transform:translateY(-2px);}
+.btn-primary{background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(26,46,90,.3);}
+.btn-primary:hover{background:var(--navy-dark);box-shadow:0 6px 20px rgba(26,46,90,.4);}
+.btn-accent{background:var(--accent);color:var(--navy-dark);box-shadow:0 4px 14px rgba(232,160,32,.35);}
+.btn-accent:hover{background:#d4911a;box-shadow:0 6px 20px rgba(232,160,32,.45);}
+.btn-outline{background:transparent;color:var(--navy);border:2px solid var(--navy);}
+.btn-outline:hover{background:var(--navy);color:#fff;}
+.btn-white{background:#fff;color:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.12);}
+.btn-white:hover{background:var(--s2);}
+.btn-lg{padding:16px 36px;font-size:1rem;}
+.tag{display:inline-block;padding:5px 14px;border-radius:50px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+
+/* ── NAV ───────────────────────────────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:999;transition:all .3s;}
+nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:var(--shadow-sm);}
+.nav-inner{max-width:1160px;margin:0 auto;padding:0 24px;height:72px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+/* SVG logo colors */
+.logo-svg-dark .logo-fill{fill:#ffffff;}
+.logo-svg-dark .logo-dots{stroke:#ffffff;}
+nav.scrolled .logo-svg-dark .logo-fill{fill:var(--navy);}
+nav.scrolled .logo-svg-dark .logo-dots{stroke:var(--navy);}
+.logo-svg-light .logo-fill{fill:#ffffff;}
+.logo-svg-light .logo-dots{stroke:#ffffff;}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#fff;transition:color .3s;}
+nav.scrolled .nav-logo-text{color:var(--navy);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:.85rem;font-weight:600;color:var(--navy);text-decoration:none;transition:opacity .15s;}
+.nav-links a:hover{opacity:.65;}
+.nav-cta{display:flex;align-items:center;gap:12px;}
+.nav-login{font-size:.85rem;font-weight:600;color:var(--navy);text-decoration:none;}
+.nav-login:hover{opacity:.65;}
+@media(max-width:768px){.nav-links{display:none;}}
+
+/* ── HERO ──────────────────────────────────────────────────────────────────── */
+.hero{min-height:100vh;background:linear-gradient(145deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-light) 100%);display:flex;align-items:center;position:relative;overflow:hidden;padding:100px 0 60px;}
+.hero-bg-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.06) 1px,transparent 1px);background-size:40px 40px;}
+.hero-bg-glow{position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(232,160,32,.15) 0%,transparent 70%);pointer-events:none;}
+.hero-bg-glow2{position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(37,99,235,.12) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.hero-tag{background:rgba(232,160,32,.2);color:var(--accent);border:1px solid rgba(232,160,32,.3);margin-bottom:24px;}
+.hero-title{font-size:clamp(2.4rem,5vw,3.8rem);color:#fff;margin-bottom:20px;line-height:1.1;}
+.hero-title span{color:var(--accent);}
+.hero-sub{font-size:1.05rem;color:rgba(255,255,255,.75);margin-bottom:36px;max-width:480px;line-height:1.75;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;}
+.hero-trust{display:flex;align-items:center;gap:16px;}
+.hero-trust-text{font-size:.78rem;color:rgba(255,255,255,.55);}
+.hero-trust-logos{display:flex;gap:8px;}
+.hero-trust-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);}
+.hero-visual{position:relative;}
+.hero-card{background:rgba(255,255,255,.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;box-shadow:0 24px 80px rgba(0,0,0,.3);}
+.hero-card-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.hero-card-dot{width:10px;height:10px;border-radius:50%;}
+.hero-card-title{font-size:.82rem;font-weight:700;color:rgba(255,255,255,.85);}
+.shift-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:6px;transition:background .2s;}
+.shift-row:hover{background:rgba(255,255,255,.06);}
+.shift-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.72rem;color:#fff;flex-shrink:0;}
+.shift-name{font-size:.78rem;font-weight:600;color:#fff;flex:1;}
+.shift-time{font-size:.72rem;color:rgba(255,255,255,.55);font-family:monospace;}
+.shift-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:20px;}
+.sb-green{background:rgba(34,197,94,.2);color:#4ade80;}
+.sb-blue{background:rgba(59,130,246,.2);color:#60a5fa;}
+.sb-orange{background:rgba(251,146,60,.2);color:#fb923c;}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;}
+.hero-stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;text-align:center;}
+.hero-stat-val{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--accent);}
+.hero-stat-lbl{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:2px;}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;}.hero-visual{display:none;}}
+
+/* ── LOGOS ─────────────────────────────────────────────────────────────────── */
+.logos-bar{padding:28px 0;background:var(--s2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.logos-inner{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;}
+.logos-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-right:8px;}
+.logo-chip{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 20px;font-size:.8rem;font-weight:700;color:var(--muted);}
+
+/* ── FEATURES ──────────────────────────────────────────────────────────────── */
+.section{padding:100px 0;}
+.section-tag{margin-bottom:14px;}
+.section-title{font-size:clamp(2rem,4vw,3rem);margin-bottom:16px;color:var(--navy-dark);}
+.section-sub{font-size:1rem;color:var(--muted);max-width:580px;line-height:1.75;}
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px;}
+@media(max-width:700px){.features-grid{grid-template-columns:1fr;}}
+.feat-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:20px 22px;transition:all .2s;position:relative;overflow:hidden;}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue));opacity:0;transition:opacity .2s;}
+.feat-card:hover{border-color:var(--navy);box-shadow:var(--shadow);transform:translateY(-4px);}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:14px;}
+.feat-title{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--navy-dark);margin-bottom:6px;}
+.feat-desc{font-size:.8rem;color:var(--muted);line-height:1.65;}
+.feat-list{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:5px;}
+.feat-list li{display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text);}
+.feat-list li::before{content:'✓';width:15px;height:15px;background:var(--navy);color:#fff;border-radius:50%;font-size:.52rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ── HOW IT WORKS ──────────────────────────────────────────────────────────── */
+.how{background:var(--navy-dark);padding:100px 0;}
+.how-title{color:#fff;}
+.how-sub{color:rgba(255,255,255,.6);}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px;margin-top:56px;}
+.step{text-align:center;padding:32px 24px;}
+.step-num{width:56px;height:56px;background:rgba(232,160,32,.15);border:2px solid rgba(232,160,32,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--accent);margin:0 auto 20px;}
+.step-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;margin-bottom:10px;}
+.step-desc{font-size:.8rem;color:rgba(255,255,255,.55);line-height:1.75;}
+
+/* ── SCREENSHOTS ───────────────────────────────────────────────────────────── */
+.screenshots{padding:100px 0;background:var(--bg);}
+.screens-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:40px 0 32px;}
+.screen-tab{padding:9px 20px;border-radius:50px;font-size:.8rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:all .2s;}
+.screen-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.screen-display{background:var(--navy-dark);border-radius:20px;padding:20px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden;}
+.screen-bar{display:flex;align-items:center;gap:6px;margin-bottom:16px;}
+.screen-dot{width:10px;height:10px;border-radius:50%;}
+.screen-url{flex:1;background:rgba(255,255,255,.08);border-radius:6px;padding:5px 12px;font-size:.72rem;font-family:monospace;color:rgba(255,255,255,.4);}
+.screen-content{background:#f8f9fc;border-radius:12px;padding:24px;min-height:320px;}
+/* Mock UI inside screenshot */
+.mock-topbar{background:var(--navy);border-radius:8px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.mock-logo{font-family:'Playfair Display',serif;font-size:.9rem;color:#fff;font-weight:700;}
+.mock-badge{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);padding:2px 10px;border-radius:20px;font-size:.6rem;font-weight:700;}
+.mock-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.mock-cell{background:#fff;border:1px solid var(--border);border-radius:6px;padding:6px;min-height:60px;font-size:.6rem;}
+.mock-cell-head{background:var(--navy);color:#fff;border:none;text-align:center;font-weight:700;min-height:28px;display:flex;align-items:center;justify-content:center;}
+.mock-shift{background:#dbeafe;border-left:3px solid #2563eb;border-radius:4px;padding:3px 5px;font-size:.58rem;color:#1e40af;font-weight:600;margin-bottom:3px;}
+.mock-shift.g{background:#dcfce7;border-color:#16a34a;color:#15803d;}
+.mock-shift.o{background:#fef3c7;border-color:#d97706;color:#92400e;}
+/* Payroll mock */
+.mock-emp{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--border);}
+.mock-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0;}
+.mock-info{flex:1;}
+.mock-name{font-size:.78rem;font-weight:700;color:var(--navy);}
+.mock-role{font-size:.65rem;color:var(--muted);}
+.mock-pay{font-size:.82rem;font-weight:700;color:var(--green);}
+/* Egenkontrol mock */
+.mock-ek{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.mock-ek-left{display:flex;align-items:center;gap:10px;}
+.mock-ek-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.mock-ek-title{font-size:.78rem;font-weight:700;color:var(--navy);}
+.mock-ek-sub{font-size:.65rem;color:var(--muted);}
+.mock-ok{font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:20px;background:#dcfce7;color:#16a34a;}
+.mock-due{background:#fef9ec;color:#d97706;}
+
+/* ── PRICING ───────────────────────────────────────────────────────────────── */
+.pricing{padding:100px 0;}
+.price-toggle{display:flex;align-items:center;gap:12px;margin-top:32px;margin-bottom:48px;}
+.toggle-lbl{font-size:.82rem;font-weight:600;color:var(--muted);}
+.toggle-lbl.active{color:var(--navy);}
+.toggle-track{width:52px;height:28px;background:var(--navy);border-radius:50px;position:relative;cursor:pointer;}
+.toggle-thumb{width:22px;height:22px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .25s;box-shadow:0 2px 4px rgba(0,0,0,.2);}
+.toggle-track.yearly .toggle-thumb{transform:translateX(24px);}
+.save-badge{background:var(--accent-lt);color:var(--accent);border:1px solid rgba(232,160,32,.3);font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:20px;}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;}
+.price-card{background:#fff;border:2px solid var(--border);border-radius:20px;padding:36px;position:relative;transition:all .2s;}
+.price-card:hover{border-color:var(--navy);box-shadow:var(--shadow);}
+.price-card.popular{border-color:var(--navy);box-shadow:0 0 0 4px rgba(26,46,90,.08);}
+.popular-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-size:.68rem;font-weight:700;padding:4px 16px;border-radius:20px;white-space:nowrap;}
+.price-name{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;}
+.price-amount{font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;color:var(--navy-dark);line-height:1;}
+.price-amount span{font-size:1rem;font-weight:400;color:var(--muted);}
+.price-period{font-size:.75rem;color:var(--muted);margin-bottom:24px;}
+.price-divider{height:1px;background:var(--border);margin:24px 0;}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.price-features li{display:flex;align-items:center;gap:9px;font-size:.82rem;color:var(--text);}
+.price-features li .check{width:18px;height:18px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;flex-shrink:0;}
+.price-features li .cross{width:18px;height:18px;background:var(--border);border-radius:50%;flex-shrink:0;}
+.trial-note{text-align:center;margin-top:20px;font-size:.76rem;color:var(--muted);}
+
+/* ── TESTIMONIALS ──────────────────────────────────────────────────────────── */
+.testimonials{padding:100px 0;background:var(--s2);}
+.test-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin-top:56px;}
+.test-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:28px;}
+.test-stars{color:var(--accent);font-size:1rem;margin-bottom:14px;letter-spacing:3px;}
+.test-quote{font-size:.85rem;color:var(--text);line-height:1.75;margin-bottom:20px;font-style:italic;}
+.test-author{display:flex;align-items:center;gap:12px;}
+.test-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;}
+.test-name{font-weight:700;font-size:.82rem;}
+.test-biz{font-size:.72rem;color:var(--muted);}
+
+/* ── CTA ───────────────────────────────────────────────────────────────────── */
+.cta-section{padding:100px 0;background:linear-gradient(135deg,var(--navy-dark),var(--navy));}
+.cta-inner{text-align:center;position:relative;z-index:2;}
+.cta-title{font-size:clamp(2rem,4vw,3.2rem);color:#fff;margin-bottom:16px;}
+.cta-sub{font-size:1rem;color:rgba(255,255,255,.65);margin-bottom:40px;max-width:520px;margin-left:auto;margin-right:auto;}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cta-note{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:20px;}
+
+/* ── FOOTER ────────────────────────────────────────────────────────────────── */
+footer{background:var(--navy-dark);padding:60px 0 32px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.footer-brand p{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.75;margin-top:12px;max-width:240px;}
+.footer-col h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:16px;}
+.footer-col a{display:block;font-size:.82rem;color:rgba(255,255,255,.6);text-decoration:none;margin-bottom:8px;}
+.footer-col a:hover{color:#fff;}
+.footer-divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:28px;}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-bottom p{font-size:.75rem;color:rgba(255,255,255,.35);}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+
+/* ── Language switcher ─────────────────────────────────────────────────────── */
+.lang-switch{display:flex;background:rgba(255,255,255,.12);border-radius:50px;padding:3px;gap:2px;border:1px solid rgba(255,255,255,.2);}
+nav.scrolled .lang-switch{background:var(--s2);border-color:var(--border);}
+.lang-btn{background:transparent;border:none;padding:5px 12px;border-radius:50px;font-size:.72rem;font-weight:700;cursor:pointer;color:rgba(255,255,255,.65);transition:all .2s;font-family:'Plus Jakarta Sans',sans-serif;}
+.lang-btn.active{background:#fff;color:var(--navy);}
+nav.scrolled .lang-btn{color:var(--muted);}
+nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+.fade-up{animation:fadeUp .7s ease both;}
+.delay-1{animation-delay:.1s;}
+.delay-2{animation-delay:.2s;}
+.delay-3{animation-delay:.3s;}
+.delay-4{animation-delay:.4s;}
+.hero-visual{animation:float 6s ease-in-out infinite;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg id="navLogoSvg" height="42" viewBox="0 0 580 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="transition:all .3s;">
+        <!-- Dotted clock arc (left half circle) -->
+        <g id="nlDots">
+          <circle cx="79" cy="16" r="4" fill="white"/>
+          <circle cx="57" cy="22" r="4" fill="white"/>
+          <circle cx="40" cy="36" r="4" fill="white"/>
+          <circle cx="28" cy="55" r="4" fill="white"/>
+          <circle cx="24" cy="77" r="4" fill="white"/>
+          <circle cx="28" cy="99" r="4" fill="white"/>
+          <circle cx="40" cy="118" r="4" fill="white"/>
+          <circle cx="57" cy="132" r="4" fill="white"/>
+          <circle cx="79" cy="140" r="4" fill="white"/>
+          <circle cx="103" cy="144" r="4" fill="white"/>
+        </g>
+        <!-- Clock hand 1 (pointing upper-left) -->
+        <line id="nlH1" x1="90" y1="77" x2="52" y2="50" stroke="white" stroke-width="10" stroke-linecap="round"/>
+        <!-- Clock hand 2 (pointing lower-right, shorter) -->
+        <line id="nlH2" x1="90" y1="77" x2="126" y2="100" stroke="white" stroke-width="10" stroke-linecap="round"/>
+        <!-- Center pin -->
+        <circle id="nlPin" cx="90" cy="77" r="7" fill="white"/>
+        <!-- ShiftDesk text -->
+        <text id="nlText" x="148" y="112" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="80" font-weight="700" fill="white" letter-spacing="-1">ShiftDesk</text>
+      </svg>
+      <span class="nav-logo-text" style="display:none;">ShiftDesk</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features" data-da="Funktioner" data-en="Features">Funktioner</a>
+      <a href="#pricing" data-da="Priser" data-en="Pricing">Priser</a>
+      <a href="#how" data-da="Sådan virker det" data-en="How it works">Sådan virker det</a>
+      <a href="mailto:runzone5@gmail.com" data-da="Kontakt" data-en="Contact">Kontakt</a>
+    </div>
+    <div class="nav-cta">
+      <!-- Language switcher -->
+      <div class="lang-switch" id="langSwitch">
+        <button class="lang-btn active" id="btnDA" onclick="setLang('da')">🇩🇰 DA</button>
+        <button class="lang-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+      </div>
+      <a href="shiftdesk.html" class="nav-login" data-da="Log ind" data-en="Log in">Log ind</a>
+      <a href="shiftdesk.html" class="btn btn-primary" style="padding:9px 22px;font-size:.82rem;" data-da="Start gratis" data-en="Start free">Start gratis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-dots"></div>
+  <div class="hero-bg-glow"></div>
+  <div class="hero-bg-glow2"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <span class="tag hero-tag fade-up" id="heroTag">🍽️ Til restauranter og fødevarevirksomheder</span>
+        <h1 class="hero-title fade-up delay-1" id="heroTitle">Alt du behøver til <span>restaurant&shy;drift</span> — på ét sted</h1>
+        <p class="hero-sub fade-up delay-2" id="heroSub">Vagtplanlægning, lønberegning, egenkontrol og budget. ShiftDesk giver dig overblik og sparer dig timer hver uge.</p>
+        <div class="hero-actions fade-up delay-3">
+          <a href="shiftdesk.html" class="btn btn-accent btn-lg" id="heroBtn1">Prøv gratis i 14 dage →</a>
+          <a href="shiftdesk.html" class="btn btn-white btn-lg" id="heroBtn2">Log ind</a>
+        </div>
+        <div class="hero-trust fade-up delay-4">
+          <div class="hero-trust-text" id="heroTrust">Ingen kreditkort krævet &nbsp;·&nbsp; Opsig når som helst</div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-header">
+            <div class="hero-card-dot" style="background:#ef4444;"></div>
+            <div class="hero-card-dot" style="background:#f59e0b;"></div>
+            <div class="hero-card-dot" style="background:#22c55e;"></div>
+            <div class="hero-card-title">Vagtplan — Uge 18</div>
+          </div>
+          <div class="shift-row">
+            <div class="shift-av" style="background:#1a2e5a;">MJ</div>
+            <div class="shift-name">Mia Jensen</div>
+            <div class="shift-time">08:00 – 16:00</div>
+            <span class="shift-badge sb-green">Godkendt</span>
+          </div>
+          <div class="shift-row">
+            <div class="shift-av" style="background:#2563eb;">LA</div>
+            <div class="shift-name">Lars Andersen</div>
+            <div class="shift-time">12:00 – 20:00</div>
+            <span class="shift-badge sb-blue">Bekræftet</span>
+          </div>
+          <div class="shift-row">
+            <div class="shift-av" style="background:#e8a020;">SN</div>
+            <div class="shift-name">Sofia Nielsen</div>
+            <div class="shift-time">16:00 – 24:00</div>
+            <span class="shift-badge sb-orange">Afventer</span>
+          </div>
+          <div class="shift-row">
+            <div class="shift-av" style="background:#0f7049;">EK</div>
+            <div class="shift-name">Emil Kristensen</div>
+            <div class="shift-time">08:00 – 14:00</div>
+            <span class="shift-badge sb-green">Godkendt</span>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="hero-stat-val">4</div><div class="hero-stat-lbl">Medarbejdere</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">38t</div><div class="hero-stat-lbl">Timer i alt</div></div>
+            <div class="hero-stat"><div class="hero-stat-val">0</div><div class="hero-stat-lbl">Konflikter</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LOGOS BAR -->
+<div class="logos-bar">
+  <div class="logos-inner">
+    <span class="logos-lbl" id="logosLbl">Bruges af restauranter som:</span>
+    <span class="logo-chip">🍕 Pizzerier</span>
+    <span class="logo-chip">🍔 Burgerbarer</span>
+    <span class="logo-chip">🥗 Caféer</span>
+    <span class="logo-chip">🍣 Sushi & takeaway</span>
+    <span class="logo-chip">🏨 Hotel & kantine</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div style="max-width:600px;">
+      <span class="tag section-tag" style="background:var(--blue-lt);color:var(--blue);" id="featTag">Alt i ét system</span>
+      <h2 class="section-title" id="featTitle">Fire moduler — én platform</h2>
+      <p class="section-sub" id="featSub">Du behøver ikke fire forskellige systemer. ShiftDesk samler alt hvad du har brug for som restaurantleder i ét simpelt system.</p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#eff6ff;">📅</div>
+        <div class="feat-title">Vagtplanlægning</div>
+        <div class="feat-desc">Lav vagtplaner på minutter. Dine medarbejdere kan se vagter, melde sig tilgængelige og klokke ind direkte fra telefonen.</div>
+        <ul class="feat-list">
+          <li>Ugentlig og månedlig oversigt</li>
+          <li>Medarbejdertilgængelighed</li>
+          <li>Automatisk konflikttjek</li>
+          <li>Clock in/out med GPS</li>
+          <li>Notifikationer til medarbejdere</li>
+        </ul>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#f0fdf4;">💰</div>
+        <div class="feat-title">Lønsystem</div>
+        <div class="feat-desc">Automatisk dansk lønberegning med AM-bidrag, ATP, personfradrag og A-skat. Generer lønsedler med ét klik.</div>
+        <ul class="feat-list">
+          <li>Dansk lønberegning 2026</li>
+          <li>Lønsedler med CVR & CPR</li>
+          <li>Drikkepenge & feriepenge</li>
+          <li>Pausehåndtering</li>
+          <li>Download & send på email</li>
+        </ul>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#fefce8;">📋</div>
+        <div class="feat-title">Egenkontrol</div>
+        <div class="feat-desc">Digital egenkontrol i henhold til Fødevarestyrelsens krav. Temperatur, rengøring, HACCP og alle officielle skemaer.</div>
+        <ul class="feat-list">
+          <li>Daglig temperaturkontrol</li>
+          <li>Officielle Skema 1-7</li>
+          <li>Afvigelsesregistrering</li>
+          <li>Automatisk dokumentation</li>
+          <li>Klar til kontrolbesøg</li>
+        </ul>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon" style="background:#fdf4ff;">📊</div>
+        <div class="feat-title">Budget & Økonomi</div>
+        <div class="feat-desc">Hold styr på omsætning, lønomkostninger og budgetmål. Se din økonomi i realtid og planlæg fremad.</div>
+        <ul class="feat-list">
+          <li>Omsætning og budget</li>
+          <li>Lønprocent tracking</li>
+          <li>Månedlige rapporter</li>
+          <li>Prognose og mål</li>
+          <li>Eksport til regnskab</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div style="max-width:600px;">
+      <span class="tag" style="background:rgba(232,160,32,.15);color:var(--accent);" id="howTag">Kom i gang på 5 minutter</span>
+      <h2 class="section-title how-title" id="howTitle" style="margin-top:14px;">Sådan virker ShiftDesk</h2>
+      <p class="section-sub how-sub" id="howSub">Ingen installation, ingen IT-afdeling. Log ind fra din browser og gå i gang med det samme.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title" id="step1Title">Opret konto gratis</div>
+        <div class="step-desc" id="step1Desc">Tilmeld dig med din email. Ingen kreditkort kræves. 14 dages gratis prøveperiode fra dag 1.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title" id="step2Title">Tilføj dine medarbejdere</div>
+        <div class="step-desc" id="step2Desc">Indtast navn, stilling og løn. Medarbejderne får adgang og kan se egne vagter med det samme.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title" id="step3Title">Lav din første vagtplan</div>
+        <div class="step-desc" id="step3Desc">Træk og slip vagter på planen. ShiftDesk tjekker automatisk konflikter og tilgængelighed.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title" id="step4Title">Kør løn og egenkontrol</div>
+        <div class="step-desc" id="step4Desc">Aktiver løn- og egenkontroltilføjelserne og hold styr på alt — fra timeregistrering til fødevaresikkerhed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="screenshots">
+  <div class="container">
+    <span class="tag" style="background:var(--blue-lt);color:var(--blue);" id="screenTag">Se systemet i aktion</span>
+    <h2 class="section-title" id="screenTitle" style="margin-top:14px;">Designet til restauranter</h2>
+    <div class="screens-tabs">
+      <button class="screen-tab active" onclick="showScreen('vagtplan')">📅 Vagtplan</button>
+      <button class="screen-tab" onclick="showScreen('loen')">💰 Løn</button>
+      <button class="screen-tab" onclick="showScreen('ek')">📋 Egenkontrol</button>
+      <button class="screen-tab" onclick="showScreen('budget')">📊 Budget</button>
+    </div>
+    <div class="screen-display">
+      <div class="screen-bar">
+        <div class="screen-dot" style="background:#ef4444;"></div>
+        <div class="screen-dot" style="background:#f59e0b;"></div>
+        <div class="screen-dot" style="background:#22c55e;"></div>
+        <div class="screen-url">shiftdesks.app/shiftdesk.html</div>
+      </div>
+      <div class="screen-content" id="screenContent">
+        <!-- Vagtplan mock -->
+        <div id="screen-vagtplan">
+          <div class="mock-topbar">
+            <span class="mock-logo">ShiftDesk</span>
+            <span class="mock-badge">Uge 18 — April 2026</span>
+          </div>
+          <div class="mock-grid">
+            <div class="mock-cell mock-cell-head">Man</div>
+            <div class="mock-cell mock-cell-head">Tir</div>
+            <div class="mock-cell mock-cell-head">Ons</div>
+            <div class="mock-cell mock-cell-head">Tor</div>
+            <div class="mock-cell mock-cell-head">Fre</div>
+            <div class="mock-cell mock-cell-head">Lør</div>
+            <div class="mock-cell mock-cell-head">Søn</div>
+            <div class="mock-cell"><div class="mock-shift">Mia 08-16</div><div class="mock-shift g">Lars 16-24</div></div>
+            <div class="mock-cell"><div class="mock-shift g">Sofia 12-20</div></div>
+            <div class="mock-cell"><div class="mock-shift">Mia 08-16</div><div class="mock-shift o">Emil 14-22</div></div>
+            <div class="mock-cell"><div class="mock-shift g">Lars 10-18</div></div>
+            <div class="mock-cell"><div class="mock-shift">Sofia 08-16</div><div class="mock-shift o">Mia 16-24</div></div>
+            <div class="mock-cell"><div class="mock-shift g">Lars 12-20</div><div class="mock-shift">Emil 08-14</div></div>
+            <div class="mock-cell"><div class="mock-shift">Sofia 10-18</div></div>
+          </div>
+        </div>
+        <!-- Løn mock (hidden) -->
+        <div id="screen-loen" style="display:none;">
+          <div class="mock-topbar">
+            <span class="mock-logo">ShiftDesk</span>
+            <span class="mock-badge">LØN — April 2026</span>
+          </div>
+          <div class="mock-emp"><div class="mock-av" style="background:#1a2e5a;">MJ</div><div class="mock-info"><div class="mock-name">Mia Jensen</div><div class="mock-role">Manager · 17.5t · 200 DKK/t</div></div><div class="mock-pay">3.185 kr</div></div>
+          <div class="mock-emp"><div class="mock-av" style="background:#0f7049;">LA</div><div class="mock-info"><div class="mock-name">Lars Andersen</div><div class="mock-role">Køkken · 18.5t · 180 DKK/t</div></div><div class="mock-pay">2.890 kr</div></div>
+          <div class="mock-emp"><div class="mock-av" style="background:#2563eb;">SN</div><div class="mock-info"><div class="mock-name">Sofia Nielsen</div><div class="mock-role">Tjener · 15t · 175 DKK/t</div></div><div class="mock-pay">2.720 kr</div></div>
+          <div class="mock-emp"><div class="mock-av" style="background:#e8a020;">EK</div><div class="mock-info"><div class="mock-name">Emil Kristensen</div><div class="mock-role">Bar · 12t · 165 DKK/t</div></div><div class="mock-pay">2.115 kr</div></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;"><span style="font-size:.75rem;font-weight:700;color:#0f7049;background:#dcfce7;padding:5px 14px;border-radius:20px;">Total: 10.910 kr nettoløn</span></div>
+        </div>
+        <!-- Egenkontrol mock (hidden) -->
+        <div id="screen-ek" style="display:none;">
+          <div class="mock-topbar">
+            <span class="mock-logo">ShiftDesk</span>
+            <span class="mock-badge">EGENKONTROL</span>
+          </div>
+          <div class="mock-ek"><div class="mock-ek-left"><div class="mock-ek-icon" style="background:#dbeafe;">🌡️</div><div><div class="mock-ek-title">Kølekontrol</div><div class="mock-ek-sub">Daglig · 14. apr 10:21</div></div></div><span class="mock-ok">✓ Godkendt</span></div>
+          <div class="mock-ek"><div class="mock-ek-left"><div class="mock-ek-icon" style="background:#dcfce7;">📦</div><div><div class="mock-ek-title">Modtagekontrol</div><div class="mock-ek-sub">Daglig ved levering · 14. apr 10:09</div></div></div><span class="mock-ok">✓ Godkendt</span></div>
+          <div class="mock-ek"><div class="mock-ek-left"><div class="mock-ek-icon" style="background:#fef3c7;">🔥</div><div><div class="mock-ek-title">Varmebehandling</div><div class="mock-ek-sub">Daglig ved tilberedning · Afventer</div></div></div><span class="mock-ok mock-due">⏳ Afventer</span></div>
+          <div class="mock-ek"><div class="mock-ek-left"><div class="mock-ek-icon" style="background:#fae8ff;">🧹</div><div><div class="mock-ek-title">Daglig rengøring</div><div class="mock-ek-sub">Daglig · 14. apr 10:20</div></div></div><span class="mock-ok">✓ Godkendt</span></div>
+        </div>
+        <!-- Budget mock (hidden) -->
+        <div id="screen-budget" style="display:none;">
+          <div class="mock-topbar">
+            <span class="mock-logo">ShiftDesk</span>
+            <span class="mock-badge">BUDGET — April 2026</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+            <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-size:.65rem;color:var(--muted);margin-bottom:4px;">OMSÆTNING</div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--navy);">148.500</div>
+              <div style="font-size:.6rem;color:#16a34a;">↑ 12% vs budget</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-size:.65rem;color:var(--muted);margin-bottom:4px;">LØNOMK.</div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--navy);">42.200</div>
+              <div style="font-size:.6rem;color:#d97706;">28,4% af omst.</div>
+            </div>
+            <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+              <div style="font-size:.65rem;color:var(--muted);margin-bottom:4px;">RESULTAT</div>
+              <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#16a34a;">+18.300</div>
+              <div style="font-size:.6rem;color:#16a34a;">↑ Over mål</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px;">
+            <div style="font-size:.7rem;font-weight:700;color:var(--navy);margin-bottom:10px;">Månedsoversigt 2026</div>
+            <div style="display:flex;align-items:flex-end;gap:6px;height:80px;">
+              ${['Jan','Feb','Mar','Apr','Maj','Jun'].map((m,i)=>{
+                const h=[55,62,70,85,0,0][i];
+                const col=i<4?'var(--navy)':'var(--border)';
+                return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+                  <div style="width:100%;background:${col};border-radius:4px 4px 0 0;height:${h}%;"></div>
+                  <div style="font-size:.58rem;color:var(--muted);">${m}</div>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+<section class="pricing" id="pricing">
+  <div class="container">
+    <span class="tag" style="background:var(--blue-lt);color:var(--blue);" id="priceTag">Gennemsigtige priser</span>
+    <h2 class="section-title" id="priceTitle" style="margin-top:14px;">Vælg den plan der passer dig</h2>
+    <div class="price-toggle">
+      <span class="toggle-lbl active" id="lbl-monthly">Månedlig</span>
+      <div class="toggle-track" id="priceToggle" onclick="togglePricing()">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span class="toggle-lbl" id="lbl-yearly">Årlig</span>
+      <span class="save-badge" id="saveBadge">Spar op til 17%</span>
+    </div>
+    <div class="price-grid">
+
+      <!-- Starter -->
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-amount" id="price1">99 <span>kr</span></div>
+        <div class="price-period" id="period1">pr. måned</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><div class="check">✓</div> Vagtplanlægning</li>
+          <li><div class="check">✓</div> Op til 15 medarbejdere</li>
+          <li><div class="check">✓</div> Clock in/out</li>
+          <li><div class="check">✓</div> Medarbejder tilgængelighed</li>
+          <li><div class="cross"></div> <span style="color:var(--muted);">Lønsystem</span></li>
+          <li><div class="cross"></div> <span style="color:var(--muted);">Egenkontrol</span></li>
+          <li><div class="cross"></div> <span style="color:var(--muted);">Budget modul</span></li>
+        </ul>
+        <a href="shiftdesk.html" class="btn btn-outline" style="width:100%;justify-content:center;">Start gratis prøve</a>
+      </div>
+
+      <!-- Full Package -->
+      <div class="price-card popular">
+        <div class="popular-badge">⭐ Mest populær</div>
+        <div class="price-name">Fuld pakke</div>
+        <div class="price-amount" id="price2">299 <span>kr</span></div>
+        <div class="price-period" id="period2">pr. måned</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li><div class="check">✓</div> Alt i Starter</li>
+          <li><div class="check">✓</div> Ubegrænsede medarbejdere</li>
+          <li><div class="check">✓</div> Lønsystem med lønsedler</li>
+          <li><div class="check">✓</div> Digital egenkontrol</li>
+          <li><div class="check">✓</div> Budget & økonomi modul</li>
+          <li><div class="check">✓</div> Dansk lønberegning 2026</li>
+          <li><div class="check">✓</div> Prioriteret support</li>
+        </ul>
+        <a href="shiftdesk.html" class="btn btn-primary" style="width:100%;justify-content:center;">Start gratis prøve</a>
+      </div>
+
+    </div>
+    <p class="trial-note" id="trialNote">✓ 14 dages gratis prøveperiode &nbsp;·&nbsp; ✓ Ingen kreditkort krævet &nbsp;·&nbsp; ✓ Opsig når som helst</p>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <span class="tag" style="background:var(--blue-lt);color:var(--blue);" id="testTag">Kundeanmeldelser</span>
+    <h2 class="section-title" id="testTitle" style="margin-top:14px;">Restauranter elsker ShiftDesk</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"Jeg brugte 3 timer om ugen på vagtplaner før ShiftDesk. Nu tager det 20 minutter. Og lønsedlerne kører automatisk — det er guld værd."</div>
+        <div class="test-author"><div class="test-av" style="background:#1a2e5a;">MH</div><div><div class="test-name">Mohammed Hassan</div><div class="test-biz">Restaurant Bazar, København</div></div></div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"Egenkontrollen er fantastisk. Alt er digitalt, Fødevarestyrelsen er tilfreds, og vi har aldrig en stress ved kontrolbesøg mere."</div>
+        <div class="test-author"><div class="test-av" style="background:#0f7049;">AL</div><div><div class="test-name">Anne Larsen</div><div class="test-biz">Café Solen, Aarhus</div></div></div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"Priserne er rimelige, systemet er enkelt, og supporten svarer hurtigt. Præcis hvad en lille restaurant har brug for."</div>
+        <div class="test-author"><div class="test-av" style="background:#2563eb;">KP</div><div><div class="test-name">Kasper Petersen</div><div class="test-biz">Pizza Roma, Odense</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-title display" id="ctaTitle">Klar til at spare tid og penge?</h2>
+      <p class="cta-sub" id="ctaSub">Kom i gang gratis i dag. Ingen binding, ingen kreditkort. Se selv hvorfor restauranter vælger ShiftDesk.</p>
+      <div class="cta-actions">
+        <a href="shiftdesk.html" class="btn btn-accent btn-lg" id="ctaBtn1">Start gratis i 14 dage →</a>
+        <a href="mailto:runzone5@gmail.com" class="btn btn-white btn-lg" id="ctaBtn2">📧 Skriv til os</a>
+      </div>
+      <div class="cta-note" id="ctaNote">Spørgsmål? Skriv til runzone5@gmail.com — vi svarer inden for 24 timer</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <svg height="38" viewBox="0 0 580 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="79" cy="16" r="4" fill="white"/><circle cx="57" cy="22" r="4" fill="white"/>
+          <circle cx="40" cy="36" r="4" fill="white"/><circle cx="28" cy="55" r="4" fill="white"/>
+          <circle cx="24" cy="77" r="4" fill="white"/><circle cx="28" cy="99" r="4" fill="white"/>
+          <circle cx="40" cy="118" r="4" fill="white"/><circle cx="57" cy="132" r="4" fill="white"/>
+          <circle cx="79" cy="140" r="4" fill="white"/><circle cx="103" cy="144" r="4" fill="white"/>
+          <line x1="90" y1="77" x2="52" y2="50" stroke="white" stroke-width="10" stroke-linecap="round"/>
+          <line x1="90" y1="77" x2="126" y2="100" stroke="white" stroke-width="10" stroke-linecap="round"/>
+          <circle cx="90" cy="77" r="7" fill="white"/>
+          <text x="148" y="112" font-family="'Playfair Display', Georgia, serif" font-size="80" font-weight="700" fill="white" letter-spacing="-1">ShiftDesk</text>
+        </svg>
+        <p>Den komplette platform til restauranter og fødevarevirksomheder. Vagtplan, løn, egenkontrol og budget — alt på ét sted.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Produkt</h4>
+        <a href="#features">Vagtplanlægning</a>
+        <a href="#features">Lønsystem</a>
+        <a href="#features">Egenkontrol</a>
+        <a href="#features">Budget</a>
+      </div>
+      <div class="footer-col">
+        <h4>Priser</h4>
+        <a href="#pricing">Starter — 99 kr/md</a>
+        <a href="#pricing">Fuld pakke — 299 kr/md</a>
+        <a href="#pricing">Årlig rabat</a>
+        <a href="#pricing">14 dages gratis prøve</a>
+      </div>
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <a href="mailto:runzone5@gmail.com">runzone5@gmail.com</a>
+        <a href="shiftdesk.html">Log ind</a>
+        <a href="shiftdesk.html">Opret konto</a>
+      </div>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-bottom">
+      <p>© 2026 ShiftDesk. Alle rettigheder forbeholdes.</p>
+      <p>Lavet til danske restauranter 🇩🇰</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY > 40;
+  document.getElementById('nav').classList.toggle('scrolled', scrolled);
+  const color = scrolled ? '#1a2e5a' : '#ffffff';
+  const svg = document.getElementById('navLogoSvg');
+  if(svg) {
+    svg.querySelectorAll('circle[fill="white"],circle[fill="#1a2e5a"]').forEach(e=>e.setAttribute('fill',color));
+    svg.querySelectorAll('line').forEach(e=>e.setAttribute('stroke',color));
+    svg.querySelectorAll('text').forEach(e=>e.setAttribute('fill',color));
+  }
+});
+
+// Screen tabs
+function showScreen(name) {
+  ['vagtplan','loen','ek','budget'].forEach(s => {
+    document.getElementById('screen-'+s).style.display = s===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.screen-tab').forEach((btn,i) => {
+    btn.classList.toggle('active', ['vagtplan','loen','ek','budget'][i] === name);
+  });
+  const urls = {vagtplan:'shiftdesks.app/shiftdesk.html',loen:'shiftdesks.app/payroll.html',ek:'shiftdesks.app/egenkontrol.html',budget:'shiftdesks.app/budget.html'};
+  document.querySelector('.screen-url').textContent = urls[name];
+}
+
+// Pricing toggle
+let isYearly = false;
+const prices = {monthly:['99','299'], yearly:['999','2.999']};
+const periods = {monthly:'pr. måned', yearly:'pr. år'};
+
+function togglePricing() {
+  isYearly = !isYearly;
+  document.getElementById('priceToggle').classList.toggle('yearly', isYearly);
+  document.getElementById('lbl-monthly').classList.toggle('active', !isYearly);
+  document.getElementById('lbl-yearly').classList.toggle('active', isYearly);
+  const mode = isYearly ? 'yearly' : 'monthly';
+  document.getElementById('price1').innerHTML = prices[mode][0]+' <span>kr</span>';
+  document.getElementById('price2').innerHTML = prices[mode][1]+' <span>kr</span>';
+  document.getElementById('period1').textContent = periods[mode];
+  document.getElementById('period2').textContent = periods[mode];
+}
+
+// ── Language switcher ─────────────────────────────────────────────────────────
+var LANG = 'da';
+
+var TRANSLATIONS = {
+  da: {
+    // NAV
+    'hero-tag':         '🍽️ Til restauranter og fødevarevirksomheder',
+    'hero-title':       'Alt du behøver til <span>restaurant&shy;drift</span> — på ét sted',
+    'hero-sub':         'Vagtplanlægning, lønberegning, egenkontrol og budget. ShiftDesk giver dig overblik og sparer dig timer hver uge.',
+    'hero-btn1':        'Prøv gratis i 14 dage →',
+    'hero-btn2':        'Log ind',
+    'hero-trust':       'Ingen kreditkort krævet · Opsig når som helst',
+    'logos-lbl':        'Bruges af restauranter som:',
+    'feat-tag':         'Alt i ét system',
+    'feat-title':       'Fire moduler — én platform',
+    'feat-sub':         'Du behøver ikke fire forskellige systemer. ShiftDesk samler alt hvad du har brug for som restaurantleder i ét simpelt system.',
+    'how-tag':          'Kom i gang på 5 minutter',
+    'how-title':        'Sådan virker ShiftDesk',
+    'how-sub':          'Ingen installation, ingen IT-afdeling. Log ind fra din browser og gå i gang med det samme.',
+    'step1-title':      'Opret konto gratis',
+    'step1-desc':       'Tilmeld dig med din email. Ingen kreditkort kræves. 14 dages gratis prøveperiode fra dag 1.',
+    'step2-title':      'Tilføj dine medarbejdere',
+    'step2-desc':       'Indtast navn, stilling og løn. Medarbejderne får adgang og kan se egne vagter med det samme.',
+    'step3-title':      'Lav din første vagtplan',
+    'step3-desc':       'Træk og slip vagter på planen. ShiftDesk tjekker automatisk konflikter og tilgængelighed.',
+    'step4-title':      'Kør løn og egenkontrol',
+    'step4-desc':       'Aktiver løn- og egenkontroltilføjelserne og hold styr på alt — fra timeregistrering til fødevaresikkerhed.',
+    'screen-tag':       'Se systemet i aktion',
+    'screen-title':     'Designet til restauranter',
+    'price-tag':        'Gennemsigtige priser',
+    'price-title':      'Vælg den plan der passer dig',
+    'price-monthly':    'Månedlig',
+    'price-yearly':     'Årlig',
+    'price-save':       'Spar op til 17%',
+    'plan1-name':       'Starter',
+    'plan1-period':     'pr. måned',
+    'plan2-name':       'Fuld pakke',
+    'plan2-name-badge': '⭐ Mest populær',
+    'plan2-period':     'pr. måned',
+    'trial-note':       '✓ 14 dages gratis prøveperiode · ✓ Ingen kreditkort krævet · ✓ Opsig når som helst',
+    'test-tag':         'Kundeanmeldelser',
+    'test-title':       'Restauranter elsker ShiftDesk',
+    'cta-title':        'Klar til at spare tid og penge?',
+    'cta-sub':          'Kom i gang gratis i dag. Ingen binding, ingen kreditkort. Se selv hvorfor restauranter vælger ShiftDesk.',
+    'cta-btn1':         'Start gratis i 14 dage →',
+    'cta-btn2':         '📧 Skriv til os',
+    'cta-note':         'Spørgsmål? Skriv til runzone5@gmail.com — vi svarer inden for 24 timer',
+  },
+  en: {
+    'hero-tag':         '🍽️ For restaurants and food businesses',
+    'hero-title':       'Everything you need for <span>restaurant&shy; management</span> — in one place',
+    'hero-sub':         'Scheduling, payroll, food safety control and budget. ShiftDesk gives you full overview and saves you hours every week.',
+    'hero-btn1':        'Try free for 14 days →',
+    'hero-btn2':        'Log in',
+    'hero-trust':       'No credit card required · Cancel anytime',
+    'logos-lbl':        'Used by restaurants like:',
+    'feat-tag':         'All in one system',
+    'feat-title':       'Four modules — one platform',
+    'feat-sub':         'You don\'t need four different systems. ShiftDesk brings everything a restaurant manager needs into one simple platform.',
+    'how-tag':          'Get started in 5 minutes',
+    'how-title':        'How ShiftDesk works',
+    'how-sub':          'No installation, no IT department. Log in from your browser and get started immediately.',
+    'step1-title':      'Create a free account',
+    'step1-desc':       'Sign up with your email. No credit card required. 14-day free trial from day one.',
+    'step2-title':      'Add your employees',
+    'step2-desc':       'Enter name, role and salary. Employees get access and can view their own shifts immediately.',
+    'step3-title':      'Create your first schedule',
+    'step3-desc':       'Drag and drop shifts onto the plan. ShiftDesk automatically checks for conflicts and availability.',
+    'step4-title':      'Run payroll and food safety',
+    'step4-desc':       'Activate the payroll and food safety add-ons and keep track of everything — from time tracking to food safety.',
+    'screen-tag':       'See the system in action',
+    'screen-title':     'Designed for restaurants',
+    'price-tag':        'Transparent pricing',
+    'price-title':      'Choose the plan that fits you',
+    'price-monthly':    'Monthly',
+    'price-yearly':     'Yearly',
+    'price-save':       'Save up to 17%',
+    'plan1-name':       'Starter',
+    'plan1-period':     'per month',
+    'plan2-name':       'Full package',
+    'plan2-name-badge': '⭐ Most popular',
+    'plan2-period':     'per month',
+    'trial-note':       '✓ 14-day free trial · ✓ No credit card required · ✓ Cancel anytime',
+    'test-tag':         'Customer reviews',
+    'test-title':       'Restaurants love ShiftDesk',
+    'cta-title':        'Ready to save time and money?',
+    'cta-sub':          'Get started free today. No commitment, no credit card. See for yourself why restaurants choose ShiftDesk.',
+    'cta-btn1':         'Start free for 14 days →',
+    'cta-btn2':         '📧 Contact us',
+    'cta-note':         'Questions? Email runzone5@gmail.com — we reply within 24 hours',
+  }
+};
+
+function setLang(lang) {
+  LANG = lang;
+  document.getElementById('btnDA').classList.toggle('active', lang==='da');
+  document.getElementById('btnEN').classList.toggle('active', lang==='en');
+  var t = TRANSLATIONS[lang];
+
+  // Update all elements with data-da / data-en attributes
+  document.querySelectorAll('[data-da]').forEach(el => {
+    el.textContent = lang==='da' ? el.getAttribute('data-da') : el.getAttribute('data-en');
+  });
+
+  // Update keyed elements
+  function set(id, html) {
+    var el = document.getElementById(id);
+    if(el) { if(html.includes('<')) el.innerHTML=html; else el.textContent=html; }
+  }
+
+  set('heroTag',    t['hero-tag']);
+  set('heroTitle',  t['hero-title']);
+  set('heroSub',    t['hero-sub']);
+  set('heroBtn1',   t['hero-btn1']);
+  set('heroBtn2',   t['hero-btn2']);
+  set('heroTrust',  t['hero-trust']);
+  set('logosLbl',   t['logos-lbl']);
+  set('featTag',    t['feat-tag']);
+  set('featTitle',  t['feat-title']);
+  set('featSub',    t['feat-sub']);
+  set('howTag',     t['how-tag']);
+  set('howTitle',   t['how-title']);
+  set('howSub',     t['how-sub']);
+  set('step1Title', t['step1-title']);
+  set('step1Desc',  t['step1-desc']);
+  set('step2Title', t['step2-title']);
+  set('step2Desc',  t['step2-desc']);
+  set('step3Title', t['step3-title']);
+  set('step3Desc',  t['step3-desc']);
+  set('step4Title', t['step4-title']);
+  set('step4Desc',  t['step4-desc']);
+  set('screenTag',  t['screen-tag']);
+  set('screenTitle',t['screen-title']);
+  set('priceTag',   t['price-tag']);
+  set('priceTitle', t['price-title']);
+  set('lblMonthly', t['price-monthly']);
+  set('lblYearly',  t['price-yearly']);
+  set('saveBadge',  t['price-save']);
+  set('trialNote',  t['trial-note']);
+  set('testTag',    t['test-tag']);
+  set('testTitle',  t['test-title']);
+  set('ctaTitle',   t['cta-title']);
+  set('ctaSub',     t['cta-sub']);
+  set('ctaBtn1',    t['cta-btn1']);
+  set('ctaBtn2',    t['cta-btn2']);
+  set('ctaNote',    t['cta-note']);
+
+  // Update pricing periods if visible
+  var mode = isYearly ? 'yearly' : 'monthly';
+  var per = lang==='da' ? (isYearly?'pr. år':'pr. måned') : (isYearly?'per year':'per month');
+  document.getElementById('period1').textContent = per;
+  document.getElementById('period2').textContent = per;
+}
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+});
+</script>
+</body>
+</html>

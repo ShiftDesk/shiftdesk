@@ -1108,6 +1108,8 @@ document.getElementById('psCancelEdit').addEventListener('click',()=>{
 });
 
 document.getElementById('psApplyEdit').addEventListener('click',async ()=>{
+  var btn=document.getElementById('psApplyEdit');
+  btn.disabled=true; btn.textContent='Gemmer...';
   function pf(id,def){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?def:v;}
   _psOverride={
     rate:          pf('edit_rate',         DEF.rate),
@@ -1120,16 +1122,23 @@ document.getElementById('psApplyEdit').addEventListener('click',async ()=>{
     atp:           pf('edit_atp',          DEF.atp),
     meal:          pf('edit_meal',         DEF.meal)
   };
-  // Save tax settings to Firebase so they persist
-  try {
-    var settingsKey='cust_'+_cust.id+'_payrollSettings';
-    var sv=await window.fb.get(settingsKey)||{};
-    sv[String(_psStaffId)]=_psOverride;
-    await window.fb.set(settingsKey,sv);
-  } catch(e){}
-  document.getElementById('psEditBar').style.display='none';
   renderPayslip();
-  toast('✓ Lønseddel gemt og opdateret');
+  // Save to Firebase
+  try {
+    if(!window.fb) throw new Error('Firebase ikke klar');
+    if(!_cust||!_cust.id) throw new Error('Ikke logget ind');
+    var settingsKey='cust_'+_cust.id+'_payrollSettings';
+    var sv=await window.fb.get(settingsKey);
+    var obj=(sv&&typeof sv==='object'&&!Array.isArray(sv))?sv:{};
+    obj[String(_psStaffId)]=_psOverride;
+    await window.fb.set(settingsKey,obj);
+    document.getElementById('psEditBar').style.display='none';
+    toast('✓ Gemt og opdateret');
+  } catch(e){
+    toast('Fejl ved gemning: '+e.message);
+    console.error('psApplyEdit error:',e);
+  }
+  btn.disabled=false; btn.textContent='✓ Opdater lønseddel';
 });
 
 document.getElementById('psSendToggle').addEventListener('click',()=>{

@@ -268,6 +268,8 @@ input:focus,select:focus{border-color:var(--accent);background:#fff}
       <button class="action-btn" onclick="doEmail()">✉ Send</button>
       <button class="action-btn" onclick="doPrint()">⎙ Print</button>
       <button class="action-btn" onclick="doDownload()">↓ Hent</button>
+      <button class="action-btn" onclick="exportCSV()">📊 CSV Eksport</button>
+      <button class="action-btn" onclick="visMonthlyRapport()">📋 Månedlig Rapport</button>
       <button class="action-btn primary" id="save-btn" onclick="manualSave()" style="min-width:90px">💾 Gem</button>
     </div>
   </div>
@@ -1474,6 +1476,147 @@ async function initBudget(){
 }
 
 document.addEventListener('DOMContentLoaded',function(){initBudget();});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE 4: CSV Eksport til regnskab
+// ═══════════════════════════════════════════════════════════════════════════
+function exportCSV(){
+  const mn=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+  const mo=mn[curMonth]+' '+curYear;
+  const omsk=getOmsaetning();
+  const momsPct=getMomsPct();
+  const omskEx=omsk/(1+momsPct/100);
+  const vare=getVare();
+  const lon=getLonTotal();
+  const drift=getDrift();
+  const res=omskEx-vare.r-lon-drift.r;
+
+  let rows=[
+    ['ShiftDesk Budget Export','',mo],
+    [''],
+    ['Post','Beloeb (DKK)','Note'],
+    ['Omsaetning inkl. moms',omsk.toFixed(2),''],
+    ['Moms '+momsPct+'%',(omsk-omskEx).toFixed(2),'Udgaaende moms'],
+    ['Omsaetning ekskl. moms',omskEx.toFixed(2),''],
+    ['Vareforbrug',(-vare.r).toFixed(2),''],
+    ['Bruttoresultat',(omskEx-vare.r).toFixed(2),''],
+    ['Lonomkostninger (inkl. ferie+ATP)',(-lon).toFixed(2),''],
+    ['Driftsomkostninger',(-drift.r).toFixed(2),''],
+    ['Nettoresultat EBIT',res.toFixed(2),''],
+    [''],
+    ['Medarbejdere - Lon'],
+    ['Navn','Timer','Timelon','Bruttolon','Feriepenge','ATP','Total']
+  ];
+  getLonData().forEach(function(r){
+    rows.push([r.navn,r.timer,r.timelon,r.brutto.toFixed(2),r.ferie.toFixed(2),r.atp,r.total.toFixed(2)]);
+  });
+  rows.push(['']);
+  rows.push(['Vareforbrug poster']);
+  rows.push(['Kategori','Budget','Realiseret']);
+  vareRows.forEach(function(r){rows.push([r.kat,r.budget,r.real]);});
+  rows.push(['']);
+  rows.push(['Driftsomkostninger']);
+  rows.push(['Post','Budget','Realiseret']);
+  driftRows.forEach(function(r){rows.push([r.post,r.budget,r.real]);});
+
+  const csv=rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v===undefined||v===null?'':v);
+      if(s.includes(','))s='"'+s+'"';
+      return s;
+    }).join(';');
+  }).join('\n');
+
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='ShiftDesk_Budget_'+(mn[curMonth]+'_'+curYear)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},3000);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE 5: Maanedlig Rapport
+// ═══════════════════════════════════════════════════════════════════════════
+function visMonthlyRapport(){
+  const mn=['Januar','Februar','Marts','April','Maj','Juni','Juli','August','September','Oktober','November','December'];
+  const mo=mn[curMonth]+' '+curYear;
+  const omsk=getOmsaetning();
+  const momsPct=getMomsPct();
+  const omskEx=omsk/(1+momsPct/100);
+  const vare=getVare();
+  const lon=getLonTotal();
+  const drift=getDrift();
+  const res=omskEx-vare.r-lon-drift.r;
+  const resPct=omskEx>0?res/omskEx*100:0;
+  const lonPct=omsk>0?lon/omsk*100:0;
+  const varePct=omskEx>0?vare.r/omskEx*100:0;
+  const fmt2=function(n){return Math.round(n).toLocaleString('da-DK')+' kr';};
+  const pct2=function(n){return n.toFixed(1)+'%';};
+  const col=function(n,good,warn){return n>=good?'#1E7A4A':n>=warn?'#B07800':'#C0392B';};
+
+  document.getElementById('rapportModal').innerHTML=`
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)document.getElementById('rapportModal').innerHTML=''">
+    <div style="background:#fff;border-radius:16px;padding:32px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <div>
+          <div style="font-family:var(--display);font-size:1.3rem;font-weight:700;">Maanedlig Rapport</div>
+          <div style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">${mo}</div>
+        </div>
+        <button onclick="document.getElementById('rapportModal').innerHTML=''" style="background:#f0ede7;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:700;">✕ Luk</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div style="background:var(--bg);border-radius:10px;padding:16px;border:1.5px solid var(--border);">
+          <div style="font-size:.65rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Omsaetning</div>
+          <div style="font-size:1.6rem;font-weight:700;font-family:var(--display);">${fmt2(omsk)}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">inkl. moms</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:16px;border:1.5px solid var(--border);">
+          <div style="font-size:.65rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Nettoresultat</div>
+          <div style="font-size:1.6rem;font-weight:700;font-family:var(--display);color:${res>=0?'#1E7A4A':'#C0392B'}">${fmt2(res)}</div>
+          <div style="font-size:.75rem;color:var(--text-muted);">${pct2(resPct)} overskudsgrad</div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px;border:1.5px solid var(--border);">
+        <div style="font-weight:700;margin-bottom:12px;">Oekonomisk oversigt</div>
+        ${[
+          ['Omsaetning ekskl. moms',fmt2(omskEx),''],
+          ['Vareforbrug',fmt2(vare.r),pct2(varePct)+' af omsk.'],
+          ['Bruttoresultat',fmt2(omskEx-vare.r),''],
+          ['Lonomkostninger',fmt2(lon),pct2(lonPct)+' af omsk.'],
+          ['Driftsomkostninger',fmt2(drift.r),''],
+          ['Nettoresultat',fmt2(res),pct2(resPct)+' margin'],
+        ].map(function(r){return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem;"><span>'+r[0]+'</span><span><strong>'+r[1]+'</strong>'+(r[2]?' <span style="color:var(--text-muted);font-size:.72rem;">('+r[2]+')</span>':'')+'</span></div>';}).join('')}
+      </div>
+
+      <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:16px;border:1.5px solid var(--border);">
+        <div style="font-weight:700;margin-bottom:12px;">Noegletal</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          ${[
+            ['Vareforbrug %',pct2(varePct),col(-varePct,-28,-35),'maal: 28-35%'],
+            ['Loen %',pct2(lonPct),col(-lonPct,-30,-37),'maal: 30-35%'],
+            ['Overskudsgrad',pct2(resPct),col(resPct,10,0),'maal: >10%'],
+          ].map(function(k){return '<div style="background:#fff;border-radius:8px;padding:12px;text-align:center;border:1px solid var(--border);"><div style="font-size:1.3rem;font-weight:700;color:'+k[2]+'">'+k[1]+'</div><div style="font-size:.65rem;font-weight:700;margin-top:2px;">'+k[0]+'</div><div style="font-size:.6rem;color:var(--text-muted);">'+k[3]+'</div></div>';}).join('')}
+        </div>
+      </div>
+
+      <div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:20px;border:1.5px solid var(--border);">
+        <div style="font-weight:700;margin-bottom:10px;">Medarbejdere (${lonRows.length} pers.)</div>
+        ${getLonData().map(function(r){return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;"><span>'+r.navn+' ('+r.timer+'t)</span><span><strong>'+Math.round(r.total).toLocaleString('da-DK')+' kr</strong></span></div>';}).join('')}
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:.85rem;font-weight:700;"><span>Total lonomkostning</span><span>${fmt2(lon)}</span></div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="window.print()" style="flex:1;padding:11px;background:var(--accent);border:none;border-radius:9px;font-weight:700;cursor:pointer;">🖨 Print Rapport</button>
+        <button onclick="exportCSV()" style="flex:1;padding:11px;background:#e6edf9;border:1.5px solid #1A5A8A;color:#1A5A8A;border-radius:9px;font-weight:700;cursor:pointer;">📊 Download CSV</button>
+      </div>
+    </div>
+  </div>`;
+}
 </script>
+<div id="rapportModal"></div>
 </body>
 </html>

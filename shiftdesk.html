@@ -692,6 +692,7 @@ window.handleLogin = async function handleLogin() {
         <div class="drop-item" id="payrollMenuItem" style="background:#f5f0ff;border-left:3px solid #6b21a8;display:none;"><span style="width:20px;text-align:center;">&#128176;</span> <span style="color:#6b21a8;font-weight:700;">Løn</span> <span style="font-size:.6rem;background:#6b21a8;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" id="egenMenuItem" style="background:#e4f2ec;border-left:3px solid #1b6e40;display:none;"><span style="width:20px;text-align:center;">📋</span> <span style="color:#1b6e40;font-weight:700;">Egenkontrol</span> <span style="font-size:.6rem;background:#1b6e40;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" onclick="sendWhatsApp()"><span style="width:20px;text-align:center;">&#128172;</span> Send WhatsApp</div>
+        <div class="drop-item" onclick="notifyAll()"><span style="width:20px;text-align:center;">&#128140;</span> Email alle vagter</div>
         <div class="drop-item" onclick="openPhoneView()"><span style="width:20px;text-align:center;">&#128241;</span> Phone View</div>
         <div class="drop-sep"></div>
         <div class="drop-item" onclick="openChangePw()"><span style="width:20px;text-align:center;">&#128273;</span> Change Manager Password</div>
@@ -851,10 +852,11 @@ window.handleLogin = async function handleLogin() {
   <div class="modal">
     <div class="modal-title" id="smTitle">Add Shift</div>
     <div class="fg"><label class="fl">Employee</label><select class="fc" id="sm_staff"></select></div>
-    <div class="frow"><div class="fg"><label class="fl">Start</label><input class="fc" type="time" id="sm_s" value="09:00"></div><div class="fg"><label class="fl">End</label><input class="fc" type="time" id="sm_e" value="17:00"></div></div>
+    <div class="frow"><div class="fg"><label class="fl">Start</label><input class="fc" type="time" id="sm_s" value="09:00" oninput="checkConflicts()"></div><div class="fg"><label class="fl">End</label><input class="fc" type="time" id="sm_e" value="17:00" oninput="checkConflicts()"></div></div>
     <div class="fg"><label style="font-size:.79rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;"><input type="checkbox" id="sm_hb" onchange="toggleBreak()" style="width:15px;height:15px;accent-color:var(--acc)"> Add break</label></div>
     <div id="breakBox" style="display:none;"><div class="frow"><div class="fg"><label class="fl">Break start</label><input class="fc" type="time" id="sm_bs" value="12:00"></div><div class="fg"><label class="fl">Break end</label><input class="fc" type="time" id="sm_be" value="12:30"></div></div></div>
     <div class="fg"><label class="fl">Note (optional)</label><input class="fc" type="text" id="sm_note" placeholder="Floor A, Section B..." maxlength="50"></div>
+    <div id="smConflictWarn" style="display:none;background:#fdf0f0;border:1.5px solid #f5c0c0;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:.74rem;color:#c0392b;"></div>
     <div class="modal-actions"><button class="btn-del" id="smDel" style="display:none;" onclick="deleteShift()">&#128465; Delete</button><button class="btn btn-ghost" onclick="closeShift()">Cancel</button><button class="btn btn-acc" onclick="saveShift()">Save</button></div>
     <div id="smApproveSection" style="display:none;margin-top:14px;padding-top:14px;border-top:1.5px solid var(--border);">
       <div style="font-size:.72rem;font-weight:700;color:var(--green);margin-bottom:6px;">&#128273; Admin: Approve Work Hours</div>
@@ -1220,7 +1222,7 @@ function popStaff(pre){document.getElementById('sm_staff').innerHTML=staff.map(f
 function toggleBreak(){document.getElementById('breakBox').style.display=document.getElementById('sm_hb').checked?'block':'none';}
 function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popStaff(sid);document.getElementById('smTitle').textContent='Add Shift \u2014 '+DF[day];document.getElementById('sm_s').value='09:00';document.getElementById('sm_e').value='17:00';document.getElementById('sm_note').value='';document.getElementById('sm_hb').checked=false;document.getElementById('breakBox').style.display='none';document.getElementById('smDel').style.display='none';document.getElementById('shiftModal').style.display='flex';
   var sec2=document.getElementById('smApproveSection');if(sec2)sec2.style.display='none';
-}
+  var _cw=document.getElementById('smConflictWarn');if(_cw)_cw.style.display='none';
 function openEdit(sid,day,idx){
   var sh=shifts[sid][day][idx];
   editingShift={sid:sid,day:day,idx:idx};
@@ -2418,6 +2420,112 @@ async function sendForgotPwRequest(){
   document.getElementById('fpwOk').style.display='block';
   if(emailEl)emailEl.value='';
   setTimeout(closeForgotPwRequest,3500);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE 1: Automatisk konflikttjek
+// ═══════════════════════════════════════════════════════════════════════════
+function minsOf(t){if(!t)return 0;var p=t.split(':').map(Number);return p[0]*60+p[1];}
+function shiftsOverlap(s1,e1,s2,e2){
+  var a=minsOf(s1),b=minsOf(e1),x=minsOf(s2),y=minsOf(e2);
+  if(b<=a)b+=1440;if(y<=x)y+=1440;
+  return a<y&&x<b;
+}
+function checkConflicts(){
+  var sid=parseInt(document.getElementById('sm_staff').value);
+  var day=pendingCell?pendingCell.day:null;
+  if(day===null||!sid)return;
+  var start=document.getElementById('sm_s').value;
+  var end=document.getElementById('sm_e').value;
+  if(!start||!end)return;
+  var existing=(shifts[sid]||{})[day]||[];
+  var conflicts=[];
+  existing.forEach(function(sh,idx){
+    if(editingShift&&editingShift.sid===sid&&editingShift.day===day&&editingShift.idx===idx)return;
+    if(shiftsOverlap(start,end,sh.start,sh.end))conflicts.push(sh.start+'\u2013'+sh.end);
+  });
+  var warn=document.getElementById('smConflictWarn');
+  if(!warn)return;
+  if(conflicts.length){
+    warn.style.display='block';
+    warn.innerHTML='\u26a0\ufe0f Konflikt! Overlapper med: '+conflicts.join(', ')+' — gem alligevel for at tillade dobbelt vagt';
+  } else {
+    warn.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE 2: GPS ved clock in
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  var _orig=window.checkIn;
+  if(!_orig)return;
+  window.checkIn=function(sid){
+    _orig(sid);
+    // Add GPS to the entry that was just created
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat=pos.coords.latitude.toFixed(5);
+        var lng=pos.coords.longitude.toFixed(5);
+        var acc=Math.round(pos.coords.accuracy);
+        var gpsStr=lat+','+lng+' ('+acc+'m)';
+        var ds=todayStr();
+        if(clockLog[sid])clockLog[sid].gps=gpsStr;
+        if(clockHistory[sid]&&clockHistory[sid][ds])clockHistory[sid][ds].gps=gpsStr;
+        saveClockLog();
+        if(typeof saveClockHistory==='function')saveClockHistory();
+        // Update GPS badge in panel
+        var badge=document.getElementById('gps_'+sid);
+        if(badge){badge.textContent='\uD83D\uDCCD '+gpsStr;badge.style.display='block';}
+      },function(){},{timeout:8000,maximumAge:0});
+    }
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FEATURE 3: Notifikationer — Email vagtplan til medarbejder
+// ═══════════════════════════════════════════════════════════════════════════
+function notifyEmployee(sid){
+  var s=staff.find(function(x){return x.id===sid;});
+  if(!s)return;
+  var sd=shifts[sid]||{};
+  var days=['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lordag','Sondag'];
+  var lines=[s.name+' \u2014 Din vagtplan'];
+  lines.push(fmtS(weekStart)+' \u2013 '+fmtS(addDays(weekStart,6)));
+  lines.push('');
+  var hasShift=false;
+  for(var d=0;d<7;d++){
+    (sd[d]||[]).forEach(function(sh){
+      hasShift=true;
+      var bm=brkMin(sh);
+      lines.push(days[d]+': '+sh.start+'\u2013'+sh.end+(bm?' (pause '+bm+'min)':'')+(sh.note?' - '+sh.note:''));
+    });
+  }
+  if(!hasShift)lines.push('Ingen vagter denne uge.');
+  lines.push('');
+  lines.push('Med venlig hilsen');
+  lines.push('Ledelsen');
+  var subj=s.name+' \u2013 Vagtplan '+fmtS(weekStart);
+  window.location.href='mailto:?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(lines.join('\n'));
+  toast('\uD83D\uDCE7 Email klar for '+s.name.split(' ')[0]);
+}
+function notifyAll(){
+  var days=['Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lordag','Sondag'];
+  var parts=[];
+  staff.forEach(function(s){
+    var sd=shifts[s.id]||{},lines=[s.name+':'],hasAny=false;
+    for(var d=0;d<7;d++){
+      (sd[d]||[]).forEach(function(sh){
+        hasAny=true;
+        lines.push('  '+days[d]+': '+sh.start+'\u2013'+sh.end);
+      });
+    }
+    if(hasAny)parts.push(lines.join('\n'));
+  });
+  if(!parts.length){toast('Ingen vagter at sende');return;}
+  var body='Vagtplan '+fmtS(weekStart)+' \u2013 '+fmtS(addDays(weekStart,6))+'\n\n'+parts.join('\n\n');
+  window.location.href='mailto:?subject='+encodeURIComponent('Vagtplan '+fmtS(weekStart))+'&body='+encodeURIComponent(body);
+  toast('\uD83D\uDCE7 Email klar med alle vagter');
 }
 
 </script>

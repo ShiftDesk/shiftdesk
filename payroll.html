@@ -734,7 +734,7 @@ function renderAll() {
 
   var html='', totHours=0, totNet=0;
   _staff.forEach((s,idx)=>{
-    var entries=getEntries(s.id), pay=calcPay(s,entries);
+    var entries=getEntries(s.id), pay=calcPay(s,entries,_payrollSettings[String(s.id)]||{});
     totHours+=pay.totalHours; totNet+=pay.nettoLon;
     var col=avCol(idx);
 

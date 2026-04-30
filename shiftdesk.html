@@ -1223,6 +1223,7 @@ function toggleBreak(){document.getElementById('breakBox').style.display=documen
 function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popStaff(sid);document.getElementById('smTitle').textContent='Add Shift \u2014 '+DF[day];document.getElementById('sm_s').value='09:00';document.getElementById('sm_e').value='17:00';document.getElementById('sm_note').value='';document.getElementById('sm_hb').checked=false;document.getElementById('breakBox').style.display='none';document.getElementById('smDel').style.display='none';document.getElementById('shiftModal').style.display='flex';
   var sec2=document.getElementById('smApproveSection');if(sec2)sec2.style.display='none';
   var _cw=document.getElementById('smConflictWarn');if(_cw)_cw.style.display='none';
+}
 function openEdit(sid,day,idx){
   var sh=shifts[sid][day][idx];
   editingShift={sid:sid,day:day,idx:idx};

@@ -941,22 +941,41 @@ function openPayslip(sid) {
   var s=_staff.find(x=>x.id===sid);
   if(!s) return;
 
-  // Pre-fill edit fields with current values
-  document.getElementById('edit_rate').value          = s.rate||0;
-  document.getElementById('edit_drikkepenge').value   = DEF.drikkepenge;
-  document.getElementById('edit_askat').value         = DEF.askat;
-  document.getElementById('edit_personfradrag').value = DEF.personfradrag;
-  document.getElementById('edit_beskfradrag').value   = DEF.beskfradrag_pct;
-  document.getElementById('edit_pension_e').value     = DEF.pension_e;
-  document.getElementById('edit_pension_c').value     = DEF.pension_c;
-  document.getElementById('edit_atp').value           = DEF.atp;
-  document.getElementById('edit_meal').value          = DEF.meal;
+  // Load saved settings from Firebase for this employee
+  (async function(){
+    try {
+      var settingsKey='cust_'+_cust.id+'_payrollSettings';
+      var sv=await window.fb.get(settingsKey);
+      var saved=sv&&sv[String(sid)]?sv[String(sid)]:null;
+      if(saved) _psOverride=saved;
+      // Pre-fill edit fields with saved values or defaults
+      document.getElementById('edit_rate').value          = saved?saved.rate:(s.rate||0);
+      document.getElementById('edit_drikkepenge').value   = saved?saved.drikkepenge:DEF.drikkepenge;
+      document.getElementById('edit_askat').value         = saved?saved.askat:DEF.askat;
+      document.getElementById('edit_personfradrag').value = saved?saved.personfradrag:DEF.personfradrag;
+      document.getElementById('edit_beskfradrag').value   = saved?saved.beskfradrag:DEF.beskfradrag_pct;
+      document.getElementById('edit_pension_e').value     = saved?saved.pension_e:DEF.pension_e;
+      document.getElementById('edit_pension_c').value     = saved?saved.pension_c:DEF.pension_c;
+      document.getElementById('edit_atp').value           = saved?saved.atp:DEF.atp;
+      document.getElementById('edit_meal').value          = saved?saved.meal:DEF.meal;
+      renderPayslip();
+    } catch(e){
+      // Fallback to defaults
+      document.getElementById('edit_rate').value          = s.rate||0;
+      document.getElementById('edit_askat').value         = DEF.askat;
+      document.getElementById('edit_personfradrag').value = DEF.personfradrag;
+      document.getElementById('edit_beskfradrag').value   = DEF.beskfradrag_pct;
+      document.getElementById('edit_pension_e').value     = DEF.pension_e;
+      document.getElementById('edit_pension_c').value     = DEF.pension_c;
+      document.getElementById('edit_atp').value           = DEF.atp;
+      document.getElementById('edit_meal').value          = DEF.meal;
+      renderPayslip();
+    }
+  })();
 
   document.getElementById('ps_subline').textContent=s.name+' — '+MONTHS[_selMonth]+' '+_selYear;
   document.getElementById('psEditBar').style.display='none';
   document.getElementById('psSendBar').style.display='none';
-
-  renderPayslip();
 
   var ps=document.getElementById('payslipSection');
   ps.style.display='block';
@@ -1088,20 +1107,29 @@ document.getElementById('psCancelEdit').addEventListener('click',()=>{
   document.getElementById('psEditBar').style.display='none';
 });
 
-document.getElementById('psApplyEdit').addEventListener('click',()=>{
+document.getElementById('psApplyEdit').addEventListener('click',async ()=>{
+  function pf(id,def){var v=parseFloat(document.getElementById(id).value);return isNaN(v)?def:v;}
   _psOverride={
-    rate:        parseFloat(document.getElementById('edit_rate').value)||0,
-    drikkepenge: parseFloat(document.getElementById('edit_drikkepenge').value)||0,
-    askat:       parseFloat(document.getElementById('edit_askat').value)||37,
-    personfradrag:parseFloat(document.getElementById('edit_personfradrag').value)||4508,
-    beskfradrag: parseFloat(document.getElementById('edit_beskfradrag').value)||10.65,
-    pension_e:   parseFloat(document.getElementById('edit_pension_e').value)||4,
-    pension_c:   parseFloat(document.getElementById('edit_pension_c').value)||8,
-    atp:         parseFloat(document.getElementById('edit_atp').value)||99,
-    meal:        parseFloat(document.getElementById('edit_meal').value)||0
+    rate:          pf('edit_rate',         DEF.rate),
+    drikkepenge:   pf('edit_drikkepenge',  DEF.drikkepenge),
+    askat:         pf('edit_askat',        DEF.askat),
+    personfradrag: pf('edit_personfradrag',DEF.personfradrag),
+    beskfradrag:   pf('edit_beskfradrag',  DEF.beskfradrag_pct),
+    pension_e:     pf('edit_pension_e',    DEF.pension_e),
+    pension_c:     pf('edit_pension_c',    DEF.pension_c),
+    atp:           pf('edit_atp',          DEF.atp),
+    meal:          pf('edit_meal',         DEF.meal)
   };
+  // Save tax settings to Firebase so they persist
+  try {
+    var settingsKey='cust_'+_cust.id+'_payrollSettings';
+    var sv=await window.fb.get(settingsKey)||{};
+    sv[String(_psStaffId)]=_psOverride;
+    await window.fb.set(settingsKey,sv);
+  } catch(e){}
+  document.getElementById('psEditBar').style.display='none';
   renderPayslip();
-  toast('✓ Lønseddel opdateret');
+  toast('✓ Lønseddel gemt og opdateret');
 });
 
 document.getElementById('psSendToggle').addEventListener('click',()=>{

@@ -44,9 +44,9 @@ service cloud.firestore {
     //
     // Both single and double prefix variants are accepted for safety.
     match /customerData/{id} {
-      allow read: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
-      allow write: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
-      allow delete: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
+      allow read: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|payrollSettings|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
+      allow write: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|payrollSettings|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
+      allow delete: if id.matches('cust_(cust_)?[0-9]+_(staff|shifts|meetings|monthStore|monthMeet|avail|clockHistory|clockLog|pi|payrollExtra|payrollRates|payrollProfile|payrollSettings|egenkontrol|egenVirksomhed|skema1|skema2|skema3|skema4|skema7|weekShifts|ws2)') || id.matches('mgr_pw_(cust_)?(cust_)?[0-9]+') || id.matches('cust_(cust_)?[0-9]+_pin_[0-9]+');
     }
 
   }

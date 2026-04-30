@@ -802,12 +802,16 @@ function renderLonseddel(){
   if(!lonRows[i])return;
   const r=lonRows[i];
   const brutto=r.timer*r.timelon;
-  const am=brutto*0.08;
-  const grundlag=brutto-am;
-  const askat=Math.round(grundlag*0.38);
-  const netto=Math.round(grundlag-askat);
-  const ferie=brutto*0.125;
+  const ferie=Math.round(brutto*0.125);
   const atp=r.timer>=130?ATP:Math.round(ATP*(r.timer/160));
+  // Correct Danish formula: ATP deducted BEFORE AM-bidrag (verified vs Zenegy)
+  const amGrundlag=brutto-atp;
+  const am=Math.round(amGrundlag*0.08);
+  // A-skat grundlag = AM-grundlag - AM-bidrag - personfradrag (4508/md)
+  const grundlag=Math.max(0,amGrundlag-am-4508);
+  const askat=Math.round(grundlag*0.38);
+  // Netto = bruttoLøn - AM-bidrag - ATP - A-skat
+  const netto=Math.round(brutto-am-atp-askat);
   document.getElementById('lonseddel-output').innerHTML=`
     <div class="lonseddel">
       <div style="font-family:var(--display);font-weight:600;margin-bottom:12px">${r.navn}</div>
@@ -1272,8 +1276,10 @@ function calc(){
   const inputMoms=vare.r*(momsPct/100);
   const momsBalance=momsKr-inputMoms;
   const samletBrutto=lonRows.reduce((s,r)=>s+r.timer*r.timelon,0);
-  const amBidrag=samletBrutto*0.08;
-  const askatEst=Math.round((samletBrutto-amBidrag)*0.38);
+  // Correct: ATP deducted before AM-bidrag, personfradrag reduces A-skat base
+  const samletATP=lonRows.reduce((s,r)=>{const atp=r.timer>=130?ATP:Math.round(ATP*(r.timer/160));return s+atp;},0);
+  const amBidrag=Math.round((samletBrutto-samletATP)*0.08);
+  const askatEst=Math.round(Math.max(0,(samletBrutto-samletATP)-amBidrag-lonRows.length*4508)*0.38);
 
   // KPI
   document.getElementById('kpi-grid').innerHTML=`

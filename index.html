@@ -340,7 +340,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
             <div class="shift-av" style="background:#2563eb;">LA</div>
             <div class="shift-name">Lars Andersen</div>
             <div class="shift-time">12:00 – 20:00</div>
-            <span class="shift-badge sb-blue">Bekræftet</span>
+            <span class="shift-badge sb-blue" id="mockConfirmed">Bekræftet</span>
           </div>
           <div class="shift-row">
             <div class="shift-av" style="background:#e8a020;">SN</div>
@@ -809,6 +809,22 @@ var TRANSLATIONS = {
     'cta-btn1':         'Start gratis i 14 dage →',
     'cta-btn2':         '📧 Skriv til os',
     'cta-note':         'Spørgsmål? Skriv til support@shiftdesks.app — vi svarer inden for 24 timer',
+    // Pricing features
+    'pf1-1': '✓ Vagtplanlægning', 'pf1-2': '✓ Op til 15 medarbejdere',
+    'pf1-4': 'Lønsystem', 'pf1-5': 'Egenkontrol', 'pf1-6': 'Budget modul',
+    'plan1-btn': 'Start gratis prøve',
+    'pf2-1': '✓ Alt i Starter', 'pf2-2': '✓ Ubegrænsede medarbejdere',
+    'pf2-3': '✓ Lønsystem med lønsedler', 'pf2-4': '✓ Digital egenkontrol',
+    'pf2-5': '✓ Budget & økonomi modul', 'pf2-6': '✓ Dansk lønberegning 2026',
+    'pf2-7': '✓ Prioriteret support', 'plan2-btn': 'Start gratis prøve',
+    // Footer
+    'ft-head1': 'Produkt', 'ft-head2': 'Priser', 'ft-head3': 'Konto',
+    'ft-lnk1': 'Vagtplanlægning', 'ft-lnk2': 'Lønsystem', 'ft-lnk3': 'Egenkontrol',
+    'ft-lnk4': 'Starter — 99 kr/md', 'ft-lnk5': 'Fuld pakke — 299 kr/md',
+    'ft-lnk6': 'Årlig rabat', 'ft-lnk7': '14 dages gratis prøve',
+    'ft-lnk8': 'Opret konto', 'ft-bottom': 'Lavet til danske restauranter 🇩🇰',
+    // Page title
+    'page-title': 'ShiftDesk — Vagtplanlægning & Løn til Restauranter',
   },
   en: {
     'hero-tag':         '🍽️ For restaurants and food businesses',
@@ -852,6 +868,22 @@ var TRANSLATIONS = {
     'cta-btn1':         'Start free for 14 days →',
     'cta-btn2':         '📧 Contact us',
     'cta-note':         'Questions? Email support@shiftdesks.app — we reply within 24 hours',
+    // Pricing features
+    'pf1-1': '✓ Scheduling', 'pf1-2': '✓ Up to 15 employees',
+    'pf1-4': 'Payroll', 'pf1-5': 'Food safety', 'pf1-6': 'Budget module',
+    'plan1-btn': 'Start free trial',
+    'pf2-1': '✓ Everything in Starter', 'pf2-2': '✓ Unlimited employees',
+    'pf2-3': '✓ Payroll with payslips', 'pf2-4': '✓ Digital food safety control',
+    'pf2-5': '✓ Budget & finance module', 'pf2-6': '✓ Danish payroll 2026',
+    'pf2-7': '✓ Priority support', 'plan2-btn': 'Start free trial',
+    // Footer
+    'ft-head1': 'Product', 'ft-head2': 'Pricing', 'ft-head3': 'Account',
+    'ft-lnk1': 'Scheduling', 'ft-lnk2': 'Payroll', 'ft-lnk3': 'Food safety',
+    'ft-lnk4': 'Starter — 99 DKK/mo', 'ft-lnk5': 'Full package — 299 DKK/mo',
+    'ft-lnk6': 'Annual discount', 'ft-lnk7': '14-day free trial',
+    'ft-lnk8': 'Create account', 'ft-bottom': 'Built for Danish restaurants 🇩🇰',
+    // Page title
+    'page-title': 'ShiftDesk — Scheduling & Payroll for Restaurants',
   }
 };
 
@@ -908,6 +940,21 @@ function setLang(lang) {
   set('ctaBtn1',    t['cta-btn1']);
   set('ctaBtn2',    t['cta-btn2']);
   set('ctaNote',    t['cta-note']);
+  // Pricing features
+  ['pf1-1','pf1-2','pf1-4','pf1-5','pf1-6',
+   'pf2-1','pf2-2','pf2-3','pf2-4','pf2-5','pf2-6','pf2-7'].forEach(function(id){
+    set(id, t[id]);
+  });
+  set('planBtn1', t['plan1-btn']);
+  set('planBtn2', t['plan2-btn']);
+  // Footer
+  set('ftHead1', t['ft-head1']); set('ftHead2', t['ft-head2']); set('ftHead3', t['ft-head3']);
+  set('ftLnk1', t['ft-lnk1']); set('ftLnk2', t['ft-lnk2']); set('ftLnk3', t['ft-lnk3']);
+  set('ftLnk4', t['ft-lnk4']); set('ftLnk5', t['ft-lnk5']); set('ftLnk6', t['ft-lnk6']);
+  set('ftLnk7', t['ft-lnk7']); set('ftLnk8', t['ft-lnk8']);
+  set('ftBottom', t['ft-bottom']);
+  // Page title
+  document.title = t['page-title'];
 
   // Update pricing periods if visible
   var mode = isYearly ? 'yearly' : 'monthly';

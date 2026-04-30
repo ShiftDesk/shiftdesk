@@ -2261,6 +2261,7 @@ saveData = function() {
   try {
     localStorage.setItem('sd_staff', JSON.stringify(staff));
     localStorage.setItem('sd_shifts', JSON.stringify(shifts));
+    localStorage.setItem('sd_wsh', JSON.stringify(weekShifts));
   } catch(e) {}
   saveDataCloud();
 };

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>ShiftDesk — Check In/Out</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f1;--white:#fff;--border:#e3ddd4;--b2:#c9c3b8;
+  --text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--acc-lt:#fdf0e8;
+  --green:#1b6e40;--green-lt:#e4f2ec;--red:#c0392b;--red-lt:#fdf0f0;
+  --shadow:0 4px 24px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 16px 40px;}
+.logo{display:flex;align-items:center;gap:8px;margin-bottom:28px;margin-top:8px;}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);}
+.logo-text{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:420px;box-shadow:var(--shadow);}
+.card-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+.card-sub{font-size:.75rem;color:var(--muted);margin-bottom:20px;}
+.lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:5px;font-weight:700;}
+.inp{width:100%;background:var(--bg);border:1.5px solid var(--b2);color:var(--text);border-radius:10px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .13s;margin-bottom:14px;}
+.inp:focus{border-color:var(--acc);background:#fff;}
+.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.staff-btn{padding:12px 8px;border-radius:10px;border:2px solid var(--border);background:#fff;cursor:pointer;text-align:center;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.staff-btn:hover{border-color:var(--acc);background:var(--acc-lt);}
+.staff-btn.selected{border-color:var(--green);background:var(--green-lt);}
+.staff-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;margin:0 auto 6px;}
+.staff-name{font-size:.8rem;font-weight:600;}
+.staff-role{font-size:.62rem;color:var(--muted);}
+/* PIN pad */
+.pin-display{background:var(--bg);border:1.5px solid var(--b2);border-radius:10px;padding:14px;text-align:center;font-family:'DM Mono',monospace;font-size:1.6rem;letter-spacing:.3em;margin-bottom:12px;min-height:54px;}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.pin-btn{padding:16px;border-radius:10px;border:1.5px solid var(--border);background:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s;}
+.pin-btn:hover{background:var(--bg);border-color:var(--b2);}
+.pin-btn:active{transform:scale(.95);}
+.pin-btn.del{font-size:.9rem;color:var(--muted);}
+.btn{width:100%;padding:15px;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;border:none;transition:all .15s;margin-bottom:8px;}
+.btn-checkin{background:var(--green);color:#fff;}
+.btn-checkin:hover{background:#145530;}
+.btn-checkout{background:var(--acc);color:#fff;}
+.btn-checkout:hover{background:#9d3c07;}
+.btn-ghost{background:#fff;border:1.5px solid var(--b2);color:var(--text);}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.status-box{border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:.82rem;}
+.status-in{background:var(--green-lt);border:1.5px solid #a8d5bc;color:var(--green);}
+.status-out{background:#f0ede7;border:1.5px solid var(--border);color:var(--muted);}
+.err{background:var(--red-lt);border:1.5px solid #f5c0c0;color:var(--red);border-radius:10px;padding:10px 14px;font-size:.8rem;margin-bottom:12px;display:none;}
+.success{background:var(--green-lt);border:1.5px solid #a8d5bc;color:var(--green);border-radius:10px;padding:16px;font-size:.9rem;margin-bottom:12px;display:none;text-align:center;}
+.step{display:none;}
+.step.active{display:block;}
+.back-btn{background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:14px;padding:4px 0;display:flex;align-items:center;gap:4px;}
+.back-btn:hover{color:var(--text);}
+.live-time{font-family:'DM Mono',monospace;font-size:1rem;font-weight:700;color:var(--acc);text-align:center;margin-bottom:20px;}
+.shift-info{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:.76rem;color:var(--muted);margin-bottom:12px;border:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<div class="logo">
+  <div class="logo-dot"></div>
+  <div class="logo-text">ShiftDesk</div>
+</div>
+
+<div class="live-time" id="liveTime"></div>
+
+<div class="card">
+
+  <!-- STEP 1: Loading -->
+  <div class="step active" id="stepLoading">
+    <div class="card-title">Indlæser...</div>
+    <div class="card-sub">Henter medarbejderliste</div>
+    <div id="loadErr" class="err"></div>
+  </div>
+
+  <!-- STEP 2: Select employee -->
+  <div class="step" id="stepSelect">
+    <div class="card-title">Hvem er du?</div>
+    <div class="card-sub">Vælg dit navn for at checke ind eller ud</div>
+    <div class="staff-grid" id="staffGrid"></div>
+    <div id="selectErr" class="err"></div>
+  </div>
+
+  <!-- STEP 3: PIN entry -->
+  <div class="step" id="stepPin">
+    <button class="back-btn" onclick="goBack()">← Tilbage</button>
+    <div class="card-title" id="pinName">Indtast PIN</div>
+    <div class="card-sub">Indtast din 4-cifrede PIN-kode</div>
+    <div id="pinStatus" class="status-box status-out" style="display:none;"></div>
+    <div id="pinShift" class="shift-info" style="display:none;"></div>
+    <div class="pin-display" id="pinDisplay">____</div>
+    <div id="pinErr" class="err"></div>
+    <div class="pin-grid">
+      <button class="pin-btn" onclick="pinPress('1')">1</button>
+      <button class="pin-btn" onclick="pinPress('2')">2</button>
+      <button class="pin-btn" onclick="pinPress('3')">3</button>
+      <button class="pin-btn" onclick="pinPress('4')">4</button>
+      <button class="pin-btn" onclick="pinPress('5')">5</button>
+      <button class="pin-btn" onclick="pinPress('6')">6</button>
+      <button class="pin-btn" onclick="pinPress('7')">7</button>
+      <button class="pin-btn" onclick="pinPress('8')">8</button>
+      <button class="pin-btn" onclick="pinPress('9')">9</button>
+      <button class="pin-btn pin-btn" onclick="pinClear()">Ryd</button>
+      <button class="pin-btn" onclick="pinPress('0')">0</button>
+      <button class="pin-btn del" onclick="pinDel()">⌫</button>
+    </div>
+    <button class="btn btn-checkin" id="btnCheckIn" onclick="doCheckIn()">✓ Check Ind</button>
+    <button class="btn btn-checkout" id="btnCheckOut" onclick="doCheckOut()" style="display:none;">✓ Check Ud</button>
+  </div>
+
+  <!-- STEP 4: Success -->
+  <div class="step" id="stepDone">
+    <div class="success" id="successMsg" style="display:block;"></div>
+    <button class="btn btn-ghost" onclick="goStart()">← Tilbage til forsiden</button>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, getDocs, setDoc, getDoc, doc }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const cfg = {
+  apiKey: "AIzaSyA-LRHC7d0DkjArQBkivoV4EwW5iV5vX6M",
+  authDomain: "shiftdesk-admin.firebaseapp.com",
+  projectId: "shiftdesk-admin",
+  storageBucket: "shiftdesk-admin.firebasestorage.app",
+  messagingSenderId: "942500137972",
+  appId: "1:942500137972:web:c0e0755c97f3590bcb07a1"
+};
+
+try {
+  const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+  const db  = getFirestore(app);
+  window.fbGetData  = async function(key){ try{ const d=await getDoc(doc(db,'customerData',key)); return d.exists()?d.data().value:null; }catch(e){return null;} };
+  window.fbSetData  = async function(key,val){ await setDoc(doc(db,'customerData',key),{value:val}); };
+  window.fbLoadCustomers = async function(){ const s=await getDocs(collection(db,'customers')); return s.docs.map(d=>({id:d.id,...d.data()})); };
+  window._fbReady = true;
+} catch(e){
+  window._fbReady = false;
+  showErr('loadErr','Kunne ikke forbinde til databasen. Tjek din internetforbindelse.');
+}
+</script>
+
+<script>
+'use strict';
+
+// ── State ─────────────────────────────────────────────────────────────────
+var customers = [];
+var selectedCustomer = null;
+var staff = [];
+var selectedStaff = null;
+var pinValue = '';
+var clockHistory = {};
+var clockLog = {};
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function nowHHMM(){ var n=new Date(); return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
+function showErr(id, msg){ var el=document.getElementById(id); el.textContent=msg; el.style.display='block'; }
+function hideErr(id){ document.getElementById(id).style.display='none'; }
+function showStep(id){ document.querySelectorAll('.step').forEach(function(s){s.classList.remove('active');}); document.getElementById(id).classList.add('active'); }
+function ini(n){ return n.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
+
+var AV_COLS=['#bf4a0a','#1b6e40','#1b4896','#6b21a8','#b45309','#0e7490','#be185d'];
+function avCol(i){ return AV_COLS[i%AV_COLS.length]; }
+
+// Live clock
+function updateClock(){
+  var n=new Date();
+  document.getElementById('liveTime').textContent=n.toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' · '+n.toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long'});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// ── Wait for Firebase ─────────────────────────────────────────────────────
+function waitFb(){
+  return new Promise(function(resolve){
+    if(window._fbReady!==undefined){resolve(window._fbReady);return;}
+    var t=0,iv=setInterval(function(){
+      if(window._fbReady!==undefined||++t>50){clearInterval(iv);resolve(!!window._fbReady);}
+    },100);
+  });
+}
+
+// ── Boot: load customers, show selector if multiple ───────────────────────
+async function boot(){
+  var ok = await waitFb();
+  if(!ok){showErr('loadErr','Ingen databaseforbindelse.');return;}
+
+  // Check if there's a saved customer preference from URL or localStorage
+  var params = new URLSearchParams(window.location.search);
+  var custId = params.get('cust') || localStorage.getItem('sd_checkin_cust');
+
+  try {
+    customers = await window.fbLoadCustomers();
+    var active = customers.filter(function(c){return c.status==='active';});
+    if(!active.length){showErr('loadErr','Ingen aktive konti fundet.');return;}
+
+    if(custId){
+      var match = active.find(function(c){return c.id===custId;});
+      if(match){ await loadForCustomer(match); return; }
+    }
+
+    if(active.length===1){
+      await loadForCustomer(active[0]);
+    } else {
+      // Show customer picker
+      showCustomerPicker(active);
+    }
+  } catch(e){
+    showErr('loadErr','Fejl: '+e.message);
+  }
+}
+
+function showCustomerPicker(active){
+  var grid=document.getElementById('staffGrid');
+  // Reuse staff grid for customer selection
+  document.getElementById('stepSelect').querySelector('.card-title').textContent='Vælg restaurant';
+  document.getElementById('stepSelect').querySelector('.card-sub').textContent='Vælg hvilken restaurant du arbejder på';
+  grid.innerHTML=active.map(function(c,i){
+    return '<button class="staff-btn" onclick="pickCustomer(\''+c.id+'\')"><div class="staff-av" style="background:'+avCol(i)+'">'+ini(c.name)+'</div><div class="staff-name">'+c.name+'</div></button>';
+  }).join('');
+  showStep('stepSelect');
+}
+
+window.pickCustomer = async function(id){
+  var c=customers.find(function(x){return x.id===id;});
+  if(!c)return;
+  localStorage.setItem('sd_checkin_cust',id);
+  await loadForCustomer(c);
+};
+
+async function loadForCustomer(cust){
+  selectedCustomer = cust;
+  // Load staff list
+  try {
+    var s = await window.fbGetData('cust_'+cust.id+'_staff');
+    staff = s ? JSON.parse(s) : [];
+    if(typeof s === 'object' && s !== null && !Array.isArray(s)) staff = s;
+    if(!Array.isArray(staff)) staff = [];
+  } catch(e){ staff=[]; }
+
+  // Load clock history
+  try {
+    var ch = await window.fbGetData('cust_'+cust.id+'_clockHistory');
+    clockHistory = ch ? (typeof ch==='string'?JSON.parse(ch):ch) : {};
+    // Normalize keys to integers
+    var norm={};
+    Object.keys(clockHistory).forEach(function(k){ norm[parseInt(k)]=clockHistory[k]; });
+    clockHistory=norm;
+  } catch(e){ clockHistory={}; }
+
+  // Load today's clockLog
+  try {
+    var cl = await window.fbGetData('cust_'+cust.id+'_clockLog');
+    clockLog = cl ? (typeof cl==='string'?JSON.parse(cl):cl) : {};
+    var norm2={};
+    Object.keys(clockLog).forEach(function(k){ norm2[parseInt(k)]=clockLog[k]; });
+    clockLog=norm2;
+  } catch(e){ clockLog={}; }
+
+  renderStaffGrid();
+}
+
+// ── Staff grid ────────────────────────────────────────────────────────────
+function renderStaffGrid(){
+  var grid=document.getElementById('staffGrid');
+  document.getElementById('stepSelect').querySelector('.card-title').textContent='Hvem er du?';
+  document.getElementById('stepSelect').querySelector('.card-sub').textContent='Vælg dit navn for at checke ind eller ud';
+
+  if(!staff.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--muted);">Ingen medarbejdere fundet</div>';
+    showStep('stepSelect');
+    return;
+  }
+
+  grid.innerHTML=staff.map(function(s,i){
+    var isIn = clockLog[s.id] && clockLog[s.id].date===todayStr() && clockLog[s.id].inTime && !clockLog[s.id].outTime;
+    var isDone = clockLog[s.id] && clockLog[s.id].date===todayStr() && clockLog[s.id].outTime;
+    var badge = isIn ? '<div style="font-size:.58rem;color:var(--green);font-weight:700;margin-top:2px;">● Ind</div>'
+                    : isDone ? '<div style="font-size:.58rem;color:var(--muted);margin-top:2px;">✓ Ud</div>' : '';
+    return '<button class="staff-btn'+(isIn?' selected':'')+'" onclick="selectStaff('+s.id+')">'
+      +'<div class="staff-av" style="background:'+avCol(i)+'">'+ini(s.name)+'</div>'
+      +'<div class="staff-name">'+s.name+'</div>'
+      +'<div class="staff-role">'+s.role+'</div>'
+      +badge
+      +'</button>';
+  }).join('');
+  showStep('stepSelect');
+}
+
+// ── Select staff → PIN step ───────────────────────────────────────────────
+window.selectStaff = function(sid){
+  selectedStaff = staff.find(function(s){return s.id===sid;});
+  if(!selectedStaff) return;
+  pinValue='';
+  updatePinDisplay();
+  hideErr('pinErr');
+
+  document.getElementById('pinName').textContent = selectedStaff.name;
+
+  // Show current status
+  var entry = clockLog[sid];
+  var isIn  = entry && entry.date===todayStr() && entry.inTime && !entry.outTime;
+  var isDone= entry && entry.date===todayStr() && entry.outTime;
+  var statusEl = document.getElementById('pinStatus');
+  var shiftEl  = document.getElementById('pinShift');
+
+  if(isIn){
+    statusEl.className='status-box status-in';
+    statusEl.textContent='● Tjekket ind: '+entry.inTime+' — tryk Check Ud når du går';
+    statusEl.style.display='block';
+    document.getElementById('btnCheckIn').style.display='none';
+    document.getElementById('btnCheckOut').style.display='block';
+  } else if(isDone){
+    statusEl.className='status-box status-out';
+    statusEl.textContent='✓ Færdig i dag: '+entry.inTime+' – '+entry.outTime;
+    statusEl.style.display='block';
+    document.getElementById('btnCheckIn').style.display='block';
+    document.getElementById('btnCheckOut').style.display='none';
+  } else {
+    statusEl.style.display='none';
+    document.getElementById('btnCheckIn').style.display='block';
+    document.getElementById('btnCheckOut').style.display='none';
+  }
+
+  // Show today's scheduled shift if available
+  // We check shifts from clockHistory pattern
+  shiftEl.style.display='none';
+
+  showStep('stepPin');
+};
+
+// ── PIN logic ─────────────────────────────────────────────────────────────
+window.pinPress = function(d){
+  if(pinValue.length>=4) return;
+  pinValue+=d;
+  updatePinDisplay();
+  if(pinValue.length===4) setTimeout(verifyPin,200);
+};
+window.pinDel = function(){ pinValue=pinValue.slice(0,-1); updatePinDisplay(); };
+window.pinClear = function(){ pinValue=''; updatePinDisplay(); };
+
+function updatePinDisplay(){
+  var s='';
+  for(var i=0;i<4;i++) s+=i<pinValue.length?'●':'_';
+  document.getElementById('pinDisplay').textContent=s;
+}
+
+async function verifyPin(){
+  hideErr('pinErr');
+  // Load PIN for this employee from Firebase
+  var storedPin = null;
+  try {
+    storedPin = await window.fbGetData('cust_'+selectedCustomer.id+'_pin_'+selectedStaff.id);
+  } catch(e){}
+
+  // If no PIN set yet — first time, accept any 4-digit code and save it
+  if(!storedPin){
+    // Save this as their PIN
+    try { await window.fbSetData('cust_'+selectedCustomer.id+'_pin_'+selectedStaff.id, pinValue); }
+    catch(e){}
+    // PIN accepted — show action buttons
+    document.querySelectorAll('.pin-btn').forEach(function(b){b.disabled=true;});
+    return; // buttons already visible
+  }
+
+  if(pinValue !== storedPin){
+    showErr('pinErr','Forkert PIN. Prøv igen.');
+    pinValue='';
+    updatePinDisplay();
+    document.querySelectorAll('.pin-btn').forEach(function(b){b.disabled=false;});
+    return;
+  }
+  // Correct PIN — enable action
+  document.querySelectorAll('.pin-btn').forEach(function(b){b.disabled=true;});
+}
+
+// ── Check In ──────────────────────────────────────────────────────────────
+window.doCheckIn = async function(){
+  if(pinValue.length < 4){ showErr('pinErr','Indtast din PIN-kode først.'); return; }
+  var btn=document.getElementById('btnCheckIn');
+  btn.disabled=true; btn.textContent='Gemmer...';
+
+  var inT=nowHHMM(), ds=todayStr(), sid=selectedStaff.id;
+  clockLog[sid]={inTime:inT,outTime:null,date:ds};
+  if(!clockHistory[sid]) clockHistory[sid]={};
+  clockHistory[sid][ds]={inTime:inT,outTime:null,approved:false,approvedBy:'',note:'Medarbejder selv',dateStr:ds};
+
+  try {
+    await window.fbSetData('cust_'+selectedCustomer.id+'_clockHistory', clockHistory);
+    await window.fbSetData('cust_'+selectedCustomer.id+'_clockLog', clockLog);
+    document.getElementById('successMsg').innerHTML=
+      '✓ '+selectedStaff.name+'<br>Tjekket ind kl. <strong>'+inT+'</strong><br><span style="font-size:.78rem;color:var(--green);opacity:.8;">God arbejdsdag! 👋</span>';
+    showStep('stepDone');
+  } catch(e){
+    showErr('pinErr','Fejl ved gemning: '+e.message);
+    btn.disabled=false; btn.textContent='✓ Check Ind';
+  }
+};
+
+// ── Check Out ─────────────────────────────────────────────────────────────
+window.doCheckOut = async function(){
+  if(pinValue.length < 4){ showErr('pinErr','Indtast din PIN-kode først.'); return; }
+  var btn=document.getElementById('btnCheckOut');
+  btn.disabled=true; btn.textContent='Gemmer...';
+
+  var outT=nowHHMM(), ds=todayStr(), sid=selectedStaff.id;
+  var inEntry = clockLog[sid];
+  var inT = inEntry ? inEntry.inTime : '?';
+
+  if(clockLog[sid]) clockLog[sid].outTime=outT;
+  if(clockHistory[sid]&&clockHistory[sid][ds]) clockHistory[sid][ds].outTime=outT;
+  else {
+    if(!clockHistory[sid]) clockHistory[sid]={};
+    clockHistory[sid][ds]={inTime:inT,outTime:outT,approved:false,approvedBy:'',note:'Medarbejder selv',dateStr:ds};
+  }
+
+  // Calculate hours worked
+  var minsWorked=0;
+  if(inT && inT!=='?'){
+    var ip=inT.split(':').map(Number), op=outT.split(':').map(Number);
+    minsWorked=(op[0]*60+op[1])-(ip[0]*60+ip[1]);
+  }
+  var h=Math.floor(minsWorked/60), m=minsWorked%60;
+  var workedStr=h+'t '+(m>0?m+'min':'');
+
+  try {
+    await window.fbSetData('cust_'+selectedCustomer.id+'_clockHistory', clockHistory);
+    await window.fbSetData('cust_'+selectedCustomer.id+'_clockLog', clockLog);
+    document.getElementById('successMsg').innerHTML=
+      '✓ '+selectedStaff.name+'<br>Tjekket ud kl. <strong>'+outT+'</strong><br>'
+      +'<span style="font-size:.78rem;color:var(--green);opacity:.8;">Arbejdet: '+workedStr+' · Tak for i dag! 🙌</span>';
+    showStep('stepDone');
+  } catch(e){
+    showErr('pinErr','Fejl ved gemning: '+e.message);
+    btn.disabled=false; btn.textContent='✓ Check Ud';
+  }
+};
+
+// ── Navigation ────────────────────────────────────────────────────────────
+window.goBack = function(){ selectedStaff=null; pinValue=''; renderStaffGrid(); };
+window.goStart = function(){ selectedStaff=null; pinValue=''; renderStaffGrid(); };
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>

@@ -1113,7 +1113,13 @@ function ini(n){return n.split(' ').map(function(w){return w[0];}).join('').slic
 function tdiff(s,e){var sh=parseInt(s),sm=parseInt(s.split(':')[1]),eh=parseInt(e),em=parseInt(e.split(':')[1]);if(eh<sh)eh+=24;return((eh*60+em)-(sh*60+sm))/60;}
 function brkMin(sh){if(!sh.breakStart||!sh.breakEnd)return 0;return Math.round(tdiff(sh.breakStart,sh.breakEnd)*60);}
 function workedH(sh){if(!sh.end||sh.end===sh.start)return 0;return Math.max(0,tdiff(sh.start,sh.end)-brkMin(sh)/60);}
-function staffH(id){var h=0;Object.values(shifts[id]||{}).forEach(function(a){a.forEach(function(s){h+=workedH(s);});});return Math.round(h*10)/10;}
+function staffH(id){
+  // Show hours for the currently-viewed week (not the repeating template total)
+  var h=0;
+  var ws=getWeekAllShifts(id);
+  Object.values(ws).forEach(function(a){a.forEach(function(s){h+=workedH(s);});});
+  return Math.round(h*10)/10;
+}
 function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2300);}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function nowHHMM(){var n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
@@ -1129,7 +1135,7 @@ function renderHeader(){
   var h='<div class="ghc-corner"><span class="ghc-corner-lbl">Employee</span></div>';
   for(var i=0;i<7;i++){
     var d=addDays(weekStart,i),tod=isToday(d),meet=meetings[i];
-    var cnt=staff.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
+    var cnt=staff.reduce(function(a,s){return a+getWeekShifts(s.id,i).length;},0);
     var cls='ghc-cell'+(tod?' is-today':'')+(meet?' is-meet':'');
     h+='<div class="'+cls+'" onclick="openMeet('+i+')" title="Click to set meeting day">';
     h+='<div class="g-day-abbr">'+DN[i]+'</div>';
@@ -1151,7 +1157,7 @@ function renderBody(){
     html+='<div class="role-group"><div class="role-hdr">';
     html+='<div class="rhc-label" style="border-right:1px solid var(--border)"><div class="r-dot" style="background:'+rc.color+'"></div><span class="r-nm">'+role+'</span><span style="font-size:.61rem;color:var(--muted);font-family:\'DM Mono\',monospace;margin-left:auto;">'+members.length+'</span></div>';
     for(var i=0;i<7;i++){
-      var cnt=members.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
+      var cnt=members.reduce(function(a,s){return a+getWeekShifts(s.id,i).length;},0);
       html+='<div class="rhc-day'+(meetings[i]?' mc':'')+'">'+( cnt||'\u2013')+'</div>';
     }
     html+='</div>';
@@ -1165,7 +1171,7 @@ function renderBody(){
       html+='<div class="sr-h">'+staffH(s.id)+'h</div></div></div></div>';
       for(var d=0;d<7;d++){
         var avState=(availability[s.id]||{})[addDays(weekStart,d).toISOString().slice(0,10)];
-        var cellSh=((shifts[s.id]||{})[d]||[]);
+        var cellSh=getWeekShifts(s.id,d);
         var cellBg=avState==='sick'?'style="background:#fdf8f8"':avState==='unavail'?'style="background:#fdf5f0"':'';
         html+='<div class="shift-cell'+(meetings[d]?' mc':'')+'" '+cellBg+' ondragover="ev(event)" ondrop="dp(event,'+s.id+','+d+')" ondragleave="dl(event)">';
         if(avState&&!cellSh.length){html+='<div style="font-size:.6rem;color:'+(avState==='sick'?'#c0392b':'var(--acc)')+';font-style:italic;padding:3px;">'+(avState==='sick'?'\uD83E\uDD12 Sick':'\u274C Unavail')+'</div>';}
@@ -1222,7 +1228,9 @@ function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popSta
   var sec2=document.getElementById('smApproveSection');if(sec2)sec2.style.display='none';
 }
 function openEdit(sid,day,idx){
-  var sh=shifts[sid][day][idx];
+  var wStore=ensureWeekStore(sid);
+  var weekDay=wStore[day]&&wStore[day].length?wStore[day]:((shifts[sid]||{})[day]||[]);
+  var sh=weekDay[idx];
   editingShift={sid:sid,day:day,idx:idx};
   pendingCell={sid:sid,day:day};
   popStaff(sid);
@@ -1270,14 +1278,33 @@ function saveShift(){
   var note=document.getElementById('sm_note').value.trim();
   var hb=document.getElementById('sm_hb').checked;
   var bStart=hb?document.getElementById('sm_bs').value:null,bEnd=hb?document.getElementById('sm_be').value:null;
-  if(!shifts[sid])shifts[sid]={};if(!shifts[sid][day])shifts[sid][day]=[];
+  // Write to week-specific store so other weeks are not affected
+  var wStore=ensureWeekStore(sid);
+  if(!wStore[day])wStore[day]=[];
   var entry={start:start,end:end,note:note,breakStart:bStart,breakEnd:bEnd};
-  if(editingShift&&editingShift.sid===sid&&editingShift.day===day){shifts[sid][day][editingShift.idx]=entry;toast('Shift updated \u2713');}
-  else{shifts[sid][day].push(entry);toast('Shift saved \u2713');}
+  if(editingShift&&editingShift.sid===sid&&editingShift.day===day){wStore[day][editingShift.idx]=entry;toast('Shift updated \u2713');}
+  else{wStore[day].push(entry);toast('Shift saved \u2713');}
+  // Also update the repeating template so new weeks start from latest pattern
+  if(!shifts[sid])shifts[sid]={};
+  shifts[sid][day]=wStore[day].map(function(sh){return Object.assign({},sh);});
   closeShift();render();
 }
-function deleteShift(){if(!editingShift)return;var e=editingShift;shifts[e.sid][e.day].splice(e.idx,1);closeShift();render();toast('Shift deleted');}
-function quickDel(sid,day,idx,ev){ev.stopPropagation();shifts[sid][day].splice(idx,1);render();}
+function deleteShift(){
+  if(!editingShift)return;
+  var e=editingShift;
+  var wStore=ensureWeekStore(e.sid);
+  if(wStore[e.day])wStore[e.day].splice(e.idx,1);
+  // Sync deletion back to template
+  if(shifts[e.sid]&&shifts[e.sid][e.day])shifts[e.sid][e.day].splice(e.idx,1);
+  closeShift();render();toast('Shift deleted');
+}
+function quickDel(sid,day,idx,ev){
+  ev.stopPropagation();
+  var wStore=ensureWeekStore(sid);
+  if(wStore[day])wStore[day].splice(idx,1);
+  if(shifts[sid]&&shifts[sid][day])shifts[sid][day].splice(idx,1);
+  render();
+}
 
 // ── ADD STAFF ────────────────────────────────────────────────────────────
 function openAddStaff(){requirePassword('Add Staff Member','Only managers can add new team members.',function(){document.getElementById('ns_name').value='';document.getElementById('ns_rate').value='';staffPhotoData=null;document.getElementById('ns_photo_prev').innerHTML='<span style="font-size:1.3rem;">\uD83D\uDCF7</span><span style="font-size:.6rem;color:var(--muted);">Click to upload</span>';document.getElementById('staffModal').style.display='flex';});}
@@ -1293,8 +1320,6 @@ function dl(e){e.currentTarget.classList.remove('drop-on');}
 function dp(e,sid,day){e.preventDefault();e.currentTarget.classList.remove('drop-on');if(dragId!==null){openAdd(dragId,day);dragId=null;}}
 
 // ── VIEW / NAV ───────────────────────────────────────────────────────────
-document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
-document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
 function switchView(v){
   currentView=v;
   document.getElementById('btnWeekView').classList.toggle('active',v==='week');
@@ -1580,14 +1605,48 @@ function syncMonthStore(){
   }
 }
 function getMonthDayShifts(sid,d){
-  // Always use the live repeating shift template as the source of truth.
-  // monthShiftsStore entries are only used when they represent a saved
-  // week-specific override (i.e. weekStart key == that week's Monday AND
-  // the stored entry differs from the template — future feature).
-  // For now: shifts[sid][dayIdx] is always correct and always up to date.
   var dayIdx=(d.getDay()+6)%7;
-  var rep=shifts[sid]||{};
-  return (rep[dayIdx]||[]);
+  // Check for a week-specific override in monthShiftsStore first
+  var wKey=getMonday(new Date(d)).toISOString().slice(0,10);
+  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
+  if(stored&&stored[dayIdx]) return stored[dayIdx];
+  // Fall back to the repeating weekly template
+  return (shifts[sid]||{})[dayIdx]||[];
+}
+
+// Get shifts for a specific weekday in the currently-viewed week
+function getWeekShifts(sid,dayIdx){
+  var wKey=weekStart.toISOString().slice(0,10);
+  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
+  if(stored&&stored[dayIdx]) return stored[dayIdx];
+  return (shifts[sid]||{})[dayIdx]||[];
+}
+
+// Get all shifts for a staff member in the currently-viewed week (all 7 days)
+function getWeekAllShifts(sid){
+  var wKey=weekStart.toISOString().slice(0,10);
+  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
+  var result={};
+  for(var d=0;d<7;d++){
+    if(stored&&stored[d]) result[d]=stored[d];
+    else result[d]=(shifts[sid]||{})[d]||[];
+  }
+  return result;
+}
+
+// Ensure week-specific store exists for current weekStart, copying from template
+function ensureWeekStore(sid){
+  var wKey=weekStart.toISOString().slice(0,10);
+  if(!monthShiftsStore[sid]) monthShiftsStore[sid]={};
+  if(!monthShiftsStore[sid][wKey]){
+    // Deep copy the template so edits don't affect other weeks
+    var tmpl=shifts[sid]||{};
+    monthShiftsStore[sid][wKey]={};
+    for(var d=0;d<7;d++){
+      monthShiftsStore[sid][wKey][d]=tmpl[d]?tmpl[d].map(function(sh){return Object.assign({},sh);}):[];
+    }
+  }
+  return monthShiftsStore[sid][wKey];
 }
 function renderMonth(){
   syncMonthStore(); // ensure all weeks of this month are populated

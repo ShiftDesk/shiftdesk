@@ -687,6 +687,7 @@ window.handleLogin = async function handleLogin() {
       <button class="btn btn-ghost" onclick="toggleTools()">&#128295; Tools &#9660;</button>
       <div class="drop-menu">
         <div class="drop-item" onclick="openClockPanel()"><span style="width:20px;text-align:center;">&#128336;</span> Clock In/Out</div>
+        <div class="drop-item" onclick="showCheckinLink()" style="background:#e4f2ec;border-left:3px solid #1b6e40;"><span style="width:20px;text-align:center;">&#128241;</span> <span style="color:#1b6e40;font-weight:700;">Employee Check-in Link</span></div>
         <div class="drop-item" onclick="openAvailability()"><span style="width:20px;text-align:center;">&#128197;</span> Availability</div>
         <div class="drop-item" id="budgetMenuItem" onclick="openBudgetSystem()" style="background:#e6edf9;border-left:3px solid #1b4896;display:none;"><span style="width:20px;text-align:center;">&#128202;</span> <span style="color:#1b4896;font-weight:700;">Budget</span> <span style="font-size:.6rem;background:#1b4896;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
         <div class="drop-item" id="payrollMenuItem" style="background:#f5f0ff;border-left:3px solid #6b21a8;display:none;"><span style="width:20px;text-align:center;">&#128176;</span> <span style="color:#6b21a8;font-weight:700;">Løn</span> <span style="font-size:.6rem;background:#6b21a8;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ADDON</span></div>
@@ -2529,9 +2530,57 @@ function notifyAll(){
   toast('\uD83D\uDCE7 Email klar med alle vagter');
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Employee Check-in Link
+// ═══════════════════════════════════════════════════════════════════════════
+function showCheckinLink(){
+  document.getElementById('toolsWrap').classList.remove('open');
+  var cust=window._currentCustomer;
+  if(!cust){toast('Log ind for at se linket');return;}
+  var base=window.location.origin+window.location.pathname.replace(/[^\/]*$/,'');
+  var link=base+'checkin.html?cust='+cust.id;
+  document.getElementById('checkinLinkUrl').value=link;
+  document.getElementById('checkinLinkModal').style.display='flex';
+}
+function closeCheckinLink(){document.getElementById('checkinLinkModal').style.display='none';}
+function copyCheckinLink(){
+  var el=document.getElementById('checkinLinkUrl');
+  el.select();el.setSelectionRange(0,9999);
+  try{document.execCommand('copy');toast('\uD83D\uDCCB Link kopieret!');}
+  catch(e){if(navigator.clipboard)navigator.clipboard.writeText(el.value).then(function(){toast('\uD83D\uDCCB Link kopieret!');});}
+}
+function shareCheckinLink(){
+  var url=document.getElementById('checkinLinkUrl').value;
+  if(navigator.share){navigator.share({title:'ShiftDesk Check In/Out',text:'Brug dette link til at checke ind og ud:',url:url});}
+  else{copyCheckinLink();}
+}
+
 </script>
 
-<!-- Forgot Password Modal -->
+<!-- Check-in Link Modal -->
+<div class="overlay" id="checkinLinkModal" style="display:none;" onclick="if(event.target===this)closeCheckinLink()">
+  <div class="modal" style="width:420px;">
+    <div class="modal-title">&#128241; Medarbejder Check-in Link</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      Send dette link til dine medarbejdere. De åbner det på deres telefon og kan selv checke ind og ud med deres navn og PIN-kode.<br><br>
+      <strong>Første gang</strong> de logger ind vælger de selv deres PIN — derefter bruger de samme PIN hver dag.
+    </div>
+    <div class="fg">
+      <label class="fl">Dit unikke check-in link</label>
+      <div style="display:flex;gap:8px;">
+        <input class="fc" type="text" id="checkinLinkUrl" readonly style="font-size:.72rem;flex:1;">
+        <button class="btn btn-acc btn-sm" onclick="copyCheckinLink()" style="padding:8px 14px;white-space:nowrap;">&#128203; Kopier</button>
+      </div>
+    </div>
+    <div style="background:var(--green-lt);border:1.5px solid #a8d5bc;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.76rem;color:var(--green);">
+      &#128274; <strong>Sikkert:</strong> Kun medarbejdere der kender deres fulde navn og PIN kan logge ind. Ingen kan se andre kunders data.
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-green" onclick="shareCheckinLink()" style="flex:1;">&#128172; Del link</button>
+      <button class="btn btn-ghost" onclick="closeCheckinLink()" style="flex:1;">Luk</button>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="forgotPwModal" style="display:none;" onclick="if(event.target===this)closeForgotPwRequest()">
   <div class="modal" style="width:380px;text-align:center;">
     <div style="font-size:2rem;margin-bottom:10px;">&#128274;</div>

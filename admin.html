@@ -823,11 +823,20 @@ async function saveCustomer() {
   btn.disabled    = true;
   btn.textContent = 'Saving…';
 
+  // Wait for Firebase to be ready (up to 5 seconds)
+  var fbOk = await waitFb();
+  if (!fbOk || !window.fb) {
+    showErr(errEl, 'Cannot connect to database. Check your internet connection and try again.');
+    btn.disabled    = false;
+    btn.textContent = isEditing ? 'Save Changes' : 'Add Customer';
+    return;
+  }
+
   try {
     if (!isEditing) {
       // Duplicate email check against fresh Firebase data
       var fresh = [];
-      if (window._fbReady && window.fb) { try { fresh = await window.fb.loadCustomers(); } catch(e){} }
+      try { fresh = await window.fb.loadCustomers(); } catch(e){ fresh = customers; }
       var dupe = fresh.find(function(c){ return c.email && c.email.toLowerCase() === email; });
       if (dupe) {
         showErr(errEl, 'A customer with this email already exists.');
@@ -848,11 +857,9 @@ async function saveCustomer() {
           plan:plan, duration:duration, startDate:startDate,
           expiryDate:expiryDate, status:status, notes:notes, hasBudget:hasBudget, hasPayroll:hasPayroll, hasEgenkontrol:hasEgenkontrol
         });
-        if (window._fbReady && window.fb) {
-          await window.fb.saveCustomer(customers[idx]);
-          if (password) {
-            try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e){}
-          }
+        await window.fb.saveCustomer(customers[idx]);
+        if (password) {
+          try { await window.fb.setCustomerData('mgr_pw_' + customers[idx].id, password); } catch(e){}
         }
       }
       toast('Customer updated ✓');
@@ -864,15 +871,14 @@ async function saveCustomer() {
         expiryDate:expiryDate, status:status, notes:notes,
         hasBudget:hasBudget, hasPayroll:hasPayroll, hasEgenkontrol:hasEgenkontrol, createdAt:new Date().toISOString()
       };
-      customers.push(newCust);
-      if (window._fbReady && window.fb) {
-        await window.fb.saveCustomer(newCust);
-        // Retry mgr_pw up to 3 times
-        for (var i = 0; i < 3; i++) {
-          try { await window.fb.setCustomerData('mgr_pw_' + newCust.id, password); break; }
-          catch(e) { await new Promise(function(r){ setTimeout(r, 600); }); }
-        }
+      // Save to Firebase FIRST — only add to local list if save succeeds
+      await window.fb.saveCustomer(newCust);
+      // Save manager password
+      for (var i = 0; i < 3; i++) {
+        try { await window.fb.setCustomerData('mgr_pw_' + newCust.id, password); break; }
+        catch(e) { await new Promise(function(r){ setTimeout(r, 600); }); }
       }
+      customers.push(newCust);
       toast('Customer added ✓');
     }
 
@@ -881,7 +887,7 @@ async function saveCustomer() {
     updateStats();
 
   } catch(err) {
-    showErr(errEl, 'Save failed: ' + err.message);
+    showErr(errEl, 'Save failed: ' + err.message + '. Please try again.');
     btn.disabled    = false;
     btn.textContent = isEditing ? 'Save Changes' : 'Add Customer';
   }

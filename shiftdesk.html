@@ -1558,12 +1558,46 @@ function loadMeetingsForWeek(){
   }
 }
 function syncMonthStore(){
+  // Always sync the current week view
   var monKey=weekStart.toISOString().slice(0,10);
-  staff.forEach(function(s){if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};monthShiftsStore[s.id][monKey]=Object.assign({},shifts[s.id]||{});});
-  Object.keys(meetings).forEach(function(dayIdx){var d=addDays(weekStart,parseInt(dayIdx));monthMeetings[d.toISOString().slice(0,10)]=meetings[dayIdx].note||'Meeting';});
+  staff.forEach(function(s){
+    if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};
+    monthShiftsStore[s.id][monKey]=Object.assign({},shifts[s.id]||{});
+  });
+  Object.keys(meetings).forEach(function(dayIdx){
+    var d=addDays(weekStart,parseInt(dayIdx));
+    monthMeetings[d.toISOString().slice(0,10)]=meetings[dayIdx].note||'Meeting';
+  });
+  // Also pre-populate all weeks of the currently displayed month
+  // so the monthly calendar shows shifts without needing to visit each week first
+  var year=monthDate.getFullYear(),month=monthDate.getMonth();
+  var firstDay=new Date(year,month,1),lastDay=new Date(year,month+1,0);
+  var w=new Date(getMonday(firstDay));
+  var endW=new Date(getMonday(lastDay));endW.setDate(endW.getDate()+7);
+  while(w<=endW){
+    var wKey=w.toISOString().slice(0,10);
+    staff.forEach(function(s){
+      if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};
+      // Only write if not already explicitly overridden (don't overwrite custom week edits)
+      if(!monthShiftsStore[s.id][wKey]){
+        monthShiftsStore[s.id][wKey]=Object.assign({},shifts[s.id]||{});
+      }
+    });
+    w.setDate(w.getDate()+7);
+  }
 }
-function getMonthDayShifts(sid,d){var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];return stored&&stored[dayIdx]?stored[dayIdx]:[];}
+function getMonthDayShifts(sid,d){
+  var dayIdx=(d.getDay()+6)%7;
+  var monKey=getMonday(new Date(d)).toISOString().slice(0,10);
+  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];
+  // If we have an explicit stored week for this key, use it
+  if(stored&&stored[dayIdx]&&stored[dayIdx].length) return stored[dayIdx];
+  // Otherwise fall back to the repeating weekly shift pattern
+  var rep=shifts[sid]||{};
+  return rep[dayIdx]||[];
+}
 function renderMonth(){
+  syncMonthStore(); // ensure all weeks of this month are populated
   var year=monthDate.getFullYear(),month=monthDate.getMonth();
   var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('monthNavLabel').textContent=MN[month]+' '+year;
@@ -1582,7 +1616,7 @@ function renderMonth(){
     var cls='cal-cell'+((!inM)?' other':'')+(isT?' today-cell':'');
     gridHtml+='<div class="'+cls+'"><div class="cal-day-num'+(inM?' this':'')+(isT?' tod':'')+'">'+day.getDate()+'</div>';
     if(hasMeet)gridHtml+='<div class="cal-meet">\uD83D\uDCC5 '+hasMeet+'</div>';
-    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];ds.forEach(function(sh){gridHtml+='<div class="cal-pill" style="background:'+rc.bg+';color:'+rc.color+';border-left-color:'+rc.color+';cursor:pointer;" onclick="openPersonReport('+s.id+')" title="'+s.name+'">'+s.name.split(' ')[0]+' '+sh.start+'\u2013'+sh.end+'</div>';});});}
+    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var ds=getMonthDayShifts(s.id,new Date(day));ds.forEach(function(sh){gridHtml+='<div class="cal-pill" style="background:'+rc.bg+';color:'+rc.color+';border-left-color:'+rc.color+';cursor:pointer;" onclick="openPersonReport('+s.id+')" title="'+s.name+'">'+s.name.split(' ')[0]+' '+sh.start+'\u2013'+sh.end+'</div>';});});}
     gridHtml+='</div>';
   }
   document.getElementById('calGrid').innerHTML=gridHtml;

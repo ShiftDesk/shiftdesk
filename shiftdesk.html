@@ -2097,7 +2097,7 @@ function doPublish(){var b=document.getElementById('pubBtn');b.textContent='\u27
 // ── PERSISTENCE ──────────────────────────────────────────────────────────
 function saveData(){
   syncMonthStore();
-  try{localStorage.setItem(atob('c2hpZnRkZXNrX3N0YWZm'),JSON.stringify(staff));localStorage.setItem(atob('c2hpZnRkZXNrX3NoaWZ0cw=='),JSON.stringify(shifts));localStorage.setItem(atob('c2hpZnRkZXNrX21lZXRpbmdz'),JSON.stringify(meetings));localStorage.setItem(atob('c2hpZnRkZXNrX21vbnRoc3RvcmU='),JSON.stringify(monthShiftsStore));localStorage.setItem(atob('c2hpZnRkZXNrX21vbnRobWVldA=='),JSON.stringify(monthMeetings));localStorage.setItem(atob('c2hpZnRkZXNrX2F2YWls'),JSON.stringify(availability));}catch(e){}
+  try{localStorage.setItem(atob('c2hpZnRkZXNrX3N0YWZm'),JSON.stringify(staff));localStorage.setItem(atob('c2hpZnRkZXNrX3NoaWZ0cw=='),JSON.stringify(shifts));localStorage.setItem(atob('c2hpZnRkZXNrX21lZXRpbmdz'),JSON.stringify(meetings));localStorage.setItem(atob('c2hpZnRkZXNrX21vbnRoc3RvcmU='),JSON.stringify(monthShiftsStore));localStorage.setItem(atob('c2hpZnRkZXNrX21vbnRobWVldA=='),JSON.stringify(monthMeetings));localStorage.setItem(atob('c2hpZnRkZXNrX2F2YWls'),JSON.stringify(availability));localStorage.setItem('sd_wsh',JSON.stringify(weekShifts));}catch(e){}
 }
 function loadData(){
   try{var s=localStorage.getItem(atob('c2hpZnRkZXNrX3N0YWZm')),sh=localStorage.getItem(atob('c2hpZnRkZXNrX3NoaWZ0cw==')),m=localStorage.getItem(atob('c2hpZnRkZXNrX21lZXRpbmdz')),ms=localStorage.getItem(atob('c2hpZnRkZXNrX21vbnRoc3RvcmU=')),mm=localStorage.getItem(atob('c2hpZnRkZXNrX21vbnRobWVldA==')),av=localStorage.getItem(atob('c2hpZnRkZXNrX2F2YWls'));
@@ -2245,7 +2245,8 @@ window.loadDataCloud = async function loadDataCloud() {
     if(m){ meetings={}; Object.keys(m).forEach(function(k){ meetings[parseInt(k)]=m[k]; }); }
     if(ms){ monthShiftsStore={}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)]=ms[k]; }); }
     if(mm) monthMeetings=mm;
-    var wsC=await sdStorageGet(custKey('weekShifts'));if(wsC){weekShifts={};Object.keys(wsC).forEach(function(wk){weekShifts[wk]={};Object.keys(wsC[wk]).forEach(function(sid){weekShifts[wk][parseInt(sid)]=wsC[wk][sid];});});}
+    var wsC=await sdStorageGet(custKey('weekShifts'));if(wsC){weekShifts={};Object.keys(wsC).forEach(function(wk){weekShifts[wk]={};Object.keys(wsC[wk]).forEach(function(sid){weekShifts[wk][parseInt(sid)]=wsC[wk][sid];});})};
+    wInit();
     if(av){ availability={}; Object.keys(av).forEach(function(k){ availability[parseInt(k)]=av[k]; }); }
     var ch=await sdStorageGet(custKey('clockHistory'));
     if(ch){ clockHistory={}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)]=ch[k]; }); }
@@ -2337,6 +2338,7 @@ window.bootApp = function bootApp(email, customer){
     badge.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+email+'">'+displayName+'</span><span onclick="doLogout()" style="cursor:pointer;color:var(--acc);font-weight:700;margin-left:2px;flex-shrink:0;" title="Sign out">&times;</span>';
     tb.insertBefore(badge, tb.firstChild);
   }
+  wInit();
   render();
 }
 

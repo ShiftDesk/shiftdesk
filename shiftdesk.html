@@ -1113,15 +1113,7 @@ function ini(n){return n.split(' ').map(function(w){return w[0];}).join('').slic
 function tdiff(s,e){var sh=parseInt(s),sm=parseInt(s.split(':')[1]),eh=parseInt(e),em=parseInt(e.split(':')[1]);if(eh<sh)eh+=24;return((eh*60+em)-(sh*60+sm))/60;}
 function brkMin(sh){if(!sh.breakStart||!sh.breakEnd)return 0;return Math.round(tdiff(sh.breakStart,sh.breakEnd)*60);}
 function workedH(sh){if(!sh.end||sh.end===sh.start)return 0;return Math.max(0,tdiff(sh.start,sh.end)-brkMin(sh)/60);}
-function staffH(id){
-  var h=0;
-  var ws=getWeekAllShifts(id);
-  for(var d=0;d<7;d++){
-    var arr=ws[d]||[];
-    arr.forEach(function(s){h+=workedH(s);});
-  }
-  return Math.round(h*10)/10;
-}
+function staffH(id){var h=0;Object.values(shifts[id]||{}).forEach(function(a){a.forEach(function(s){h+=workedH(s);});});return Math.round(h*10)/10;}
 function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2300);}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function nowHHMM(){var n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
@@ -1137,7 +1129,7 @@ function renderHeader(){
   var h='<div class="ghc-corner"><span class="ghc-corner-lbl">Employee</span></div>';
   for(var i=0;i<7;i++){
     var d=addDays(weekStart,i),tod=isToday(d),meet=meetings[i];
-    var cnt=staff.reduce(function(a,s){return a+getWeekShifts(s.id,i).length;},0);
+    var cnt=staff.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
     var cls='ghc-cell'+(tod?' is-today':'')+(meet?' is-meet':'');
     h+='<div class="'+cls+'" onclick="openMeet('+i+')" title="Click to set meeting day">';
     h+='<div class="g-day-abbr">'+DN[i]+'</div>';
@@ -1159,7 +1151,7 @@ function renderBody(){
     html+='<div class="role-group"><div class="role-hdr">';
     html+='<div class="rhc-label" style="border-right:1px solid var(--border)"><div class="r-dot" style="background:'+rc.color+'"></div><span class="r-nm">'+role+'</span><span style="font-size:.61rem;color:var(--muted);font-family:\'DM Mono\',monospace;margin-left:auto;">'+members.length+'</span></div>';
     for(var i=0;i<7;i++){
-      var cnt=members.reduce(function(a,s){return a+getWeekShifts(s.id,i).length;},0);
+      var cnt=members.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
       html+='<div class="rhc-day'+(meetings[i]?' mc':'')+'">'+( cnt||'\u2013')+'</div>';
     }
     html+='</div>';
@@ -1173,7 +1165,7 @@ function renderBody(){
       html+='<div class="sr-h">'+staffH(s.id)+'h</div></div></div></div>';
       for(var d=0;d<7;d++){
         var avState=(availability[s.id]||{})[addDays(weekStart,d).toISOString().slice(0,10)];
-        var cellSh=getWeekShifts(s.id,d);
+        var cellSh=((shifts[s.id]||{})[d]||[]);
         var cellBg=avState==='sick'?'style="background:#fdf8f8"':avState==='unavail'?'style="background:#fdf5f0"':'';
         html+='<div class="shift-cell'+(meetings[d]?' mc':'')+'" '+cellBg+' ondragover="ev(event)" ondrop="dp(event,'+s.id+','+d+')" ondragleave="dl(event)">';
         if(avState&&!cellSh.length){html+='<div style="font-size:.6rem;color:'+(avState==='sick'?'#c0392b':'var(--acc)')+';font-style:italic;padding:3px;">'+(avState==='sick'?'\uD83E\uDD12 Sick':'\u274C Unavail')+'</div>';}
@@ -1230,10 +1222,7 @@ function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popSta
   var sec2=document.getElementById('smApproveSection');if(sec2)sec2.style.display='none';
 }
 function openEdit(sid,day,idx){
-  var wStore=ensureWeekStore(sid);
-  var weekDay=(wStore[day]||wStore[String(day)]||[]);
-  if(!weekDay.length) weekDay=(shifts[sid]||{})[day]||[];
-  var sh=weekDay[idx];
+  var sh=shifts[sid][day][idx];
   editingShift={sid:sid,day:day,idx:idx};
   pendingCell={sid:sid,day:day};
   popStaff(sid);
@@ -1281,28 +1270,14 @@ function saveShift(){
   var note=document.getElementById('sm_note').value.trim();
   var hb=document.getElementById('sm_hb').checked;
   var bStart=hb?document.getElementById('sm_bs').value:null,bEnd=hb?document.getElementById('sm_be').value:null;
-  // Write ONLY to the week-specific store — never touch the template (shifts[])
-  // The template is the default for unvisited weeks; editing one week must not affect others
-  var wStore=ensureWeekStore(sid);
-  if(!wStore[day])wStore[day]=[];
+  if(!shifts[sid])shifts[sid]={};if(!shifts[sid][day])shifts[sid][day]=[];
   var entry={start:start,end:end,note:note,breakStart:bStart,breakEnd:bEnd};
-  if(editingShift&&editingShift.sid===sid&&editingShift.day===day){wStore[day][editingShift.idx]=entry;toast('Shift updated \u2713');}
-  else{wStore[day].push(entry);toast('Shift saved \u2713');}
+  if(editingShift&&editingShift.sid===sid&&editingShift.day===day){shifts[sid][day][editingShift.idx]=entry;toast('Shift updated \u2713');}
+  else{shifts[sid][day].push(entry);toast('Shift saved \u2713');}
   closeShift();render();
 }
-function deleteShift(){
-  if(!editingShift)return;
-  var e=editingShift;
-  var wStore=ensureWeekStore(e.sid);
-  if(wStore[e.day])wStore[e.day].splice(e.idx,1);
-  closeShift();render();toast('Shift deleted');
-}
-function quickDel(sid,day,idx,ev){
-  ev.stopPropagation();
-  var wStore=ensureWeekStore(sid);
-  if(wStore[day])wStore[day].splice(idx,1);
-  render();
-}
+function deleteShift(){if(!editingShift)return;var e=editingShift;shifts[e.sid][e.day].splice(e.idx,1);closeShift();render();toast('Shift deleted');}
+function quickDel(sid,day,idx,ev){ev.stopPropagation();shifts[sid][day].splice(idx,1);render();}
 
 // ── ADD STAFF ────────────────────────────────────────────────────────────
 function openAddStaff(){requirePassword('Add Staff Member','Only managers can add new team members.',function(){document.getElementById('ns_name').value='';document.getElementById('ns_rate').value='';staffPhotoData=null;document.getElementById('ns_photo_prev').innerHTML='<span style="font-size:1.3rem;">\uD83D\uDCF7</span><span style="font-size:.6rem;color:var(--muted);">Click to upload</span>';document.getElementById('staffModal').style.display='flex';});}
@@ -1318,6 +1293,8 @@ function dl(e){e.currentTarget.classList.remove('drop-on');}
 function dp(e,sid,day){e.preventDefault();e.currentTarget.classList.remove('drop-on');if(dragId!==null){openAdd(dragId,day);dragId=null;}}
 
 // ── VIEW / NAV ───────────────────────────────────────────────────────────
+document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
+document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
 function switchView(v){
   currentView=v;
   document.getElementById('btnWeekView').classList.toggle('active',v==='week');
@@ -1492,7 +1469,9 @@ function profileEmail(){
   body2+='Role: '+s.role+(s.rate?' \u00b7 '+s.rate+' DKK/h':'')+'\n'+'='.repeat(36)+'\n\n';
   syncMonthStore();
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-    var ds3=getMonthDayShifts(sid,new Date(d));
+    var dayIdx2=(d.getDay()+6)%7,monKey2=getMonday(new Date(d)).toISOString().slice(0,10);
+    var stored2=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey2];
+    var ds3=stored2&&stored2[dayIdx2]?stored2[dayIdx2]:[];
     if(ds3.length){daysW++;ds3.forEach(function(sh){var wh=Math.round(workedH(sh)*10)/10,bm=brkMin(sh);totalW+=workedH(sh);totalB+=bm;body2+=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+sh.start+'\u2013'+sh.end+' ('+wh+'h'+(bm?', '+bm+'min break':'')+')'+(sh.note?' \u2014 '+sh.note:'')+'\n';});}
   }
   body2+='\nDays: '+daysW+'\nHours: '+Math.round(totalW*10)/10+'h\nBreak: '+totalB+'min\n';
@@ -1529,7 +1508,8 @@ function buildCalBody(sid){
   var totalW=0,totalB=0,daysW=0;
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
     var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-    var ds=getMonthDayShifts(sid,new Date(d));
+    var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];
+    var ds=stored&&stored[dayIdx]?stored[dayIdx]:[];
     if(ds.length){daysW++;ds.forEach(function(sh){totalW+=workedH(sh);totalB+=brkMin(sh);});}
   }
   var totalWR=Math.round(totalW*10)/10,avgH=daysW?Math.round(totalW/daysW*10)/10:0;
@@ -1538,7 +1518,9 @@ function buildCalBody(sid){
   var calRows='',cells=[];
   for(var day=new Date(startMon);day<=endSun;day.setDate(day.getDate()+1)){
     var inM=day.getMonth()===month,isT=day.getTime()===today.getTime();
-    var ds2=getMonthDayShifts(sid,new Date(day));
+    var dayIdx2=(day.getDay()+6)%7,monKey2=getMonday(new Date(day)).toISOString().slice(0,10);
+    var stored2=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey2];
+    var ds2=stored2&&stored2[dayIdx2]?stored2[dayIdx2]:[];
     var bg=inM?(isT?'#fff4ef':'#fff'):'#f8f7f4',dc=isT?'#bf4a0a':inM?'#18160f':'#c9c3b8';
     var pills='';
     ds2.forEach(function(sh){var wh=Math.round(workedH(sh)*10)/10,bm=brkMin(sh);pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:5px;padding:4px 6px;margin-bottom:3px;font-size:9px;"><div style="color:'+rc.color+';font-weight:700;">'+sh.start+'\u2013'+sh.end+'</div><div style="color:'+rc.color+';">'+wh+'h worked</div>'+(bm?'<div style="color:'+rc.color+';opacity:.75;">\u2615 '+bm+'min</div>':'')+(sh.note?'<div style="color:'+rc.color+';opacity:.65;font-style:italic;">'+sh.note+'</div>':'')+'</div>';});
@@ -1575,84 +1557,13 @@ function loadMeetingsForWeek(){
     }
   }
 }
-// Deep-copy a shift object
-function deepCopyShift(sh){ return Object.assign({},sh); }
-// Deep-copy one week's shifts {0:[...], 1:[...], ..., 6:[...]}
-function deepCopyWeek(weekObj){
-  var out={};
-  for(var d=0;d<7;d++){
-    var arr=(weekObj[d]||weekObj[String(d)]||[]);
-    out[d]=arr.map(deepCopyShift);
-  }
-  return out;
-}
-
 function syncMonthStore(){
-  // Sync meetings for the current week into monthMeetings
-  Object.keys(meetings).forEach(function(dayIdx){
-    var d=addDays(weekStart,parseInt(dayIdx));
-    monthMeetings[d.toISOString().slice(0,10)]=meetings[dayIdx].note||'Meeting';
-  });
-  // DO NOT overwrite week-specific stores here — we only write on navigation/save
+  var monKey=weekStart.toISOString().slice(0,10);
+  staff.forEach(function(s){if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};monthShiftsStore[s.id][monKey]=Object.assign({},shifts[s.id]||{});});
+  Object.keys(meetings).forEach(function(dayIdx){var d=addDays(weekStart,parseInt(dayIdx));monthMeetings[d.toISOString().slice(0,10)]=meetings[dayIdx].note||'Meeting';});
 }
-function getMonthDayShifts(sid,d){
-  var dayIdx=(d.getDay()+6)%7;
-  var wKey=getMonday(new Date(d)).toISOString().slice(0,10);
-  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  if(stored){
-    var row=stored[dayIdx]||stored[String(dayIdx)];
-    if(row&&row.length) return row;
-  }
-  return (shifts[sid]||{})[dayIdx]||[];
-}
-
-// Get shifts for a specific weekday in the currently-viewed week
-function getWeekShifts(sid,dayIdx){
-  var wKey=weekStart.toISOString().slice(0,10);
-  var week=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  if(week&&week[dayIdx]!==undefined) return week[dayIdx];
-  // Fall back to template for weeks not yet initialized
-  return (shifts[sid]||{})[dayIdx]||[];
-}
-
-// Get all 7 days for the current week
-function getWeekAllShifts(sid){
-  var wKey=weekStart.toISOString().slice(0,10);
-  var week=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  var result={};
-  for(var d=0;d<7;d++){
-    result[d]=(week&&week[d]!==undefined)?week[d]:((shifts[sid]||{})[d]||[]);
-  }
-  return result;
-}
-
-// Initialize a week-specific store with a deep copy of the template.
-// Called on navigation, save, and after data load. Safe to call multiple times.
-function ensureWeekStore(sid){
-  var wKey=weekStart.toISOString().slice(0,10);
-  if(!monthShiftsStore[sid]) monthShiftsStore[sid]={};
-  if(!monthShiftsStore[sid][wKey]){
-    // Week not seen before — deep copy from template
-    monthShiftsStore[sid][wKey]=deepCopyWeek(shifts[sid]||{});
-  } else {
-    // Week exists (loaded from storage) — ensure integer keys for all 7 days
-    var week=monthShiftsStore[sid][wKey];
-    for(var d=0;d<7;d++){
-      if(!week[d]){
-        week[d]=week[String(d)]||[];
-        delete week[String(d)];
-      }
-    }
-  }
-  return monthShiftsStore[sid][wKey];
-}
-
-// Initialize week stores for ALL staff on navigation, so each week is independent
-function ensureAllWeekStores(){
-  staff.forEach(function(s){ ensureWeekStore(s.id); });
-}
+function getMonthDayShifts(sid,d){var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];if(stored&&stored[dayIdx]&&stored[dayIdx].length)return stored[dayIdx];return (shifts[sid]||{})[dayIdx]||[];}
 function renderMonth(){
-  syncMonthStore(); // ensure all weeks of this month are populated
   var year=monthDate.getFullYear(),month=monthDate.getMonth();
   var MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('monthNavLabel').textContent=MN[month]+' '+year;
@@ -1691,7 +1602,7 @@ function printMonth(){
     var dayIdx=(day.getDay()+6)%7,monKey=getMonday(new Date(day)).toISOString().slice(0,10);
     var bg=inM?(isT?'#fff4ef':'#fff'):'#f5f4f1',dc=isT?'#bf4a0a':inM?'#18160f':'#c9c3b8';
     var pills='';
-    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var ds=getMonthDayShifts(s.id,new Date(day));ds.forEach(function(sh){pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:4px;padding:3px 5px;margin-bottom:2px;font-size:9px;"><span style="color:'+rc.color+';font-weight:700;">'+s.name.split(' ')[0]+'</span> <span style="color:'+rc.color+';">'+sh.start+'\u2013'+sh.end+'</span></div>';});});}
+    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];ds.forEach(function(sh){pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:4px;padding:3px 5px;margin-bottom:2px;font-size:9px;"><span style="color:'+rc.color+';font-weight:700;">'+s.name.split(' ')[0]+'</span> <span style="color:'+rc.color+';">'+sh.start+'\u2013'+sh.end+'</span></div>';});});}
     cells.push('<td style="width:14.28%;vertical-align:top;padding:5px 4px;background:'+bg+';border:1px solid #e3ddd4;min-height:80px;"><div style="font-size:'+(isT?'14':'12')+'px;font-weight:700;color:'+dc+';margin-bottom:3px;">'+day.getDate()+'</div>'+(inM?(pills||''):'')+'</td>');
     if(cells.length===7){calRows+='<tr>'+cells.join('')+'</tr>';cells=[];}
   }
@@ -1717,7 +1628,9 @@ function emailMonth(){
   shown.forEach(function(s){
     body+=s.name+' ('+s.role+')\n'+'_'.repeat(28)+'\n';
     for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-      var ds=getMonthDayShifts(s.id,new Date(d));
+      var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
+      var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];
+      var ds=(stored&&stored[dayIdx])||[];
       if(ds.length){ds.forEach(function(sh){var bm=brkMin(sh);body+='  '+d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+sh.start+'\u2013'+sh.end+(bm?' (break '+bm+'m)':'')+(sh.note?' \u00b7 '+sh.note:'')+'\n';});}
     }
     body+='\n';
@@ -1736,8 +1649,9 @@ function openPersonReport(sid){
   var weekData={};
   syncMonthStore();
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-    var monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-    var dayShifts=getMonthDayShifts(s.id,new Date(d));
+    var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
+    var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];
+    var dayShifts=(stored&&stored[dayIdx])||[];
     if(!weekData[monKey])weekData[monKey]=[];
     weekData[monKey].push({date:new Date(d),dayShifts:dayShifts});
     dayShifts.forEach(function(sh){totalShifts++;totalWorked+=workedH(sh);totalBreak+=brkMin(sh);});
@@ -2185,18 +2099,7 @@ function loadData(){
     if(s)staff=JSON.parse(s);
     if(sh){var p=JSON.parse(sh);shifts={};Object.keys(p).forEach(function(k){shifts[parseInt(k)]=p[k];});}
     if(m){var p2=JSON.parse(m);meetings={};Object.keys(p2).forEach(function(k){meetings[parseInt(k)]=p2[k];});}
-    if(ms){
-      var p3=JSON.parse(ms);monthShiftsStore={};
-      Object.keys(p3).forEach(function(sid){
-        var sidInt=parseInt(sid);
-        monthShiftsStore[sidInt]={};
-        var weekMap=p3[sid];
-        Object.keys(weekMap).forEach(function(wKey){
-          // Normalize day keys from strings to integers
-          monthShiftsStore[sidInt][wKey]=deepCopyWeek(weekMap[wKey]);
-        });
-      });
-    }
+    if(ms){var p3=JSON.parse(ms);monthShiftsStore={};Object.keys(p3).forEach(function(k){monthShiftsStore[parseInt(k)]=p3[k];});}
     if(mm)monthMeetings=JSON.parse(mm);
     if(av){var p4=JSON.parse(av);availability={};Object.keys(p4).forEach(function(k){availability[parseInt(k)]=p4[k];});}
   }catch(e){}
@@ -2259,9 +2162,8 @@ function loadPIData(){try{var d=localStorage.getItem(atob('c2hpZnRkZXNrX3Bp'));i
 
 // ── INIT ─────────────────────────────────────────────────────────────────
 loadData();loadClockLog();if(typeof loadClockHistory==="function")loadClockHistory();loadPIData();loadAvailability();
-ensureAllWeekStores(); // initialize the current week's store from the template
-document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);ensureAllWeekStores();loadMeetingsForWeek();render();};
-document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);ensureAllWeekStores();loadMeetingsForWeek();render();};
+document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
+document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
 render();
 checkBirthdays();
 checkLicense().then(function(){updateLicBtn();});
@@ -2334,25 +2236,13 @@ window.loadDataCloud = async function loadDataCloud() {
     if(s) staff = s;
     if(sh){ shifts={}; Object.keys(sh).forEach(function(k){ shifts[parseInt(k)]=sh[k]; }); }
     if(m){ meetings={}; Object.keys(m).forEach(function(k){ meetings[parseInt(k)]=m[k]; }); }
-    if(ms){
-      monthShiftsStore={};
-      Object.keys(ms).forEach(function(sid){
-        var sidInt=parseInt(sid);
-        monthShiftsStore[sidInt]={};
-        var weekMap=ms[sid];
-        Object.keys(weekMap).forEach(function(wKey){
-          monthShiftsStore[sidInt][wKey]=deepCopyWeek(weekMap[wKey]);
-        });
-      });
-    }
+    if(ms){ monthShiftsStore={}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)]=ms[k]; }); }
     if(mm) monthMeetings=mm;
     if(av){ availability={}; Object.keys(av).forEach(function(k){ availability[parseInt(k)]=av[k]; }); }
     var ch=await sdStorageGet(custKey('clockHistory'));
     if(ch){ clockHistory={}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)]=ch[k]; }); }
     var pi2=await sdStorageGet(custKey('pi'));
     if(pi2){ personalInfo={}; Object.keys(pi2).forEach(function(k){ personalInfo[parseInt(k)]=pi2[k]; }); }
-    // Re-initialize week stores from freshly loaded cloud data
-    if(typeof ensureAllWeekStores==='function') ensureAllWeekStores();
   } catch(e) {}
 }
 
@@ -2439,7 +2329,6 @@ window.bootApp = function bootApp(email, customer){
     badge.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+email+'">'+displayName+'</span><span onclick="doLogout()" style="cursor:pointer;color:var(--acc);font-weight:700;margin-left:2px;flex-shrink:0;" title="Sign out">&times;</span>';
     tb.insertBefore(badge, tb.firstChild);
   }
-  ensureAllWeekStores();
   render();
 }
 

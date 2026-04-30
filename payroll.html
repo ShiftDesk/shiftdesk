@@ -669,37 +669,49 @@ function calcPay(s, entries, overrides) {
   var totalBreakMins = approved.reduce((sum,e)=>sum+(e.breakMins||0), 0);
   var totalHours= totalMins/60;
 
-  // Bruttoløn = timeløn + drikkepenge (A-indkomst) + måltidsgodtgørelse
-  var timelon   = Math.round(totalHours * rate);
+  // ── Dansk lønberegning — verificeret mod Zenegy/Dataløn standard ────────────
+  //
+  //  Rækkefølge (verificeret mod live Zenegy lønseddel):
+  //    1. bruttoLøn = timeløn + alle tillæg
+  //    2. feriePenge = bruttoLøn × 12,5%  (separat kørsel — indgår IKKE i AM-grundlag)
+  //    3. ATP trækkes FØR AM-bidrag beregnes
+  //    4. AM-grundlag = bruttoLøn − ATP
+  //    5. AM-bidrag = round(AM-grundlag × 8%)
+  //    6. A-skat grl. = AM-grundlag − AM-bidrag − personfradrag − beskFradrag
+  //    7. A-skat = round(A-skat grl. × skattepct)
+  //    8. Nettoudb. = bruttoLøn − AM-bidrag − ATP − A-skat − pension(medarbj.)
+
+  // Step 1: Bruttoløn
+  var timelon   = Math.round(totalHours * rate * 100) / 100;
   var bruttoLon = timelon + drikkepenge + meal;
 
-  // Feriepenge 12.5% af bruttoløn
-  var feriePenge = Math.round(bruttoLon * 0.125);
+  // Step 2: Feriepenge — separat kørsel, vises men indgår IKKE i AM-grundlag
+  var feriePenge = Math.round(bruttoLon * 0.125 * 100) / 100;
 
-  // AM-grundlag = bruttoløn + feriepenge
-  var amGrundlag = bruttoLon + feriePenge;
-
-  // AM-bidrag 8%
-  var amBidrag = Math.round(amGrundlag * 0.08);
-
-  // ATP — kun hvis der er timer og en sats
+  // Step 3: ATP (kun hvis der er timer og sats)
   var atpDeduct = (totalHours > 0 && rate > 0) ? atp : 0;
 
-  // Pension medarbejder
+  // Step 4: AM-grundlag = bruttoLøn − ATP
+  var amGrundlag = bruttoLon - atpDeduct;
+
+  // Step 5: AM-bidrag 8%
+  var amBidrag = Math.round(amGrundlag * 0.08);
+
+  // Step 6: Pension (beregnes af bruttoløn)
   var pensionEDkk = Math.round(bruttoLon * pensionE);
   var pensionCDkk = Math.round(bruttoLon * pensionC);
 
-  // Beskæftigelsesfradrag — 10.65% af AM-bidragspligtig løn, max 3.800/md
+  // Step 7: Beskæftigelsesfradrag — reducerer A-skat grundlaget (ikke kontant fradrag i netto)
   var beskFradrag = Math.min(Math.round(amGrundlag * beskPct), beskMax);
 
-  // A-skat grundlag = amGrundlag - amBidrag - atp - pensionE - personfradrag - beskfradrag
-  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - atpDeduct - pensionEDkk - personfradrag - beskFradrag);
+  // Step 8: A-skat grundlag
+  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - personfradrag - beskFradrag);
 
-  // A-skat
+  // Step 9: A-skat
   var aSkat = Math.round(aSkGrundlag * askatPct);
 
-  // Nettoløn til udbetaling
-  var nettoLon = amGrundlag - amBidrag - atpDeduct - pensionEDkk - aSkat;
+  // Step 10: Nettoløn til udbetaling
+  var nettoLon = Math.round((bruttoLon - amBidrag - atpDeduct - aSkat - pensionEDkk) * 100) / 100;
 
   return {
     totalHours, totalMins, totalBreakMins, rate, timelon, meal, drikkepenge,

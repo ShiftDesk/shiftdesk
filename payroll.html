@@ -381,6 +381,7 @@ var _selMonth   = new Date().getMonth();
 var _selYear    = new Date().getFullYear();
 var _psStaffId  = null;
 var _psOverride = {};
+var _payrollSettings = {};
 
 // Default tax constants — Danish 2025/2026 rules
 // Personfradrag 2026: 54.100 DKK/år = 4.508 DKK/måned
@@ -543,6 +544,12 @@ async function loadAllData() {
     } catch(e) { _profile = {}; }
     if(!_profile.company)   _profile.company   = {};
     if(!_profile.employees) _profile.employees = {};
+
+    // Payroll settings — saved tax settings per employee
+    try {
+      var psv = await window.fb.get('cust_'+cid+'_payrollSettings');
+      _payrollSettings = (psv && typeof psv==='object' && !Array.isArray(psv)) ? psv : {};
+    } catch(e) { _payrollSettings = {}; }
 
   } catch(err) { toast('Fejl: '+err.message); }
 
@@ -937,45 +944,29 @@ async function saveHours() {
 // ── Payslip ──────────────────────────────────────────────────────────────────
 function openPayslip(sid) {
   _psStaffId=sid;
-  _psOverride={};
   var s=_staff.find(x=>x.id===sid);
   if(!s) return;
 
-  // Load saved settings from Firebase for this employee
-  (async function(){
-    try {
-      var settingsKey='cust_'+_cust.id+'_payrollSettings';
-      var sv=await window.fb.get(settingsKey);
-      var saved=sv&&sv[String(sid)]?sv[String(sid)]:null;
-      if(saved) _psOverride=saved;
-      // Pre-fill edit fields with saved values or defaults
-      document.getElementById('edit_rate').value          = saved?saved.rate:(s.rate||0);
-      document.getElementById('edit_drikkepenge').value   = saved?saved.drikkepenge:DEF.drikkepenge;
-      document.getElementById('edit_askat').value         = saved?saved.askat:DEF.askat;
-      document.getElementById('edit_personfradrag').value = saved?saved.personfradrag:DEF.personfradrag;
-      document.getElementById('edit_beskfradrag').value   = saved?saved.beskfradrag:DEF.beskfradrag_pct;
-      document.getElementById('edit_pension_e').value     = saved?saved.pension_e:DEF.pension_e;
-      document.getElementById('edit_pension_c').value     = saved?saved.pension_c:DEF.pension_c;
-      document.getElementById('edit_atp').value           = saved?saved.atp:DEF.atp;
-      document.getElementById('edit_meal').value          = saved?saved.meal:DEF.meal;
-      renderPayslip();
-    } catch(e){
-      // Fallback to defaults
-      document.getElementById('edit_rate').value          = s.rate||0;
-      document.getElementById('edit_askat').value         = DEF.askat;
-      document.getElementById('edit_personfradrag').value = DEF.personfradrag;
-      document.getElementById('edit_beskfradrag').value   = DEF.beskfradrag_pct;
-      document.getElementById('edit_pension_e').value     = DEF.pension_e;
-      document.getElementById('edit_pension_c').value     = DEF.pension_c;
-      document.getElementById('edit_atp').value           = DEF.atp;
-      document.getElementById('edit_meal').value          = DEF.meal;
-      renderPayslip();
-    }
-  })();
+  // Use saved settings for this employee, fall back to defaults
+  var saved=_payrollSettings[String(sid)]||null;
+  _psOverride=saved?Object.assign({},saved):{};
+
+  // Pre-fill edit fields
+  document.getElementById('edit_rate').value          = saved?saved.rate:(s.rate||0);
+  document.getElementById('edit_drikkepenge').value   = saved?saved.drikkepenge:DEF.drikkepenge;
+  document.getElementById('edit_askat').value         = saved?saved.askat:DEF.askat;
+  document.getElementById('edit_personfradrag').value = saved?saved.personfradrag:DEF.personfradrag;
+  document.getElementById('edit_beskfradrag').value   = saved?saved.beskfradrag:DEF.beskfradrag_pct;
+  document.getElementById('edit_pension_e').value     = saved?saved.pension_e:DEF.pension_e;
+  document.getElementById('edit_pension_c').value     = saved?saved.pension_c:DEF.pension_c;
+  document.getElementById('edit_atp').value           = saved?saved.atp:DEF.atp;
+  document.getElementById('edit_meal').value          = saved?saved.meal:DEF.meal;
 
   document.getElementById('ps_subline').textContent=s.name+' — '+MONTHS[_selMonth]+' '+_selYear;
   document.getElementById('psEditBar').style.display='none';
   document.getElementById('psSendBar').style.display='none';
+
+  renderPayslip();
 
   var ps=document.getElementById('payslipSection');
   ps.style.display='block';
@@ -1132,8 +1123,9 @@ document.getElementById('psApplyEdit').addEventListener('click',async ()=>{
     var obj=(sv&&typeof sv==='object'&&!Array.isArray(sv))?sv:{};
     obj[String(_psStaffId)]=_psOverride;
     await window.fb.set(settingsKey,obj);
+    _payrollSettings=obj; // update local cache
     document.getElementById('psEditBar').style.display='none';
-    toast('✓ Gemt og opdateret');
+    toast('✓ Gemt — indstillinger huskes næste gang');
   } catch(e){
     toast('Fejl ved gemning: '+e.message);
     console.error('psApplyEdit error:',e);

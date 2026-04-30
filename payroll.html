@@ -669,37 +669,38 @@ function calcPay(s, entries, overrides) {
   var totalBreakMins = approved.reduce((sum,e)=>sum+(e.breakMins||0), 0);
   var totalHours= totalMins/60;
 
-  // Bruttoløn = timeløn + drikkepenge (A-indkomst) + måltidsgodtgørelse
-  var timelon   = Math.round(totalHours * rate);
+  // Bruttoløn = timeløn + drikkepenge + måltidsgodtgørelse
+  var timelon   = Math.round(totalHours * rate * 100) / 100;
   var bruttoLon = timelon + drikkepenge + meal;
 
-  // Feriepenge 12.5% af bruttoløn
-  var feriePenge = Math.round(bruttoLon * 0.125);
+  // Feriepenge 12.5% — separat kørsel, indgår IKKE i AM-grundlag (verificeret mod Zenegy)
+  var feriePenge = Math.round(bruttoLon * 0.125 * 100) / 100;
 
-  // AM-grundlag = bruttoløn + feriepenge
-  var amGrundlag = bruttoLon + feriePenge;
+  // ATP trækkes FØR AM-bidrag beregnes
+  var atpDeduct = (totalHours > 0 && rate > 0) ? atp : 0;
+
+  // AM-grundlag = bruttoløn − ATP (ikke + feriepenge)
+  var amGrundlag = bruttoLon - atpDeduct;
 
   // AM-bidrag 8%
   var amBidrag = Math.round(amGrundlag * 0.08);
 
-  // ATP — kun hvis der er timer og en sats
-  var atpDeduct = (totalHours > 0 && rate > 0) ? atp : 0;
-
-  // Pension medarbejder
+  // Pension (af bruttoløn)
   var pensionEDkk = Math.round(bruttoLon * pensionE);
   var pensionCDkk = Math.round(bruttoLon * pensionC);
 
-  // Beskæftigelsesfradrag — 10.65% af AM-bidragspligtig løn, max 3.800/md
+  // Beskæftigelsesfradrag — reducerer A-skat grundlaget (ikke kontant fradrag i netto)
   var beskFradrag = Math.min(Math.round(amGrundlag * beskPct), beskMax);
 
-  // A-skat grundlag = amGrundlag - amBidrag - atp - pensionE - personfradrag - beskfradrag
-  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - atpDeduct - pensionEDkk - personfradrag - beskFradrag);
+  // A-skat grundlag = AM-grundlag − AM-bidrag − personfradrag − beskFradrag
+  // ATP og pension trækkes fra netto, ikke fra A-skat grundlaget
+  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - personfradrag - beskFradrag);
 
   // A-skat
   var aSkat = Math.round(aSkGrundlag * askatPct);
 
-  // Nettoløn til udbetaling
-  var nettoLon = amGrundlag - amBidrag - atpDeduct - pensionEDkk - aSkat;
+  // Nettoløn = bruttoløn − AM-bidrag − ATP − pension − A-skat
+  var nettoLon = Math.round((bruttoLon - amBidrag - atpDeduct - pensionEDkk - aSkat) * 100) / 100;
 
   return {
     totalHours, totalMins, totalBreakMins, rate, timelon, meal, drikkepenge,
@@ -775,9 +776,8 @@ function renderAll() {
       html+='<div class="br-row" style="font-weight:600;"><span class="br-lbl">AM-grundlag</span><span class="br-val">'+fmt(pay.amGrundlag)+' kr</span></div>';
       html+='<div class="br-row br-deduct"><span class="br-lbl">− AM-bidrag (8%)</span><span class="br-val">'+fmt(pay.amBidrag)+' kr</span></div>';
       html+='<div class="br-row br-deduct"><span class="br-lbl">− ATP</span><span class="br-val">'+fmt(pay.atp)+' kr</span></div>';
-      html+='<div class="br-row br-deduct"><span class="br-lbl">− Pension medarbejder (4%)</span><span class="br-val">'+fmt(pay.pensionEDkk)+' kr</span></div>';
-      html+='<div class="br-row" style="color:var(--green);font-size:.72rem;"><span class="br-lbl">+ Personfradrag</span><span class="br-val">'+fmt(pay.personfradrag)+' kr</span></div>';
-      html+='<div class="br-row" style="color:var(--green);font-size:.72rem;"><span class="br-lbl">+ Beskæftigelsesfradrag</span><span class="br-val">'+fmt(pay.beskFradrag)+' kr</span></div>';
+      html+='<div class="br-row br-deduct"><span class="br-lbl">− Pension medarbejder ('+pay.pensionEPct+'%)</span><span class="br-val">'+fmt(pay.pensionEDkk)+' kr</span></div>';
+      html+='<div class="br-row" style="font-size:.7rem;color:var(--muted);"><span class="br-lbl">A-skat grundlag (efter fradrag)</span><span class="br-val">'+fmt(pay.aSkGrundlag)+' kr</span></div>';
       html+='<div class="br-row br-deduct"><span class="br-lbl">− A-skat (~'+pay.askatPct+'%)</span><span class="br-val">'+fmt(pay.aSkat)+' kr</span></div>';
       html+='<div class="br-row br-total"><span class="br-lbl">Til udbetaling</span><span class="br-val">'+fmt(pay.nettoLon)+' kr</span></div>';
     }

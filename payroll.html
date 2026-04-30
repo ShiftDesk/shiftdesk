@@ -669,49 +669,37 @@ function calcPay(s, entries, overrides) {
   var totalBreakMins = approved.reduce((sum,e)=>sum+(e.breakMins||0), 0);
   var totalHours= totalMins/60;
 
-  // ── Dansk lønberegning — verificeret mod Zenegy/Dataløn standard ────────────
-  //
-  //  Rækkefølge (verificeret mod live Zenegy lønseddel):
-  //    1. bruttoLøn = timeløn + alle tillæg
-  //    2. feriePenge = bruttoLøn × 12,5%  (separat kørsel — indgår IKKE i AM-grundlag)
-  //    3. ATP trækkes FØR AM-bidrag beregnes
-  //    4. AM-grundlag = bruttoLøn − ATP
-  //    5. AM-bidrag = round(AM-grundlag × 8%)
-  //    6. A-skat grl. = AM-grundlag − AM-bidrag − personfradrag − beskFradrag
-  //    7. A-skat = round(A-skat grl. × skattepct)
-  //    8. Nettoudb. = bruttoLøn − AM-bidrag − ATP − A-skat − pension(medarbj.)
-
-  // Step 1: Bruttoløn
-  var timelon   = Math.round(totalHours * rate * 100) / 100;
+  // Bruttoløn = timeløn + drikkepenge (A-indkomst) + måltidsgodtgørelse
+  var timelon   = Math.round(totalHours * rate);
   var bruttoLon = timelon + drikkepenge + meal;
 
-  // Step 2: Feriepenge — separat kørsel, vises men indgår IKKE i AM-grundlag
-  var feriePenge = Math.round(bruttoLon * 0.125 * 100) / 100;
+  // Feriepenge 12.5% af bruttoløn
+  var feriePenge = Math.round(bruttoLon * 0.125);
 
-  // Step 3: ATP (kun hvis der er timer og sats)
-  var atpDeduct = (totalHours > 0 && rate > 0) ? atp : 0;
+  // AM-grundlag = bruttoløn + feriepenge
+  var amGrundlag = bruttoLon + feriePenge;
 
-  // Step 4: AM-grundlag = bruttoLøn − ATP
-  var amGrundlag = bruttoLon - atpDeduct;
-
-  // Step 5: AM-bidrag 8%
+  // AM-bidrag 8%
   var amBidrag = Math.round(amGrundlag * 0.08);
 
-  // Step 6: Pension (beregnes af bruttoløn)
+  // ATP — kun hvis der er timer og en sats
+  var atpDeduct = (totalHours > 0 && rate > 0) ? atp : 0;
+
+  // Pension medarbejder
   var pensionEDkk = Math.round(bruttoLon * pensionE);
   var pensionCDkk = Math.round(bruttoLon * pensionC);
 
-  // Step 7: Beskæftigelsesfradrag — reducerer A-skat grundlaget (ikke kontant fradrag i netto)
+  // Beskæftigelsesfradrag — 10.65% af AM-bidragspligtig løn, max 3.800/md
   var beskFradrag = Math.min(Math.round(amGrundlag * beskPct), beskMax);
 
-  // Step 8: A-skat grundlag
-  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - personfradrag - beskFradrag);
+  // A-skat grundlag = amGrundlag - amBidrag - atp - pensionE - personfradrag - beskfradrag
+  var aSkGrundlag = Math.max(0, amGrundlag - amBidrag - atpDeduct - pensionEDkk - personfradrag - beskFradrag);
 
-  // Step 9: A-skat
+  // A-skat
   var aSkat = Math.round(aSkGrundlag * askatPct);
 
-  // Step 10: Nettoløn til udbetaling
-  var nettoLon = Math.round((bruttoLon - amBidrag - atpDeduct - aSkat - pensionEDkk) * 100) / 100;
+  // Nettoløn til udbetaling
+  var nettoLon = amGrundlag - amBidrag - atpDeduct - pensionEDkk - aSkat;
 
   return {
     totalHours, totalMins, totalBreakMins, rate, timelon, meal, drikkepenge,
@@ -783,13 +771,14 @@ function renderAll() {
       html+='<div class="br-row"><span class="br-lbl">Timeløn ('+pay.totalHours.toFixed(2)+' t × '+pay.rate+' kr)</span><span class="br-val">'+fmt(pay.timelon)+' kr</span></div>';
       if(pay.drikkepenge>0) html+='<div class="br-row"><span class="br-lbl">Drikkepenge (A-indkomst)</span><span class="br-val">'+fmt(pay.drikkepenge)+' kr</span></div>';
       if(pay.meal>0) html+='<div class="br-row"><span class="br-lbl">Måltidsgodtgørelse</span><span class="br-val">'+fmt(pay.meal)+' kr</span></div>';
-      html+='<div class="br-row"><span class="br-lbl">Feriepenge (12,5%) — separat</span><span class="br-val" style="color:var(--muted);">'+fmt(pay.feriePenge)+' kr</span></div>';
-      html+='<div class="br-row br-deduct"><span class="br-lbl">− ATP (arbejdsmarkedspension)</span><span class="br-val">'+fmt(pay.atp)+' kr</span></div>';
-      html+='<div class="br-row" style="font-weight:600;"><span class="br-lbl">AM-grundlag (bruttoløn − ATP)</span><span class="br-val">'+fmt(pay.amGrundlag)+' kr</span></div>';
+      html+='<div class="br-row"><span class="br-lbl">Feriepenge (12,5%)</span><span class="br-val">'+fmt(pay.feriePenge)+' kr</span></div>';
+      html+='<div class="br-row" style="font-weight:600;"><span class="br-lbl">AM-grundlag</span><span class="br-val">'+fmt(pay.amGrundlag)+' kr</span></div>';
       html+='<div class="br-row br-deduct"><span class="br-lbl">− AM-bidrag (8%)</span><span class="br-val">'+fmt(pay.amBidrag)+' kr</span></div>';
-      html+='<div class="br-row br-deduct"><span class="br-lbl">− Pension medarbejder ('+pay.pensionEPct+'%)</span><span class="br-val">'+fmt(pay.pensionEDkk)+' kr</span></div>';
-      html+='<div class="br-row" style="font-size:.7rem;color:var(--muted);padding:2px 0 0;"><span class="br-lbl">A-skat grundlag efter fradrag</span><span class="br-val">'+fmt(pay.aSkGrundlag)+' kr</span></div>';
-      html+='<div class="br-row br-deduct"><span class="br-lbl">− A-skat (~'+pay.askatPct+'%, trækprocent)</span><span class="br-val">'+fmt(pay.aSkat)+' kr</span></div>';
+      html+='<div class="br-row br-deduct"><span class="br-lbl">− ATP</span><span class="br-val">'+fmt(pay.atp)+' kr</span></div>';
+      html+='<div class="br-row br-deduct"><span class="br-lbl">− Pension medarbejder (4%)</span><span class="br-val">'+fmt(pay.pensionEDkk)+' kr</span></div>';
+      html+='<div class="br-row" style="color:var(--green);font-size:.72rem;"><span class="br-lbl">+ Personfradrag</span><span class="br-val">'+fmt(pay.personfradrag)+' kr</span></div>';
+      html+='<div class="br-row" style="color:var(--green);font-size:.72rem;"><span class="br-lbl">+ Beskæftigelsesfradrag</span><span class="br-val">'+fmt(pay.beskFradrag)+' kr</span></div>';
+      html+='<div class="br-row br-deduct"><span class="br-lbl">− A-skat (~'+pay.askatPct+'%)</span><span class="br-val">'+fmt(pay.aSkat)+' kr</span></div>';
       html+='<div class="br-row br-total"><span class="br-lbl">Til udbetaling</span><span class="br-val">'+fmt(pay.nettoLon)+' kr</span></div>';
     }
     html+='</div>';
@@ -1046,10 +1035,10 @@ function renderPayslip() {
   if(pay.drikkepenge>0) html+='<tr><td>Drikkepenge (A-indkomst)</td><td>—</td><td>Beskattes som løn</td><td>'+fmt(pay.drikkepenge)+'</td></tr>';
   if(pay.meal>0) html+='<tr><td>Måltidsgodtgørelse</td><td>—</td><td>Fast</td><td>'+fmt(pay.meal)+'</td></tr>';
   html+='<tr><td>Feriepenge</td><td>'+fmt(pay.bruttoLon)+' DKK</td><td>12,5%</td><td>'+fmt(pay.feriePenge)+'</td></tr>';
-  html+='<tr><td>ATP (medarbejder)</td><td>—</td><td>Fast</td><td>−'+fmt(pay.atp)+'</td></tr>';
-  html+='<tr class="sub"><td colspan="3">AM-grundlag (bruttoløn − ATP)</td><td>'+fmt(pay.amGrundlag)+'</td></tr>';
+  html+='<tr class="sub"><td colspan="3">AM-grundlag</td><td>'+fmt(pay.amGrundlag)+'</td></tr>';
   html+='<tr class="sect"><td colspan="4">Fradrag</td></tr>';
   html+='<tr class="deduct"><td>AM-bidrag</td><td>'+fmt(pay.amGrundlag)+' DKK</td><td>8%</td><td>−'+fmt(pay.amBidrag)+'</td></tr>';
+  html+='<tr class="deduct"><td>ATP (medarbejder)</td><td>—</td><td>Fast</td><td>−'+fmt(pay.atp)+'</td></tr>';
   html+='<tr class="deduct"><td>Pension (medarbejder)</td><td>'+fmt(pay.bruttoLon)+' DKK</td><td>'+pay.pensionEPct+'%</td><td>−'+fmt(pay.pensionEDkk)+'</td></tr>';
   html+='<tr class="sect"><td colspan="4">Skattefradrag</td></tr>';
   html+='<tr style="color:var(--green);"><td>Personfradrag (skattefri indkomst)</td><td>—</td><td>Fast 2026</td><td>+'+fmt(pay.personfradrag)+'</td></tr>';
@@ -1100,22 +1089,19 @@ document.getElementById('psCancelEdit').addEventListener('click',()=>{
 });
 
 document.getElementById('psApplyEdit').addEventListener('click',()=>{
-  // Use nullish helper so entering 0 is respected (|| would fall back to default)
-  function pf(id,def){ var v=parseFloat(document.getElementById(id).value); return isNaN(v)?def:v; }
   _psOverride={
-    rate:          pf('edit_rate',         DEF.rate),
-    drikkepenge:   pf('edit_drikkepenge',  DEF.drikkepenge),
-    askat:         pf('edit_askat',        DEF.askat),
-    personfradrag: pf('edit_personfradrag',DEF.personfradrag),
-    beskfradrag:   pf('edit_beskfradrag',  DEF.beskfradrag_pct),
-    pension_e:     pf('edit_pension_e',    DEF.pension_e),
-    pension_c:     pf('edit_pension_c',    DEF.pension_c),
-    atp:           pf('edit_atp',          DEF.atp),
-    meal:          pf('edit_meal',         DEF.meal)
+    rate:        parseFloat(document.getElementById('edit_rate').value)||0,
+    drikkepenge: parseFloat(document.getElementById('edit_drikkepenge').value)||0,
+    askat:       parseFloat(document.getElementById('edit_askat').value)||37,
+    personfradrag:parseFloat(document.getElementById('edit_personfradrag').value)||4508,
+    beskfradrag: parseFloat(document.getElementById('edit_beskfradrag').value)||10.65,
+    pension_e:   parseFloat(document.getElementById('edit_pension_e').value)||4,
+    pension_c:   parseFloat(document.getElementById('edit_pension_c').value)||8,
+    atp:         parseFloat(document.getElementById('edit_atp').value)||99,
+    meal:        parseFloat(document.getElementById('edit_meal').value)||0
   };
-  document.getElementById('psEditBar').style.display='none';
   renderPayslip();
-  toast('✓ Lønseddel opdateret med nye værdier');
+  toast('✓ Lønseddel opdateret');
 });
 
 document.getElementById('psSendToggle').addEventListener('click',()=>{

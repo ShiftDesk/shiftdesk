@@ -1469,9 +1469,7 @@ function profileEmail(){
   body2+='Role: '+s.role+(s.rate?' \u00b7 '+s.rate+' DKK/h':'')+'\n'+'='.repeat(36)+'\n\n';
   syncMonthStore();
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-    var dayIdx2=(d.getDay()+6)%7,monKey2=getMonday(new Date(d)).toISOString().slice(0,10);
-    var stored2=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey2];
-    var ds3=stored2&&stored2[dayIdx2]?stored2[dayIdx2]:[];
+    var ds3=getMonthDayShifts(sid,new Date(d));
     if(ds3.length){daysW++;ds3.forEach(function(sh){var wh=Math.round(workedH(sh)*10)/10,bm=brkMin(sh);totalW+=workedH(sh);totalB+=bm;body2+=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+sh.start+'\u2013'+sh.end+' ('+wh+'h'+(bm?', '+bm+'min break':'')+')'+(sh.note?' \u2014 '+sh.note:'')+'\n';});}
   }
   body2+='\nDays: '+daysW+'\nHours: '+Math.round(totalW*10)/10+'h\nBreak: '+totalB+'min\n';
@@ -1508,8 +1506,7 @@ function buildCalBody(sid){
   var totalW=0,totalB=0,daysW=0;
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
     var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-    var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];
-    var ds=stored&&stored[dayIdx]?stored[dayIdx]:[];
+    var ds=getMonthDayShifts(sid,new Date(d));
     if(ds.length){daysW++;ds.forEach(function(sh){totalW+=workedH(sh);totalB+=brkMin(sh);});}
   }
   var totalWR=Math.round(totalW*10)/10,avgH=daysW?Math.round(totalW/daysW*10)/10:0;
@@ -1518,9 +1515,7 @@ function buildCalBody(sid){
   var calRows='',cells=[];
   for(var day=new Date(startMon);day<=endSun;day.setDate(day.getDate()+1)){
     var inM=day.getMonth()===month,isT=day.getTime()===today.getTime();
-    var dayIdx2=(day.getDay()+6)%7,monKey2=getMonday(new Date(day)).toISOString().slice(0,10);
-    var stored2=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey2];
-    var ds2=stored2&&stored2[dayIdx2]?stored2[dayIdx2]:[];
+    var ds2=getMonthDayShifts(sid,new Date(day));
     var bg=inM?(isT?'#fff4ef':'#fff'):'#f8f7f4',dc=isT?'#bf4a0a':inM?'#18160f':'#c9c3b8';
     var pills='';
     ds2.forEach(function(sh){var wh=Math.round(workedH(sh)*10)/10,bm=brkMin(sh);pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:5px;padding:4px 6px;margin-bottom:3px;font-size:9px;"><div style="color:'+rc.color+';font-weight:700;">'+sh.start+'\u2013'+sh.end+'</div><div style="color:'+rc.color+';">'+wh+'h worked</div>'+(bm?'<div style="color:'+rc.color+';opacity:.75;">\u2615 '+bm+'min</div>':'')+(sh.note?'<div style="color:'+rc.color+';opacity:.65;font-style:italic;">'+sh.note+'</div>':'')+'</div>';});
@@ -1578,23 +1573,21 @@ function syncMonthStore(){
     var wKey=w.toISOString().slice(0,10);
     staff.forEach(function(s){
       if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};
-      // Only write if not already explicitly overridden (don't overwrite custom week edits)
-      if(!monthShiftsStore[s.id][wKey]){
-        monthShiftsStore[s.id][wKey]=Object.assign({},shifts[s.id]||{});
-      }
+      // Always refresh with the latest template so month view stays in sync
+      monthShiftsStore[s.id][wKey]=Object.assign({},shifts[s.id]||{});
     });
     w.setDate(w.getDate()+7);
   }
 }
 function getMonthDayShifts(sid,d){
+  // Always use the live repeating shift template as the source of truth.
+  // monthShiftsStore entries are only used when they represent a saved
+  // week-specific override (i.e. weekStart key == that week's Monday AND
+  // the stored entry differs from the template — future feature).
+  // For now: shifts[sid][dayIdx] is always correct and always up to date.
   var dayIdx=(d.getDay()+6)%7;
-  var monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][monKey];
-  // If we have an explicit stored week for this key, use it
-  if(stored&&stored[dayIdx]&&stored[dayIdx].length) return stored[dayIdx];
-  // Otherwise fall back to the repeating weekly shift pattern
   var rep=shifts[sid]||{};
-  return rep[dayIdx]||[];
+  return (rep[dayIdx]||[]);
 }
 function renderMonth(){
   syncMonthStore(); // ensure all weeks of this month are populated
@@ -1636,7 +1629,7 @@ function printMonth(){
     var dayIdx=(day.getDay()+6)%7,monKey=getMonday(new Date(day)).toISOString().slice(0,10);
     var bg=inM?(isT?'#fff4ef':'#fff'):'#f5f4f1',dc=isT?'#bf4a0a':inM?'#18160f':'#c9c3b8';
     var pills='';
-    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];var ds=(stored&&stored[dayIdx])||[];ds.forEach(function(sh){pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:4px;padding:3px 5px;margin-bottom:2px;font-size:9px;"><span style="color:'+rc.color+';font-weight:700;">'+s.name.split(' ')[0]+'</span> <span style="color:'+rc.color+';">'+sh.start+'\u2013'+sh.end+'</span></div>';});});}
+    if(inM){shown.forEach(function(s){var rc=ROLES[s.role];var ds=getMonthDayShifts(s.id,new Date(day));ds.forEach(function(sh){pills+='<div style="background:'+rc.bg+';border-left:3px solid '+rc.color+';border-radius:4px;padding:3px 5px;margin-bottom:2px;font-size:9px;"><span style="color:'+rc.color+';font-weight:700;">'+s.name.split(' ')[0]+'</span> <span style="color:'+rc.color+';">'+sh.start+'\u2013'+sh.end+'</span></div>';});});}
     cells.push('<td style="width:14.28%;vertical-align:top;padding:5px 4px;background:'+bg+';border:1px solid #e3ddd4;min-height:80px;"><div style="font-size:'+(isT?'14':'12')+'px;font-weight:700;color:'+dc+';margin-bottom:3px;">'+day.getDate()+'</div>'+(inM?(pills||''):'')+'</td>');
     if(cells.length===7){calRows+='<tr>'+cells.join('')+'</tr>';cells=[];}
   }
@@ -1662,9 +1655,7 @@ function emailMonth(){
   shown.forEach(function(s){
     body+=s.name+' ('+s.role+')\n'+'_'.repeat(28)+'\n';
     for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-      var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-      var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];
-      var ds=(stored&&stored[dayIdx])||[];
+      var ds=getMonthDayShifts(s.id,new Date(d));
       if(ds.length){ds.forEach(function(sh){var bm=brkMin(sh);body+='  '+d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+sh.start+'\u2013'+sh.end+(bm?' (break '+bm+'m)':'')+(sh.note?' \u00b7 '+sh.note:'')+'\n';});}
     }
     body+='\n';
@@ -1683,9 +1674,8 @@ function openPersonReport(sid){
   var weekData={};
   syncMonthStore();
   for(var d=new Date(firstDay);d<=lastDay;d.setDate(d.getDate()+1)){
-    var dayIdx=(d.getDay()+6)%7,monKey=getMonday(new Date(d)).toISOString().slice(0,10);
-    var stored=monthShiftsStore[s.id]&&monthShiftsStore[s.id][monKey];
-    var dayShifts=(stored&&stored[dayIdx])||[];
+    var monKey=getMonday(new Date(d)).toISOString().slice(0,10);
+    var dayShifts=getMonthDayShifts(s.id,new Date(d));
     if(!weekData[monKey])weekData[monKey]=[];
     weekData[monKey].push({date:new Date(d),dayShifts:dayShifts});
     dayShifts.forEach(function(sh){totalShifts++;totalWorked+=workedH(sh);totalBreak+=brkMin(sh);});

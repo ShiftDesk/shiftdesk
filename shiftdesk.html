@@ -1607,42 +1607,42 @@ function getMonthDayShifts(sid,d){
 }
 
 // Get shifts for a specific weekday in the currently-viewed week
-// Keys in stored may be strings (after JSON parse) so check both int and string
 function getWeekShifts(sid,dayIdx){
   var wKey=weekStart.toISOString().slice(0,10);
-  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  if(stored){
-    var row=stored[dayIdx]||stored[String(dayIdx)];
-    if(row) return row;
-  }
-  // Fall back to template for weeks not yet visited
+  var week=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
+  if(week&&week[dayIdx]!==undefined) return week[dayIdx];
+  // Fall back to template for weeks not yet initialized
   return (shifts[sid]||{})[dayIdx]||[];
 }
 
 // Get all 7 days for the current week
 function getWeekAllShifts(sid){
   var wKey=weekStart.toISOString().slice(0,10);
-  var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
+  var week=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
   var result={};
   for(var d=0;d<7;d++){
-    if(stored){
-      var row=stored[d]||stored[String(d)];
-      result[d]=row||[];
-    } else {
-      result[d]=(shifts[sid]||{})[d]||[];
-    }
+    result[d]=(week&&week[d]!==undefined)?week[d]:((shifts[sid]||{})[d]||[]);
   }
   return result;
 }
 
 // Initialize a week-specific store with a deep copy of the template.
-// Called on navigation AND on save. Safe to call multiple times.
+// Called on navigation, save, and after data load. Safe to call multiple times.
 function ensureWeekStore(sid){
   var wKey=weekStart.toISOString().slice(0,10);
   if(!monthShiftsStore[sid]) monthShiftsStore[sid]={};
   if(!monthShiftsStore[sid][wKey]){
-    // Deep copy template — no shared array references between weeks
+    // Week not seen before — deep copy from template
     monthShiftsStore[sid][wKey]=deepCopyWeek(shifts[sid]||{});
+  } else {
+    // Week exists (loaded from storage) — ensure integer keys for all 7 days
+    var week=monthShiftsStore[sid][wKey];
+    for(var d=0;d<7;d++){
+      if(!week[d]){
+        week[d]=week[String(d)]||[];
+        delete week[String(d)];
+      }
+    }
   }
   return monthShiftsStore[sid][wKey];
 }
@@ -2185,7 +2185,18 @@ function loadData(){
     if(s)staff=JSON.parse(s);
     if(sh){var p=JSON.parse(sh);shifts={};Object.keys(p).forEach(function(k){shifts[parseInt(k)]=p[k];});}
     if(m){var p2=JSON.parse(m);meetings={};Object.keys(p2).forEach(function(k){meetings[parseInt(k)]=p2[k];});}
-    if(ms){var p3=JSON.parse(ms);monthShiftsStore={};Object.keys(p3).forEach(function(k){monthShiftsStore[parseInt(k)]=p3[k];});}
+    if(ms){
+      var p3=JSON.parse(ms);monthShiftsStore={};
+      Object.keys(p3).forEach(function(sid){
+        var sidInt=parseInt(sid);
+        monthShiftsStore[sidInt]={};
+        var weekMap=p3[sid];
+        Object.keys(weekMap).forEach(function(wKey){
+          // Normalize day keys from strings to integers
+          monthShiftsStore[sidInt][wKey]=deepCopyWeek(weekMap[wKey]);
+        });
+      });
+    }
     if(mm)monthMeetings=JSON.parse(mm);
     if(av){var p4=JSON.parse(av);availability={};Object.keys(p4).forEach(function(k){availability[parseInt(k)]=p4[k];});}
   }catch(e){}
@@ -2323,13 +2334,25 @@ window.loadDataCloud = async function loadDataCloud() {
     if(s) staff = s;
     if(sh){ shifts={}; Object.keys(sh).forEach(function(k){ shifts[parseInt(k)]=sh[k]; }); }
     if(m){ meetings={}; Object.keys(m).forEach(function(k){ meetings[parseInt(k)]=m[k]; }); }
-    if(ms){ monthShiftsStore={}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)]=ms[k]; }); }
+    if(ms){
+      monthShiftsStore={};
+      Object.keys(ms).forEach(function(sid){
+        var sidInt=parseInt(sid);
+        monthShiftsStore[sidInt]={};
+        var weekMap=ms[sid];
+        Object.keys(weekMap).forEach(function(wKey){
+          monthShiftsStore[sidInt][wKey]=deepCopyWeek(weekMap[wKey]);
+        });
+      });
+    }
     if(mm) monthMeetings=mm;
     if(av){ availability={}; Object.keys(av).forEach(function(k){ availability[parseInt(k)]=av[k]; }); }
     var ch=await sdStorageGet(custKey('clockHistory'));
     if(ch){ clockHistory={}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)]=ch[k]; }); }
     var pi2=await sdStorageGet(custKey('pi'));
     if(pi2){ personalInfo={}; Object.keys(pi2).forEach(function(k){ personalInfo[parseInt(k)]=pi2[k]; }); }
+    // Re-initialize week stores from freshly loaded cloud data
+    if(typeof ensureAllWeekStores==='function') ensureAllWeekStores();
   } catch(e) {}
 }
 
@@ -2416,6 +2439,7 @@ window.bootApp = function bootApp(email, customer){
     badge.innerHTML='<span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+email+'">'+displayName+'</span><span onclick="doLogout()" style="cursor:pointer;color:var(--acc);font-weight:700;margin-left:2px;flex-shrink:0;" title="Sign out">&times;</span>';
     tb.insertBefore(badge, tb.firstChild);
   }
+  ensureAllWeekStores();
   render();
 }
 

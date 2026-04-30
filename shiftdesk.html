@@ -1114,10 +1114,12 @@ function tdiff(s,e){var sh=parseInt(s),sm=parseInt(s.split(':')[1]),eh=parseInt(
 function brkMin(sh){if(!sh.breakStart||!sh.breakEnd)return 0;return Math.round(tdiff(sh.breakStart,sh.breakEnd)*60);}
 function workedH(sh){if(!sh.end||sh.end===sh.start)return 0;return Math.max(0,tdiff(sh.start,sh.end)-brkMin(sh)/60);}
 function staffH(id){
-  // Show hours for the currently-viewed week (not the repeating template total)
   var h=0;
   var ws=getWeekAllShifts(id);
-  Object.values(ws).forEach(function(a){a.forEach(function(s){h+=workedH(s);});});
+  for(var d=0;d<7;d++){
+    var arr=ws[d]||[];
+    arr.forEach(function(s){h+=workedH(s);});
+  }
   return Math.round(h*10)/10;
 }
 function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2300);}
@@ -1229,7 +1231,8 @@ function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popSta
 }
 function openEdit(sid,day,idx){
   var wStore=ensureWeekStore(sid);
-  var weekDay=wStore[day]&&wStore[day].length?wStore[day]:((shifts[sid]||{})[day]||[]);
+  var weekDay=(wStore[day]||wStore[String(day)]||[]);
+  if(!weekDay.length) weekDay=(shifts[sid]||{})[day]||[];
   var sh=weekDay[idx];
   editingShift={sid:sid,day:day,idx:idx};
   pendingCell={sid:sid,day:day};
@@ -1278,15 +1281,13 @@ function saveShift(){
   var note=document.getElementById('sm_note').value.trim();
   var hb=document.getElementById('sm_hb').checked;
   var bStart=hb?document.getElementById('sm_bs').value:null,bEnd=hb?document.getElementById('sm_be').value:null;
-  // Write to week-specific store so other weeks are not affected
+  // Write ONLY to the week-specific store — never touch the template (shifts[])
+  // The template is the default for unvisited weeks; editing one week must not affect others
   var wStore=ensureWeekStore(sid);
   if(!wStore[day])wStore[day]=[];
   var entry={start:start,end:end,note:note,breakStart:bStart,breakEnd:bEnd};
   if(editingShift&&editingShift.sid===sid&&editingShift.day===day){wStore[day][editingShift.idx]=entry;toast('Shift updated \u2713');}
   else{wStore[day].push(entry);toast('Shift saved \u2713');}
-  // Also update the repeating template so new weeks start from latest pattern
-  if(!shifts[sid])shifts[sid]={};
-  shifts[sid][day]=wStore[day].map(function(sh){return Object.assign({},sh);});
   closeShift();render();
 }
 function deleteShift(){
@@ -1294,15 +1295,12 @@ function deleteShift(){
   var e=editingShift;
   var wStore=ensureWeekStore(e.sid);
   if(wStore[e.day])wStore[e.day].splice(e.idx,1);
-  // Sync deletion back to template
-  if(shifts[e.sid]&&shifts[e.sid][e.day])shifts[e.sid][e.day].splice(e.idx,1);
   closeShift();render();toast('Shift deleted');
 }
 function quickDel(sid,day,idx,ev){
   ev.stopPropagation();
   var wStore=ensureWeekStore(sid);
   if(wStore[day])wStore[day].splice(idx,1);
-  if(shifts[sid]&&shifts[sid][day])shifts[sid][day].splice(idx,1);
   render();
 }
 
@@ -1577,76 +1575,81 @@ function loadMeetingsForWeek(){
     }
   }
 }
+// Deep-copy a shift object
+function deepCopyShift(sh){ return Object.assign({},sh); }
+// Deep-copy one week's shifts {0:[...], 1:[...], ..., 6:[...]}
+function deepCopyWeek(weekObj){
+  var out={};
+  for(var d=0;d<7;d++){
+    var arr=(weekObj[d]||weekObj[String(d)]||[]);
+    out[d]=arr.map(deepCopyShift);
+  }
+  return out;
+}
+
 function syncMonthStore(){
-  // Always sync the current week view
-  var monKey=weekStart.toISOString().slice(0,10);
-  staff.forEach(function(s){
-    if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};
-    monthShiftsStore[s.id][monKey]=Object.assign({},shifts[s.id]||{});
-  });
+  // Sync meetings for the current week into monthMeetings
   Object.keys(meetings).forEach(function(dayIdx){
     var d=addDays(weekStart,parseInt(dayIdx));
     monthMeetings[d.toISOString().slice(0,10)]=meetings[dayIdx].note||'Meeting';
   });
-  // Also pre-populate all weeks of the currently displayed month
-  // so the monthly calendar shows shifts without needing to visit each week first
-  var year=monthDate.getFullYear(),month=monthDate.getMonth();
-  var firstDay=new Date(year,month,1),lastDay=new Date(year,month+1,0);
-  var w=new Date(getMonday(firstDay));
-  var endW=new Date(getMonday(lastDay));endW.setDate(endW.getDate()+7);
-  while(w<=endW){
-    var wKey=w.toISOString().slice(0,10);
-    staff.forEach(function(s){
-      if(!monthShiftsStore[s.id])monthShiftsStore[s.id]={};
-      // Always refresh with the latest template so month view stays in sync
-      monthShiftsStore[s.id][wKey]=Object.assign({},shifts[s.id]||{});
-    });
-    w.setDate(w.getDate()+7);
-  }
+  // DO NOT overwrite week-specific stores here — we only write on navigation/save
 }
 function getMonthDayShifts(sid,d){
   var dayIdx=(d.getDay()+6)%7;
-  // Check for a week-specific override in monthShiftsStore first
   var wKey=getMonday(new Date(d)).toISOString().slice(0,10);
   var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  if(stored&&stored[dayIdx]) return stored[dayIdx];
-  // Fall back to the repeating weekly template
+  if(stored){
+    var row=stored[dayIdx]||stored[String(dayIdx)];
+    if(row&&row.length) return row;
+  }
   return (shifts[sid]||{})[dayIdx]||[];
 }
 
 // Get shifts for a specific weekday in the currently-viewed week
+// Keys in stored may be strings (after JSON parse) so check both int and string
 function getWeekShifts(sid,dayIdx){
   var wKey=weekStart.toISOString().slice(0,10);
   var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
-  if(stored&&stored[dayIdx]) return stored[dayIdx];
+  if(stored){
+    var row=stored[dayIdx]||stored[String(dayIdx)];
+    if(row) return row;
+  }
+  // Fall back to template for weeks not yet visited
   return (shifts[sid]||{})[dayIdx]||[];
 }
 
-// Get all shifts for a staff member in the currently-viewed week (all 7 days)
+// Get all 7 days for the current week
 function getWeekAllShifts(sid){
   var wKey=weekStart.toISOString().slice(0,10);
   var stored=monthShiftsStore[sid]&&monthShiftsStore[sid][wKey];
   var result={};
   for(var d=0;d<7;d++){
-    if(stored&&stored[d]) result[d]=stored[d];
-    else result[d]=(shifts[sid]||{})[d]||[];
+    if(stored){
+      var row=stored[d]||stored[String(d)];
+      result[d]=row||[];
+    } else {
+      result[d]=(shifts[sid]||{})[d]||[];
+    }
   }
   return result;
 }
 
-// Ensure week-specific store exists for current weekStart, copying from template
+// Initialize a week-specific store with a deep copy of the template.
+// Called on navigation AND on save. Safe to call multiple times.
 function ensureWeekStore(sid){
   var wKey=weekStart.toISOString().slice(0,10);
   if(!monthShiftsStore[sid]) monthShiftsStore[sid]={};
   if(!monthShiftsStore[sid][wKey]){
-    // Deep copy the template so edits don't affect other weeks
-    var tmpl=shifts[sid]||{};
-    monthShiftsStore[sid][wKey]={};
-    for(var d=0;d<7;d++){
-      monthShiftsStore[sid][wKey][d]=tmpl[d]?tmpl[d].map(function(sh){return Object.assign({},sh);}):[];
-    }
+    // Deep copy template — no shared array references between weeks
+    monthShiftsStore[sid][wKey]=deepCopyWeek(shifts[sid]||{});
   }
   return monthShiftsStore[sid][wKey];
+}
+
+// Initialize week stores for ALL staff on navigation, so each week is independent
+function ensureAllWeekStores(){
+  staff.forEach(function(s){ ensureWeekStore(s.id); });
 }
 function renderMonth(){
   syncMonthStore(); // ensure all weeks of this month are populated
@@ -2245,8 +2248,9 @@ function loadPIData(){try{var d=localStorage.getItem(atob('c2hpZnRkZXNrX3Bp'));i
 
 // ── INIT ─────────────────────────────────────────────────────────────────
 loadData();loadClockLog();if(typeof loadClockHistory==="function")loadClockHistory();loadPIData();loadAvailability();
-document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
-document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
+ensureAllWeekStores(); // initialize the current week's store from the template
+document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);ensureAllWeekStores();loadMeetingsForWeek();render();};
+document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);ensureAllWeekStores();loadMeetingsForWeek();render();};
 render();
 checkBirthdays();
 checkLicense().then(function(){updateLicBtn();});

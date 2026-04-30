@@ -1036,6 +1036,7 @@ var monthDate=new Date();
 var currentView='week';
 var selectedMonthStaff=new Set();
 var monthShiftsStore={};
+var weekShifts={};
 var monthMeetings={};
 var pendingCell=null,editingShift=null,pendingMeetDay=null;
 var dragId=null;
@@ -1113,7 +1114,7 @@ function ini(n){return n.split(' ').map(function(w){return w[0];}).join('').slic
 function tdiff(s,e){var sh=parseInt(s),sm=parseInt(s.split(':')[1]),eh=parseInt(e),em=parseInt(e.split(':')[1]);if(eh<sh)eh+=24;return((eh*60+em)-(sh*60+sm))/60;}
 function brkMin(sh){if(!sh.breakStart||!sh.breakEnd)return 0;return Math.round(tdiff(sh.breakStart,sh.breakEnd)*60);}
 function workedH(sh){if(!sh.end||sh.end===sh.start)return 0;return Math.max(0,tdiff(sh.start,sh.end)-brkMin(sh)/60);}
-function staffH(id){var h=0;Object.values(shifts[id]||{}).forEach(function(a){a.forEach(function(s){h+=workedH(s);});});return Math.round(h*10)/10;}
+function staffH(id){var h=0;for(var d=0;d<7;d++){wShifts(id,d).forEach(function(s){h+=workedH(s);});}return Math.round(h*10)/10;}
 function toast(msg){var t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2300);}
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function nowHHMM(){var n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
@@ -1122,6 +1123,10 @@ function fmtDur(mins){if(!mins||mins<0)return '';var h=Math.floor(mins/60),m=Mat
 
 // ── RENDER ───────────────────────────────────────────────────────────────
 function render(){renderWeek();renderHeader();renderBody();renderSidebar();updateStats();if(activeProfileId!==null)openProfile(activeProfileId);saveData();}
+function wKey(){return weekStart.toISOString().slice(0,10);}
+function wShifts(sid,day){var wk=wKey();if(weekShifts[wk]&&weekShifts[wk][sid]&&weekShifts[wk][sid][day]!==undefined)return weekShifts[wk][sid][day];return(shifts[sid]||{})[day]||[];}
+function wSet(sid,day,arr){var wk=wKey();if(!weekShifts[wk])weekShifts[wk]={};if(!weekShifts[wk][sid])weekShifts[wk][sid]={};weekShifts[wk][sid][day]=arr;}
+function wInit(){var wk=wKey();if(weekShifts[wk])return;weekShifts[wk]={};staff.forEach(function(s){weekShifts[wk][s.id]={};for(var d=0;d<7;d++){var t=(shifts[s.id]||{})[d]||[];weekShifts[wk][s.id][d]=t.map(function(sh){return Object.assign({},sh);});}});}
 
 function renderWeek(){document.getElementById('weekLabel').textContent=fmtS(weekStart)+' \u2013 '+fmtS(addDays(weekStart,6));}
 
@@ -1129,7 +1134,7 @@ function renderHeader(){
   var h='<div class="ghc-corner"><span class="ghc-corner-lbl">Employee</span></div>';
   for(var i=0;i<7;i++){
     var d=addDays(weekStart,i),tod=isToday(d),meet=meetings[i];
-    var cnt=staff.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
+    var cnt=staff.reduce(function(a,s){return a+wShifts(s.id,i).length;},0);
     var cls='ghc-cell'+(tod?' is-today':'')+(meet?' is-meet':'');
     h+='<div class="'+cls+'" onclick="openMeet('+i+')" title="Click to set meeting day">';
     h+='<div class="g-day-abbr">'+DN[i]+'</div>';
@@ -1151,7 +1156,7 @@ function renderBody(){
     html+='<div class="role-group"><div class="role-hdr">';
     html+='<div class="rhc-label" style="border-right:1px solid var(--border)"><div class="r-dot" style="background:'+rc.color+'"></div><span class="r-nm">'+role+'</span><span style="font-size:.61rem;color:var(--muted);font-family:\'DM Mono\',monospace;margin-left:auto;">'+members.length+'</span></div>';
     for(var i=0;i<7;i++){
-      var cnt=members.reduce(function(a,s){return a+((shifts[s.id]||{})[i]||[]).length;},0);
+      var cnt=members.reduce(function(a,s){return a+wShifts(s.id,i).length;},0);
       html+='<div class="rhc-day'+(meetings[i]?' mc':'')+'">'+( cnt||'\u2013')+'</div>';
     }
     html+='</div>';
@@ -1165,7 +1170,7 @@ function renderBody(){
       html+='<div class="sr-h">'+staffH(s.id)+'h</div></div></div></div>';
       for(var d=0;d<7;d++){
         var avState=(availability[s.id]||{})[addDays(weekStart,d).toISOString().slice(0,10)];
-        var cellSh=((shifts[s.id]||{})[d]||[]);
+        var cellSh=wShifts(s.id,d);
         var cellBg=avState==='sick'?'style="background:#fdf8f8"':avState==='unavail'?'style="background:#fdf5f0"':'';
         html+='<div class="shift-cell'+(meetings[d]?' mc':'')+'" '+cellBg+' ondragover="ev(event)" ondrop="dp(event,'+s.id+','+d+')" ondragleave="dl(event)">';
         if(avState&&!cellSh.length){html+='<div style="font-size:.6rem;color:'+(avState==='sick'?'#c0392b':'var(--acc)')+';font-style:italic;padding:3px;">'+(avState==='sick'?'\uD83E\uDD12 Sick':'\u274C Unavail')+'</div>';}
@@ -1222,7 +1227,7 @@ function openAdd(sid,day){editingShift=null;pendingCell={sid:sid,day:day};popSta
   var sec2=document.getElementById('smApproveSection');if(sec2)sec2.style.display='none';
 }
 function openEdit(sid,day,idx){
-  var sh=shifts[sid][day][idx];
+  var sh=wShifts(sid,day)[idx];
   editingShift={sid:sid,day:day,idx:idx};
   pendingCell={sid:sid,day:day};
   popStaff(sid);
@@ -1276,8 +1281,8 @@ function saveShift(){
   else{shifts[sid][day].push(entry);toast('Shift saved \u2713');}
   closeShift();render();
 }
-function deleteShift(){if(!editingShift)return;var e=editingShift;shifts[e.sid][e.day].splice(e.idx,1);closeShift();render();toast('Shift deleted');}
-function quickDel(sid,day,idx,ev){ev.stopPropagation();shifts[sid][day].splice(idx,1);render();}
+function deleteShift(){if(!editingShift)return;var e=editingShift;var wArr=wShifts(e.sid,e.day).slice();wArr.splice(e.idx,1);wSet(e.sid,e.day,wArr);closeShift();render();toast('Shift deleted');}
+function quickDel(sid,day,idx,ev){ev.stopPropagation();var wArr=wShifts(sid,day).slice();wArr.splice(idx,1);wSet(sid,day,wArr);render();}
 
 // ── ADD STAFF ────────────────────────────────────────────────────────────
 function openAddStaff(){requirePassword('Add Staff Member','Only managers can add new team members.',function(){document.getElementById('ns_name').value='';document.getElementById('ns_rate').value='';staffPhotoData=null;document.getElementById('ns_photo_prev').innerHTML='<span style="font-size:1.3rem;">\uD83D\uDCF7</span><span style="font-size:.6rem;color:var(--muted);">Click to upload</span>';document.getElementById('staffModal').style.display='flex';});}
@@ -1293,8 +1298,8 @@ function dl(e){e.currentTarget.classList.remove('drop-on');}
 function dp(e,sid,day){e.preventDefault();e.currentTarget.classList.remove('drop-on');if(dragId!==null){openAdd(dragId,day);dragId=null;}}
 
 // ── VIEW / NAV ───────────────────────────────────────────────────────────
-document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
-document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
+document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);wInit();loadMeetingsForWeek();render();};
+document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);wInit();loadMeetingsForWeek();render();};
 function switchView(v){
   currentView=v;
   document.getElementById('btnWeekView').classList.toggle('active',v==='week');
@@ -1968,7 +1973,7 @@ function renderAvailability(){
   document.getElementById('availList').innerHTML=html;render();
 }
 function avClick(el){var sid=parseInt(el.getAttribute('data-sid')),ds=el.getAttribute('data-ds');if(!availability[sid])availability[sid]={};var cur=(availability[sid][ds])||'ok',next=cur==='ok'?'unavail':cur==='unavail'?'sick':'ok';if(next==='ok')delete availability[sid][ds];else availability[sid][ds]=next;saveAvailability();renderAvailability();}
-function saveAvailability(){try{localStorage.setItem(atob('c2hpZnRkZXNrX2F2YWls'),JSON.stringify(availability));}catch(e){}}
+function saveAvailability(){try{localStorage.setItem(atob('c2hpZnRkZXNrX2F2YWls'),JSON.stringify(availability));localStorage.setItem('sd_wsh',JSON.stringify(weekShifts));}catch(e){}}
 function loadAvailability(){try{var d=localStorage.getItem(atob('c2hpZnRkZXNrX2F2YWls'));if(d){var p=JSON.parse(d);availability={};Object.keys(p).forEach(function(k){availability[parseInt(k)]=p[k];});}}catch(e){}}
 
 // ── WHATSAPP ─────────────────────────────────────────────────────────────
@@ -2101,7 +2106,8 @@ function loadData(){
     if(m){var p2=JSON.parse(m);meetings={};Object.keys(p2).forEach(function(k){meetings[parseInt(k)]=p2[k];});}
     if(ms){var p3=JSON.parse(ms);monthShiftsStore={};Object.keys(p3).forEach(function(k){monthShiftsStore[parseInt(k)]=p3[k];});}
     if(mm)monthMeetings=JSON.parse(mm);
-    if(av){var p4=JSON.parse(av);availability={};Object.keys(p4).forEach(function(k){availability[parseInt(k)]=p4[k];});}
+    if(av){var p4=JSON.parse(av);availability={};Object.keys(p4).forEach(function(k){availability[parseInt(k)]=p4[k];})};
+    var ws2=localStorage.getItem('sd_wsh');if(ws2){try{var o=JSON.parse(ws2);weekShifts={};Object.keys(o).forEach(function(wk){weekShifts[wk]={};Object.keys(o[wk]).forEach(function(sid){weekShifts[wk][parseInt(sid)]=o[wk][sid];});});}catch(e2){}}
   }catch(e){}
 }
 function saveClockLog(){try{localStorage.setItem(atob('c2hpZnRkZXNrX2Nsb2Nr'),JSON.stringify(clockLog));}catch(e){}}
@@ -2161,7 +2167,7 @@ function savePIData(){try{localStorage.setItem(atob('c2hpZnRkZXNrX3Bp'),btoa(JSO
 function loadPIData(){try{var d=localStorage.getItem(atob('c2hpZnRkZXNrX3Bp'));if(d)personalInfo=JSON.parse(atob(d));}catch(e){}}
 
 // ── INIT ─────────────────────────────────────────────────────────────────
-loadData();loadClockLog();if(typeof loadClockHistory==="function")loadClockHistory();loadPIData();loadAvailability();
+loadData();wInit();loadClockLog();if(typeof loadClockHistory==="function")loadClockHistory();loadPIData();loadAvailability();
 document.getElementById('prevWeek').onclick=function(){weekStart=addDays(weekStart,-7);loadMeetingsForWeek();render();};
 document.getElementById('nextWeek').onclick=function(){weekStart=addDays(weekStart,7);loadMeetingsForWeek();render();};
 render();
@@ -2217,6 +2223,7 @@ async function saveDataCloud() {
     await sdStorageSet(custKey('shifts'), shifts);
     await sdStorageSet(custKey('meetings'), meetings);
     await sdStorageSet(custKey('monthStore'), monthShiftsStore);
+    await sdStorageSet(custKey('weekShifts'), weekShifts);
     await sdStorageSet(custKey('monthMeet'), monthMeetings);
     await sdStorageSet(custKey('avail'), availability);
     await sdStorageSet(custKey('clockHistory'), clockHistory);
@@ -2238,6 +2245,7 @@ window.loadDataCloud = async function loadDataCloud() {
     if(m){ meetings={}; Object.keys(m).forEach(function(k){ meetings[parseInt(k)]=m[k]; }); }
     if(ms){ monthShiftsStore={}; Object.keys(ms).forEach(function(k){ monthShiftsStore[parseInt(k)]=ms[k]; }); }
     if(mm) monthMeetings=mm;
+    var wsC=await sdStorageGet(custKey('weekShifts'));if(wsC){weekShifts={};Object.keys(wsC).forEach(function(wk){weekShifts[wk]={};Object.keys(wsC[wk]).forEach(function(sid){weekShifts[wk][parseInt(sid)]=wsC[wk][sid];});});}
     if(av){ availability={}; Object.keys(av).forEach(function(k){ availability[parseInt(k)]=av[k]; }); }
     var ch=await sdStorageGet(custKey('clockHistory'));
     if(ch){ clockHistory={}; Object.keys(ch).forEach(function(k){ clockHistory[parseInt(k)]=ch[k]; }); }

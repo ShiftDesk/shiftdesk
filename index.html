@@ -969,8 +969,8 @@ function setLang(lang) {
   // Cookie banner
   var ct=document.getElementById('cookieText');
   if(ct) ct.innerHTML = lang==='da'
-    ? 'Vi bruger cookies for at forbedre din oplevelse og analysere besøg på siden. Ved at klikke "Accepter" accepterer du vores brug af cookies. <a href="mailto:support@shiftdesks.app">Læs mere</a>'
-    : 'We use cookies to improve your experience and analyse site visits. By clicking "Accept" you agree to our use of cookies. <a href="mailto:support@shiftdesks.app">Learn more</a>';
+    ? 'Vi bruger cookies for at forbedre din oplevelse. <a href="privacy.html" target="_blank">Læs vores cookiepolitik</a>'
+    : 'We use cookies to improve your experience. <a href="privacy.html" target="_blank">Read our cookie policy</a>';
   var ca=document.getElementById('cookieAcc');
   var cd=document.getElementById('cookieDec');
   if(ca) ca.textContent = lang==='da' ? 'Accepter cookies' : 'Accept cookies';
@@ -995,7 +995,7 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 <!-- Cookie Banner -->
 <div id="cookieBanner">
   <div class="cookie-text">
-    <span id="cookieText">Vi bruger cookies for at forbedre din oplevelse og analysere besøg på siden. Ved at klikke "Accepter" accepterer du vores brug af cookies. <a href="mailto:support@shiftdesks.app">Læs mere</a></span>
+    <span id="cookieText">Vi bruger cookies for at forbedre din oplevelse. <a href="privacy.html" target="_blank">Læs vores cookiepolitik</a></span>
   </div>
   <div class="cookie-btns">
     <button class="cookie-btn-dec" onclick="cookieDecline()" id="cookieDec">Afvis</button>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Privatlivspolitik & Cookies — ShiftDesk</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f5f1;--white:#fff;--border:#e3ddd4;--text:#18160f;--muted:#8c8880;--acc:#bf4a0a;--navy:#1a2e4a;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;}
+nav{background:#fff;border-bottom:1.5px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:var(--acc);}
+.logo-text{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;color:var(--text);}
+.lang-btns{display:flex;gap:6px;}
+.lang-btn{background:none;border:1.5px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);}
+.lang-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.container{max-width:720px;margin:0 auto;padding:48px 24px 80px;}
+h1{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;margin-bottom:8px;}
+.subtitle{color:var(--muted);font-size:.85rem;margin-bottom:40px;padding-bottom:20px;border-bottom:1.5px solid var(--border);}
+h2{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;margin:32px 0 10px;color:var(--navy);}
+p{font-size:.88rem;color:#333;margin-bottom:12px;}
+ul{margin:8px 0 12px 20px;}
+li{font-size:.88rem;color:#333;margin-bottom:6px;}
+.cookie-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.82rem;}
+.cookie-table th{background:var(--bg);padding:10px 12px;text-align:left;font-weight:700;border-bottom:2px solid var(--border);color:var(--navy);}
+.cookie-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.badge{display:inline-block;background:#e4f2ec;color:#1b6e40;border-radius:5px;padding:2px 8px;font-size:.7rem;font-weight:700;}
+.badge-req{background:#e6edf9;color:#1a2e4a;}
+a{color:var(--acc);}
+footer{text-align:center;padding:24px;font-size:.75rem;color:var(--muted);border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-dot"></div>
+    <div class="logo-text">ShiftDesk</div>
+  </a>
+  <div class="lang-btns">
+    <button class="lang-btn active" id="btnDA" onclick="setLang('da')">🇩🇰 DA</button>
+    <button class="lang-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- DA content -->
+  <div id="contentDA">
+    <h1>Privatlivspolitik & Cookies</h1>
+    <div class="subtitle">Sidst opdateret: 30. april 2026 · ShiftDesk, support@shiftdesks.app</div>
+
+    <h2>1. Hvem er vi?</h2>
+    <p>ShiftDesk er et vagtplanlægnings- og lønsystem til restauranter. Vi driver hjemmesiden shiftdesks.app. Har du spørgsmål til denne politik, kan du kontakte os på <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a>.</p>
+
+    <h2>2. Hvilke data indsamler vi?</h2>
+    <p>Vi indsamler kun de data, der er nødvendige for at drive systemet:</p>
+    <ul>
+      <li><strong>Kontodata:</strong> Navn, email og adgangskode ved oprettelse af konto</li>
+      <li><strong>Medarbejderdata:</strong> Navn, stilling, lønsats og registrerede timer — indtastet af restaurantlederen</li>
+      <li><strong>Brugsdata:</strong> Vagtplaner, lønberegninger og egenkontrolskemaer gemt i systemet</li>
+      <li><strong>Tekniske data:</strong> IP-adresse og browsertype ved brug af siden (til sikkerhed og fejlsøgning)</li>
+    </ul>
+
+    <h2>3. Cookies</h2>
+    <p>Vi bruger følgende cookies på shiftdesks.app:</p>
+    <table class="cookie-table">
+      <thead><tr><th>Cookie</th><th>Formål</th><th>Varighed</th><th>Type</th></tr></thead>
+      <tbody>
+        <tr><td><code>sd_cookie_consent</code></td><td>Husker dit cookievalg</td><td>1 år</td><td><span class="badge badge-req">Nødvendig</span></td></tr>
+        <tr><td><code>sd_auth</code></td><td>Holder dig logget ind i systemet</td><td>Session</td><td><span class="badge badge-req">Nødvendig</span></td></tr>
+        <tr><td><code>sd_checkin_cust</code></td><td>Husker hvilken restaurant check-in siden tilhører</td><td>Lokal</td><td><span class="badge badge-req">Nødvendig</span></td></tr>
+        <tr><td>Firebase cookies</td><td>Database-forbindelse (Google Firebase)</td><td>Session</td><td><span class="badge">Funktionel</span></td></tr>
+      </tbody>
+    </table>
+    <p>Vi bruger <strong>ikke</strong> tracking-cookies, annoncecookies eller tredjeparts markedsføring.</p>
+
+    <h2>4. Hvordan bruges dine data?</h2>
+    <ul>
+      <li>Til at levere ShiftDesk-systemets funktioner (vagtplaner, løn, egenkontrol)</li>
+      <li>Til at sende dig systemnotifikationer og support</li>
+      <li>Til at forbedre systemet baseret på brug</li>
+    </ul>
+    <p>Vi sælger <strong>aldrig</strong> dine data til tredjeparter.</p>
+
+    <h2>5. Dataopbevaring</h2>
+    <p>Dine data opbevares sikkert i Google Firebase (EU-datacenter). Data slettes senest 30 dage efter kontoen opsiges.</p>
+
+    <h2>6. Dine rettigheder (GDPR)</h2>
+    <p>Du har ret til at:</p>
+    <ul>
+      <li>Få indsigt i hvilke data vi har om dig</li>
+      <li>Få dine data rettet eller slettet</li>
+      <li>Trække dit samtykke tilbage når som helst</li>
+      <li>Klage til Datatilsynet (datatilsynet.dk)</li>
+    </ul>
+    <p>Kontakt os på <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a> for at udøve dine rettigheder.</p>
+
+    <h2>7. Kontakt</h2>
+    <p>ShiftDesk · <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a> · shiftdesks.app</p>
+  </div>
+
+  <!-- EN content -->
+  <div id="contentEN" style="display:none;">
+    <h1>Privacy Policy & Cookies</h1>
+    <div class="subtitle">Last updated: 30 April 2026 · ShiftDesk, support@shiftdesks.app</div>
+
+    <h2>1. Who are we?</h2>
+    <p>ShiftDesk is a scheduling and payroll system for restaurants. We operate the website shiftdesks.app. If you have questions about this policy, contact us at <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a>.</p>
+
+    <h2>2. What data do we collect?</h2>
+    <p>We only collect data necessary to operate the system:</p>
+    <ul>
+      <li><strong>Account data:</strong> Name, email and password when creating an account</li>
+      <li><strong>Employee data:</strong> Name, role, pay rate and registered hours — entered by the restaurant manager</li>
+      <li><strong>Usage data:</strong> Schedules, payroll calculations and food safety forms saved in the system</li>
+      <li><strong>Technical data:</strong> IP address and browser type when using the site (for security and debugging)</li>
+    </ul>
+
+    <h2>3. Cookies</h2>
+    <p>We use the following cookies on shiftdesks.app:</p>
+    <table class="cookie-table">
+      <thead><tr><th>Cookie</th><th>Purpose</th><th>Duration</th><th>Type</th></tr></thead>
+      <tbody>
+        <tr><td><code>sd_cookie_consent</code></td><td>Remembers your cookie choice</td><td>1 year</td><td><span class="badge badge-req">Required</span></td></tr>
+        <tr><td><code>sd_auth</code></td><td>Keeps you logged in to the system</td><td>Session</td><td><span class="badge badge-req">Required</span></td></tr>
+        <tr><td><code>sd_checkin_cust</code></td><td>Remembers which restaurant the check-in page belongs to</td><td>Local</td><td><span class="badge badge-req">Required</span></td></tr>
+        <tr><td>Firebase cookies</td><td>Database connection (Google Firebase)</td><td>Session</td><td><span class="badge">Functional</span></td></tr>
+      </tbody>
+    </table>
+    <p>We do <strong>not</strong> use tracking cookies, advertising cookies or third-party marketing.</p>
+
+    <h2>4. How is your data used?</h2>
+    <ul>
+      <li>To deliver ShiftDesk system features (scheduling, payroll, food safety)</li>
+      <li>To send you system notifications and support</li>
+      <li>To improve the system based on usage</li>
+    </ul>
+    <p>We <strong>never</strong> sell your data to third parties.</p>
+
+    <h2>5. Data storage</h2>
+    <p>Your data is stored securely in Google Firebase (EU data centre). Data is deleted within 30 days of account cancellation.</p>
+
+    <h2>6. Your rights (GDPR)</h2>
+    <p>You have the right to:</p>
+    <ul>
+      <li>Access the data we hold about you</li>
+      <li>Have your data corrected or deleted</li>
+      <li>Withdraw your consent at any time</li>
+      <li>Lodge a complaint with the Danish Data Protection Agency (datatilsynet.dk)</li>
+    </ul>
+    <p>Contact us at <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a> to exercise your rights.</p>
+
+    <h2>7. Contact</h2>
+    <p>ShiftDesk · <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a> · shiftdesks.app</p>
+  </div>
+
+</div>
+
+<footer>© 2026 ShiftDesk · <a href="index.html">Tilbage til forsiden</a></footer>
+
+<script>
+function setLang(lang){
+  document.getElementById('contentDA').style.display = lang==='da'?'block':'none';
+  document.getElementById('contentEN').style.display = lang==='en'?'block':'none';
+  document.getElementById('btnDA').classList.toggle('active', lang==='da');
+  document.getElementById('btnEN').classList.toggle('active', lang==='en');
+  document.querySelector('footer a').textContent = lang==='da'?'Tilbage til forsiden':'Back to homepage';
+  document.title = lang==='da'?'Privatlivspolitik & Cookies — ShiftDesk':'Privacy Policy & Cookies — ShiftDesk';
+  document.documentElement.lang = lang;
+}
+// Auto-detect from referrer language or default DA
+var saved = localStorage.getItem('sd_lang');
+if(saved==='en') setLang('en');
+</script>
+</body>
+</html>

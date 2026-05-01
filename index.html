@@ -252,6 +252,17 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
 .delay-3{animation-delay:.3s;}
 .delay-4{animation-delay:.4s;}
 .hero-visual{animation:float 6s ease-in-out infinite;}
+
+/* ── Cookie Banner ─────────────────────────────────────────────────────── */
+#cookieBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#1a1814;color:#f0ede7;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 -4px 24px rgba(0,0,0,.25);transform:translateY(100%);transition:transform .35s ease;}
+#cookieBanner.show{transform:translateY(0);}
+.cookie-text{font-size:.78rem;color:#c9c3b8;line-height:1.6;flex:1;min-width:200px;}
+.cookie-text a{color:#e8a87c;text-decoration:underline;}
+.cookie-btns{display:flex;gap:8px;flex-shrink:0;}
+.cookie-btn-acc{background:#bf4a0a;color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;}
+.cookie-btn-acc:hover{background:#9d3c07;}
+.cookie-btn-dec{background:transparent;color:#c9c3b8;border:1.5px solid #444;border-radius:8px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;}
+.cookie-btn-dec:hover{border-color:#888;color:#f0ede7;}
 </style>
 </head>
 <body>
@@ -955,6 +966,15 @@ function setLang(lang) {
   set('ftBottom', t['ft-bottom']);
   // Page title
   document.title = t['page-title'];
+  // Cookie banner
+  var ct=document.getElementById('cookieText');
+  if(ct) ct.innerHTML = lang==='da'
+    ? 'Vi bruger cookies for at forbedre din oplevelse og analysere besøg på siden. Ved at klikke "Accepter" accepterer du vores brug af cookies. <a href="mailto:support@shiftdesks.app">Læs mere</a>'
+    : 'We use cookies to improve your experience and analyse site visits. By clicking "Accept" you agree to our use of cookies. <a href="mailto:support@shiftdesks.app">Learn more</a>';
+  var ca=document.getElementById('cookieAcc');
+  var cd=document.getElementById('cookieDec');
+  if(ca) ca.textContent = lang==='da' ? 'Accepter cookies' : 'Accept cookies';
+  if(cd) cd.textContent = lang==='da' ? 'Afvis' : 'Decline';
 
   // Update pricing periods if visible
   var mode = isYearly ? 'yearly' : 'monthly';
@@ -970,6 +990,37 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) { e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
   });
 });
+</script>
+
+<!-- Cookie Banner -->
+<div id="cookieBanner">
+  <div class="cookie-text">
+    <span id="cookieText">Vi bruger cookies for at forbedre din oplevelse og analysere besøg på siden. Ved at klikke "Accepter" accepterer du vores brug af cookies. <a href="mailto:support@shiftdesks.app">Læs mere</a></span>
+  </div>
+  <div class="cookie-btns">
+    <button class="cookie-btn-dec" onclick="cookieDecline()" id="cookieDec">Afvis</button>
+    <button class="cookie-btn-acc" onclick="cookieAccept()" id="cookieAcc">Accepter cookies</button>
+  </div>
+</div>
+
+<script>
+// Cookie banner
+(function(){
+  if(!localStorage.getItem('sd_cookie_consent')){
+    setTimeout(function(){ document.getElementById('cookieBanner').classList.add('show'); }, 800);
+  }
+})();
+function cookieAccept(){
+  localStorage.setItem('sd_cookie_consent','accepted');
+  document.getElementById('cookieBanner').classList.remove('show');
+}
+function cookieDecline(){
+  localStorage.setItem('sd_cookie_consent','declined');
+  document.getElementById('cookieBanner').classList.remove('show');
+}
+
+// Translate cookie banner with setLang
+var _origSetLang = typeof setLang === 'function' ? setLang : null;
 </script>
 </body>
 </html>

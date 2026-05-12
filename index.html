@@ -50,6 +50,35 @@ h1,h2,h3{font-family:'Playfair Display',serif;line-height:1.15;}
 .btn-outline:hover{background:var(--navy);color:#fff;}
 .btn-white{background:#fff;color:var(--navy);box-shadow:0 4px 14px rgba(0,0,0,.12);}
 .btn-white:hover{background:var(--s2);}
+/* App Store badge */
+.appstore-btn{display:inline-flex;align-items:center;gap:10px;background:#000;color:#fff;border-radius:12px;padding:10px 20px;text-decoration:none;transition:all .2s;border:1.5px solid rgba(255,255,255,.15);}
+.appstore-btn:hover{background:#1a1a1a;transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35);}
+.appstore-btn svg{flex-shrink:0;}
+.appstore-btn-text{display:flex;flex-direction:column;line-height:1.2;}
+.appstore-btn-sub{font-size:.6rem;font-weight:400;opacity:.75;text-transform:uppercase;letter-spacing:.08em;}
+.appstore-btn-main{font-size:.95rem;font-weight:700;}
+/* App section */
+.app-section{padding:100px 0;background:linear-gradient(135deg,var(--navy-dark) 0%,var(--navy-light) 100%);position:relative;overflow:hidden;}
+.app-section::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:36px 36px;}
+.app-inner{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.app-tag{background:rgba(232,160,32,.2);color:var(--accent);border:1px solid rgba(232,160,32,.3);margin-bottom:20px;}
+.app-title{font-size:clamp(2rem,4vw,2.9rem);color:#fff;margin-bottom:16px;}
+.app-sub{font-size:1rem;color:rgba(255,255,255,.7);line-height:1.75;margin-bottom:32px;max-width:460px;}
+.app-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:36px;}
+.app-features li{display:flex;align-items:center;gap:10px;font-size:.88rem;color:rgba(255,255,255,.85);}
+.app-features li::before{content:'✓';width:20px;height:20px;background:var(--accent);color:var(--navy-dark);border-radius:50%;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.app-badges{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+.app-visual{display:flex;justify-content:center;align-items:center;}
+.app-phone-mockup{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:36px;padding:16px;width:220px;box-shadow:0 32px 80px rgba(0,0,0,.4);}
+.app-phone-screen{background:var(--bg);border-radius:24px;padding:16px;min-height:380px;}
+.app-phone-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.app-phone-title{font-size:.7rem;font-weight:700;color:var(--navy);}
+.app-phone-dot{width:8px;height:8px;border-radius:50%;background:var(--navy-light);}
+.app-shift-mini{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.app-shift-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;flex-shrink:0;}
+.app-shift-name{font-size:.72rem;font-weight:600;color:var(--navy);flex:1;}
+.app-shift-time{font-size:.6rem;color:var(--muted);font-family:monospace;}
+@media(max-width:900px){.app-inner{grid-template-columns:1fr;}.app-visual{display:none;}}
 .btn-lg{padding:16px 36px;font-size:1rem;}
 .tag{display:inline-block;padding:5px 14px;border-radius:50px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
 
@@ -226,7 +255,7 @@ nav.scrolled .nav-logo-text{color:var(--navy);}
 
 /* ── FOOTER ────────────────────────────────────────────────────────────────── */
 footer{background:var(--navy-dark);padding:60px 0 32px;}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:32px;margin-bottom:48px;}
 .footer-brand p{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.75;margin-top:12px;max-width:240px;}
 .footer-col h4{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.4);margin-bottom:16px;}
 .footer-col a{display:block;font-size:.82rem;color:rgba(255,255,255,.6);text-decoration:none;margin-bottom:8px;}
@@ -234,7 +263,7 @@ footer{background:var(--navy-dark);padding:60px 0 32px;}
 .footer-divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:28px;}
 .footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
 .footer-bottom p{font-size:.75rem;color:rgba(255,255,255,.35);}
-@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr 1fr;}} @media(max-width:600px){.footer-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
 
 /* ── Language switcher ─────────────────────────────────────────────────────── */
@@ -328,6 +357,15 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
         <div class="hero-actions fade-up delay-3">
           <a href="shiftdesk.html" class="btn btn-accent btn-lg" id="heroBtn1">Prøv gratis i 14 dage →</a>
           <a href="shiftdesk.html" class="btn btn-white btn-lg" id="heroBtn2">Log ind</a>
+        </div>
+        <div class="fade-up delay-4" style="margin-bottom:28px;">
+          <a href="https://apps.apple.com/app/shiftdesk/id6767180020" target="_blank" rel="noopener" class="appstore-btn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+            <div class="appstore-btn-text">
+              <span class="appstore-btn-sub" id="appBtnSub">Download på</span>
+              <span class="appstore-btn-main">App Store</span>
+            </div>
+          </a>
         </div>
         <div class="hero-trust fade-up delay-4">
           <div class="hero-trust-text" id="heroTrust">Ingen kreditkort krævet &nbsp;·&nbsp; Opsig når som helst</div>
@@ -685,6 +723,52 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
   </div>
 </section>
 
+<!-- APP DOWNLOAD -->
+<section class="app-section" id="app">
+  <div class="container">
+    <div class="app-inner">
+      <div>
+        <span class="tag app-tag" id="appTag">📱 Ny — ShiftDesk App</span>
+        <h2 class="app-title" id="appTitle" style="margin-top:14px;">ShiftDesk i din lomme</h2>
+        <p class="app-sub" id="appSub">Se vagter, clock ind og hold styr på dit hold — uanset hvor du er. Hent appen gratis på App Store.</p>
+        <ul class="app-features" id="appFeaturesList">
+          <li id="appF1">Se og administrer vagtplaner på farten</li>
+          <li id="appF2">Clock ind og ud direkte fra telefonen</li>
+          <li id="appF3">Notifikationer om nye og ændrede vagter</li>
+          <li id="appF4">Egenkontrol og temperaturregistrering</li>
+        </ul>
+        <div class="app-badges">
+          <a href="https://apps.apple.com/app/shiftdesk/id6767180020" target="_blank" rel="noopener" class="appstore-btn">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11"/></svg>
+            <div class="appstore-btn-text">
+              <span class="appstore-btn-sub" id="appBadgeSub">Download på</span>
+              <span class="appstore-btn-main" style="font-size:1.1rem;">App Store</span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="app-visual">
+        <div class="app-phone-mockup">
+          <div class="app-phone-screen">
+            <div class="app-phone-bar">
+              <div class="app-phone-title">ShiftDesk</div>
+              <div style="display:flex;gap:4px;"><div class="app-phone-dot"></div><div class="app-phone-dot" style="opacity:.4;"></div><div class="app-phone-dot" style="opacity:.2;"></div></div>
+            </div>
+            <div style="font-size:.6rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Uge 18 · 4 vagter</div>
+            <div class="app-shift-mini"><div class="app-shift-av" style="background:#1a2e5a;">MJ</div><div style="flex:1;"><div class="app-shift-name">Mia Jensen</div><div class="app-shift-time">08:00-16:00</div></div><span style="font-size:.58rem;background:#dcfce7;color:#15803d;font-weight:700;padding:2px 7px;border-radius:20px;">ok</span></div>
+            <div class="app-shift-mini"><div class="app-shift-av" style="background:#2563eb;">LA</div><div style="flex:1;"><div class="app-shift-name">Lars Andersen</div><div class="app-shift-time">12:00-20:00</div></div><span style="font-size:.58rem;background:#dbeafe;color:#1e40af;font-weight:700;padding:2px 7px;border-radius:20px;">ok</span></div>
+            <div class="app-shift-mini"><div class="app-shift-av" style="background:#e8a020;">SN</div><div style="flex:1;"><div class="app-shift-name">Sofia Nielsen</div><div class="app-shift-time">16:00-24:00</div></div><span style="font-size:.58rem;background:#fef9ec;color:#d97706;font-weight:700;padding:2px 7px;border-radius:20px;">...</span></div>
+            <div style="background:var(--navy);border-radius:10px;padding:12px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.85);">Clock ind nu</div>
+              <div style="background:var(--accent);border-radius:8px;padding:4px 12px;font-size:.62rem;font-weight:700;color:var(--navy-dark);">Start</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -722,6 +806,11 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
         <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a>
         <a href="shiftdesk.html">Log ind</a>
         <a href="shiftdesk.html">Opret konto</a>
+      </div>
+      <div class="footer-col">
+        <h4 id="ftHead4">App</h4>
+        <a href="https://apps.apple.com/app/shiftdesk/id6767180020" target="_blank" rel="noopener" id="ftApp1">📱 Download iOS App</a>
+        <a href="#app" id="ftApp2">Om appen</a>
       </div>
     </div>
     <div class="footer-divider"></div>
@@ -836,6 +925,7 @@ var TRANSLATIONS = {
     'ft-lnk4': 'Starter — 30 kr/md', 'ft-lnk5': 'Fuld pakke — 99 kr/md',
     'ft-lnk6': 'Årlig rabat', 'ft-lnk7': '14 dages gratis prøve',
     'ft-lnk8': 'Opret konto', 'ft-bottom': 'Lavet til danske restauranter 🇩🇰',
+    'app-tag':'📱 Ny — ShiftDesk App','app-title':'ShiftDesk i din lomme','app-sub':'Se vagter, clock ind og hold styr på dit hold — uanset hvor du er. Hent appen gratis på App Store.','app-f1':'Se og administrer vagtplaner på farten','app-f2':'Clock ind og ud direkte fra telefonen','app-f3':'Notifikationer om nye og ændrede vagter','app-f4':'Egenkontrol og temperaturregistrering','app-badge-sub':'Download på','app-btn-sub':'Download på','ft-head4':'App','ft-app1':'📱 Download iOS App','ft-app2':'Om appen',
     // Page title
     'page-title': 'ShiftDesk — Vagtplanlægning & Løn til Restauranter',
   },
@@ -895,6 +985,7 @@ var TRANSLATIONS = {
     'ft-lnk4': 'Starter — 30 DKK/mo', 'ft-lnk5': 'Full package — 99 DKK/mo',
     'ft-lnk6': 'Annual discount', 'ft-lnk7': '14-day free trial',
     'ft-lnk8': 'Create account', 'ft-bottom': 'Built for Danish restaurants 🇩🇰',
+    'app-tag':'📱 New — ShiftDesk App','app-title':'ShiftDesk in your pocket','app-sub':'View shifts, clock in and manage your team — wherever you are. Download the app free on the App Store.','app-f1':'View and manage schedules on the go','app-f2':'Clock in and out directly from your phone','app-f3':'Notifications for new and updated shifts','app-f4':'Food safety and temperature registration','app-badge-sub':'Download on the','app-btn-sub':'Download on the','ft-head4':'App','ft-app1':'📱 Download iOS App','ft-app2':'About the app',
     // Page title
     'page-title': 'ShiftDesk — Scheduling & Payroll for Restaurants',
   }
@@ -953,6 +1044,19 @@ function setLang(lang) {
   set('ctaBtn1',    t['cta-btn1']);
   set('ctaBtn2',    t['cta-btn2']);
   set('ctaNote',    t['cta-note']);
+  // App section
+  set('appTag',     t['app-tag']);
+  set('appTitle',   t['app-title']);
+  set('appSub',     t['app-sub']);
+  set('appF1',      t['app-f1']);
+  set('appF2',      t['app-f2']);
+  set('appF3',      t['app-f3']);
+  set('appF4',      t['app-f4']);
+  set('appBadgeSub',t['app-badge-sub']);
+  set('appBtnSub',  t['app-btn-sub']);
+  set('ftHead4',    t['ft-head4']);
+  set('ftApp1',     t['ft-app1']);
+  set('ftApp2',     t['ft-app2']);
   // Pricing features
   ['pf1-1','pf1-2','pf1-4','pf1-5','pf1-6',
    'pf2-1','pf2-2','pf2-3','pf2-4','pf2-5','pf2-6','pf2-7'].forEach(function(id){

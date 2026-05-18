@@ -82,6 +82,29 @@ h1,h2,h3{font-family:'Playfair Display',serif;line-height:1.15;}
 .btn-lg{padding:16px 36px;font-size:1rem;}
 .tag{display:inline-block;padding:5px 14px;border-radius:50px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
 
+/* ── TRIAL MODAL ───────────────────────────────────────────────────────────── */
+#trialModal{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;padding:20px;}
+#trialModal.open{display:flex;}
+.modal-backdrop{position:absolute;inset:0;background:rgba(15,29,59,.6);backdrop-filter:blur(4px);}
+.modal-box{position:relative;z-index:1;background:#fff;border-radius:24px;padding:48px 40px 40px;max-width:480px;width:100%;box-shadow:0 32px 80px rgba(0,0,0,.25);animation:modalPop .3s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes modalPop{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);line-height:1;padding:4px 8px;border-radius:8px;transition:background .15s;}
+.modal-close:hover{background:var(--s2);}
+.modal-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.65rem;color:var(--navy-dark);text-align:center;margin-bottom:10px;}
+.modal-sub{font-size:.88rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:24px;}
+.modal-steps{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.modal-steps li{display:flex;align-items:flex-start;gap:10px;font-size:.83rem;color:var(--text);line-height:1.5;}
+.modal-steps li::before{content:'✓';width:20px;height:20px;background:var(--navy);color:#fff;border-radius:50%;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.modal-email-box{background:var(--accent-lt);border:1.5px solid rgba(232,160,32,.35);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.modal-email-icon{font-size:1.3rem;flex-shrink:0;}
+.modal-email-text{font-size:.82rem;color:var(--navy-dark);line-height:1.55;}
+.modal-email-text a{color:var(--blue);font-weight:700;text-decoration:none;}
+.modal-email-text a:hover{text-decoration:underline;}
+.modal-cta{display:block;width:100%;text-align:center;padding:14px;background:var(--navy);color:#fff;border-radius:50px;font-weight:700;font-size:.9rem;text-decoration:none;transition:all .2s;border:none;cursor:pointer;}
+.modal-cta:hover{background:var(--navy-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,46,90,.35);}
+.modal-fine{text-align:center;font-size:.72rem;color:var(--muted);margin-top:12px;}
+
 /* ── NAV ───────────────────────────────────────────────────────────────────── */
 nav{position:fixed;top:0;left:0;right:0;z-index:999;transition:all .3s;}
 nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:var(--shadow-sm);}
@@ -338,7 +361,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
         <button class="lang-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
       </div>
       <a href="shiftdesk.html" class="nav-login" data-da="Log ind" data-en="Log in">Log ind</a>
-      <a href="shiftdesk.html" class="btn btn-primary" style="padding:9px 22px;font-size:.82rem;" data-da="Start gratis" data-en="Start free">Start gratis</a>
+      <a href="#" onclick="openTrialModal(event)" class="btn btn-primary" style="padding:9px 22px;font-size:.82rem;" data-da="Start gratis" data-en="Start free">Start gratis</a>
     </div>
   </div>
 </nav>
@@ -355,7 +378,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
         <h1 class="hero-title fade-up delay-1" id="heroTitle">Alt du behøver til <span>restaurant&shy;drift</span> — på ét sted</h1>
         <p class="hero-sub fade-up delay-2" id="heroSub">Vagtplanlægning, lønberegning, egenkontrol og budget. ShiftDesk giver dig overblik og sparer dig timer hver uge.</p>
         <div class="hero-actions fade-up delay-3">
-          <a href="shiftdesk.html" class="btn btn-accent btn-lg" id="heroBtn1">Prøv gratis i 14 dage →</a>
+          <a href="#" onclick="openTrialModal(event)" class="btn btn-accent btn-lg" id="heroBtn1">Prøv gratis i 14 dage →</a>
           <a href="shiftdesk.html" class="btn btn-white btn-lg" id="heroBtn2">Log ind</a>
         </div>
         <div class="fade-up delay-4" style="margin-bottom:28px;">
@@ -656,7 +679,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
           <li><div class="cross"></div> <span style="color:var(--muted);">Egenkontrol</span></li>
           <li><div class="cross"></div> <span style="color:var(--muted);">Budget modul</span></li>
         </ul>
-        <a href="shiftdesk.html" class="btn btn-outline" style="width:100%;justify-content:center;">Start gratis prøve</a>
+        <a href="#" onclick="openTrialModal(event)" class="btn btn-outline" style="width:100%;justify-content:center;">Start gratis prøve</a>
       </div>
 
       <!-- Full Package -->
@@ -675,7 +698,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
           <li><div class="check">✓</div> Dansk lønberegning 2026</li>
           <li><div class="check">✓</div> Prioriteret support</li>
         </ul>
-        <a href="shiftdesk.html" class="btn btn-primary" style="width:100%;justify-content:center;">Start gratis prøve</a>
+        <a href="#" onclick="openTrialModal(event)" class="btn btn-primary" style="width:100%;justify-content:center;">Start gratis prøve</a>
       </div>
 
     </div>
@@ -715,7 +738,7 @@ nav.scrolled .lang-btn.active{background:var(--navy);color:#fff;}
       <h2 class="cta-title display" id="ctaTitle">Klar til at spare tid og penge?</h2>
       <p class="cta-sub" id="ctaSub">Kom i gang gratis i dag. Ingen binding, ingen kreditkort. Se selv hvorfor restauranter vælger ShiftDesk.</p>
       <div class="cta-actions">
-        <a href="shiftdesk.html" class="btn btn-accent btn-lg" id="ctaBtn1">Start gratis i 14 dage →</a>
+        <a href="#" onclick="openTrialModal(event)" class="btn btn-accent btn-lg" id="ctaBtn1">Start gratis i 14 dage →</a>
         <a href="mailto:support@shiftdesks.app" class="btn btn-white btn-lg" id="ctaBtn2">📧 Skriv til os</a>
       </div>
       <div class="cta-note" id="ctaNote">Spørgsmål? Skriv til support@shiftdesks.app — vi svarer inden for 24 timer</div>
@@ -1089,6 +1112,18 @@ function setLang(lang) {
   document.getElementById('period2').textContent = per;
 }
 
+// ── Trial Modal ──────────────────────────────────────────────────────────────
+function openTrialModal(e) {
+  if(e) e.preventDefault();
+  document.getElementById('trialModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTrialModal() {
+  document.getElementById('trialModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeTrialModal(); });
+
 // Smooth scroll for nav links
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
@@ -1097,6 +1132,36 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 </script>
+
+<!-- ── TRIAL WELCOME MODAL ─────────────────────────────────────────────────── -->
+<div id="trialModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-backdrop" onclick="closeTrialModal()"></div>
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeTrialModal()" aria-label="Luk">✕</button>
+    <div class="modal-icon">🎉</div>
+    <h2 class="modal-title" id="modalTitle">Velkommen til ShiftDesk!</h2>
+    <p class="modal-sub">
+      Vi er glade for din interesse. Din gratis prøveperiode på <strong>14 dage</strong> venter — kom hurtigt i gang uden kreditkort.
+    </p>
+    <ul class="modal-steps">
+      <li>Fuld adgang til alle funktioner i 14 dage — ingen binding</li>
+      <li>Vagtplanlægning, lønsystem, egenkontrol &amp; budget inkluderet</li>
+      <li>Opsig når som helst — ingen kreditkort kræves</li>
+      <li>Vi opsætter dig, hvis du har brug for hjælp</li>
+    </ul>
+    <div class="modal-email-box">
+      <div class="modal-email-icon">✉️</div>
+      <div class="modal-email-text">
+        <strong>Klar til at komme i gang?</strong><br>
+        Send en e-mail til <a href="mailto:support@shiftdesks.app">support@shiftdesks.app</a> — så aktiverer vi din gratis 14-dages adgang med det samme.
+      </div>
+    </div>
+    <a href="mailto:support@shiftdesks.app?subject=Prøveadgang%20ShiftDesk%2014%20dage&body=Hej%20ShiftDesk-team%2C%0A%0AJeg%20vil%20gerne%20have%20adgang%20til%20den%20gratis%2014-dages%20prøveperiode.%0A%0ANavn%3A%20%0ARestaurant%3A%20%0A%0AMed%20venlig%20hilsen" class="modal-cta">
+      Send e-mail og få adgang →
+    </a>
+    <p class="modal-fine">Ingen kreditkort · Ingen binding · Svar inden for 24 timer</p>
+  </div>
+</div>
 
 <!-- Cookie Banner -->
 <div id="cookieBanner">
